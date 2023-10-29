@@ -1,0 +1,28 @@
+<script setup>
+import { useModelStore } from '../../../stores/model'
+defineProps({
+    width: {
+        type: Number,
+        required: true
+    },
+    height: {
+        type: Number,
+        required: true
+    },
+})
+const model = useModelStore()
+const cellWidth = 150
+const columns = [
+    { key: '1', title: '序号', dataKey: 'no', width: cellWidth },
+    { key: '2', title: '节点', dataKey: 'node', width: cellWidth },
+    { key: '3', title: '类型', dataKey: 'type', width: cellWidth },
+    { key: '4', title: '坐标系', dataKey: 'cs', width: cellWidth },
+]
+</script>
+
+
+<template>
+    <el-table-v2 :columns="columns" :data="model.cnst" :width="width" :height="height" :row-height="30" fixed />
+</template>
+<style></style>
+

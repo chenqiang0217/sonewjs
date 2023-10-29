@@ -1,0 +1,32 @@
+<script setup>
+import { useModelStore } from '../../../stores/model'
+import { useStatusStore } from '../../../stores/status'
+
+defineProps({
+    width: {
+        type: Number,
+        required: true
+    },
+    height: {
+        type: Number,
+        required: true
+    },
+})
+const model = useModelStore()
+const status = useStatusStore()
+const elem = model.result.find(res => res.step == status.result.option.step).elem
+const cellWidth = 150
+const columns = [
+    { key: '1', title: '单元号', dataKey: 'no', width: cellWidth },
+    { key: '2', title: '长度', dataKey: 'length', width: cellWidth },
+    { key: '3', title: '力密度', dataKey: 'q', width: cellWidth },
+    { key: '4', title: '内力', dataKey: 'f', width: cellWidth },
+]
+</script>
+
+<template>
+    <el-table-v2 :columns="columns" :data="elem" :width="width" :height="height" :row-height="30" fixed />
+</template>
+
+<style></style>
+
