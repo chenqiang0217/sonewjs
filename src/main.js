@@ -6,11 +6,9 @@ import router from './router/index.js'
 import { vDrag } from './directives/vDrag'
 import './index.scss'
 import './index.css'
-// import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import IconFront from './assets/icon/IconFront.vue'
 import App from './App.vue'
-import { init } from 'echarts'
 
 const app = createApp(App)
 const pinia = createPinia()
