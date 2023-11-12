@@ -4,7 +4,7 @@ import { useConfigStore } from '../stores/config'
 const service = axios.create({
     baseURL: '/api',
     withCredentials: false, // send cookies when cross-domain requests
-    timeout: 2000,
+    timeout: 1000000,
     //multipart/form-data | application/json
     // headers: {'Content-Type': 'application/json'},
 })
@@ -22,10 +22,10 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
     (res) => {
-        let data = res.data;
+        let data = res.data
         // 处理自己的业务逻辑，比如判断 token 是否过期等等
         // 代码块
-        return data;
+        return data
     },
     (error) => {
         let message = ""
@@ -94,7 +94,7 @@ const user = {
             data,
         })
     },
-    
+
 }
 
 

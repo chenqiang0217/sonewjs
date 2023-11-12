@@ -1,4 +1,4 @@
-import { Color3 } from "@babylonjs/core"
+import { Color3, Color4} from "@babylonjs/core"
 const CONSTANT = {
     MODE:{
         PREP: 0,
@@ -21,6 +21,10 @@ const CONSTANT = {
                 ELEM: {
                     PREP: 'l',
                     RSLT: 'rl',
+                },
+                MEMBRANE: {
+                    PREP: 'm',
+                    RSLT: 'rm',
                 },
             },
             TEXT: 't',
@@ -50,6 +54,9 @@ const CONSTANT = {
                         UNDEFORMED: Color3.Gray(),
                     }
                 },
+                MEMBRANE:{
+                    DEFAULT: new Color4(0.5,0.5,0.5,0.2),
+                }
             },
             TEXT: {
                 //注意text颜色和mesh颜色格式是不一致的

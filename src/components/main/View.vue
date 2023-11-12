@@ -31,7 +31,7 @@ onMounted(() => {
 
 <template>
     <!-- 必须加div包裹canvas,并设置其宽度为100%，因为canvas是有高宽比例的 -->
-    <div id="canvasWrapper" v-loading="status.ui.project.importing">
+    <div id="canvasWrapper" v-loading="status.view.loading">
         <canvas id="canvas" :width="width" :height="height"></canvas>
     </div>
 </template>

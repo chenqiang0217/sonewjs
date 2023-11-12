@@ -44,6 +44,7 @@ import Bottom from './components/bottom/Bottom.vue'
 
 .header {
     grid-area: header;
+    display: flex;
 }
 
 .main {

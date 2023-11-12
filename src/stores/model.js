@@ -1,7 +1,6 @@
-import { BasisTools } from '@babylonjs/core'
 import { defineStore } from 'pinia'
 import { sortNumber, SetOperation } from '../api/utils'
-
+import { Vector3 } from "@babylonjs/core"
 
 const TARGETTYPE = [{ no: 0, label: 'EQ' }, { no: 1, label: 'GT' }, { no: 2, label: 'LT' }]
 
@@ -12,11 +11,14 @@ class Node {
         this.y = y
         this.z = z
     }
+    get position() {
+        return new Vector3(this.x, this.y, this.z)
+    }
+    get positionInScene() {
+        return new Vector3(this.y, this.z, this.x)
+    }
     toArray() {
         return [this.no, this.x, this.y, this.z]
-    }
-    position() {
-        return { x: this.x, y: this.y, z: this.z }
     }
 }
 class Elem {
@@ -100,6 +102,7 @@ const useModelStore = defineStore('model', {
             },
             node: [],
             elem: [],
+            facet: [],
             cnst: [],
             targetGroup: [{ no: 1, label: 'basis' },],
             nodeShape: [],
@@ -402,12 +405,14 @@ const useModelStore = defineStore('model', {
             switch (mesh) {
                 case 'node':
                     switch (from) {
-                        case 'node': {
+                        case 'type': {
                             switch (label) {
                                 case 'free':
                                     return this.categorized.node.free
                                 case 'lock':
                                     return this.categorized.node.lock
+                                default:
+                                    return new Set()
                             }
                         }
                         case 'cnst': {
@@ -418,6 +423,8 @@ const useModelStore = defineStore('model', {
                             return this.categorized.nodeShape.find(shape => shape.group == group && shape.type == type)
                                 .node
                         }
+                        default:
+                            return new Set()
                     }
                 case 'elem':
                     switch (from) {
@@ -427,6 +434,8 @@ const useModelStore = defineStore('model', {
                                     return this.categorized.elem.free
                                 case 'lock':
                                     return this.categorized.elem.lock
+                                default:
+                                    return new Set()
                             }
                         case 'femType':
                             return this.categorized.elem[from].get(label)
@@ -440,9 +449,12 @@ const useModelStore = defineStore('model', {
                         case 'elemForce':
                             return this.categorized.elemForce.find(force => force.group == group && force.type == type)
                                 .elem
+                        default:
+                            return new Set()
                     }
+                default:
+                    return new Set()
             }
-            return new Set()
         }
     },
 })

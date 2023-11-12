@@ -1,4 +1,3 @@
-<script setup>
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { CONSTANT } from '../../../stores/constant'
@@ -7,13 +6,18 @@ import * as XLSX from 'xlsx/xlsx.mjs'
 import { sleep } from '../../../api/utils'
 
 
-const model = useModelStore()
-const status = useStatusStore()
-const createNewProject = (e) => {
+const projectNew = (e) => {
 
 }
-const importXlsx = async (e) => {
-    status.ui.project.importing = true
+const projectOpen = (e) => {
+
+}
+const projectImportCilck = async (e) => {
+    document.getElementById('xlsxFile').click()
+}
+const projectImport = async (e) => {
+    const status = useStatusStore()
+    status.view.loading = true
     await sleep(0.1)
     const files = e.target.files
     if (files.length != 0) {
@@ -22,7 +26,10 @@ const importXlsx = async (e) => {
             readWorkbook(workbook)
         })
     }
-    status.ui.project.importing = false
+    status.view.loading = false
+}
+const projectSave = (e) => {
+
 }
 const readLocalFile = (file, callback) => {
     const reader = new FileReader()
@@ -35,6 +42,8 @@ const readLocalFile = (file, callback) => {
 }
 
 function readWorkbook(workbook) {
+    const model = useModelStore()
+    const status = useStatusStore()
     const labels = ['node', 'elem', 'constraint', 'nodeShape', 'elemShape', 'elemForce']
     const funcs = [model.insertNode, model.insertElem, model.insertCnst,
     model.insertNodeShape, model.insertElemShape, model.insertElemForce]
@@ -71,37 +80,4 @@ function callFunc(func, no, data) {
     func(no, data)
 }
 
-</script>
-
-<template>
-    <el-button-group>
-        <el-tooltip content="新建" placement="bottom">
-            <el-button @click="createNewProject">
-                <IconFront iconName="new"></IconFront>
-            </el-button>
-        </el-tooltip>
-        <el-tooltip content="打开" placement="bottom">
-            <el-button>
-                <IconFront iconName="open"></IconFront>
-            </el-button>
-        </el-tooltip>
-        <el-tooltip content="导入" placement="bottom">
-            <el-button onclick="document.getElementById('xlsxFile').click()">
-                <IconFront iconName="import"></IconFront>
-            </el-button>
-        </el-tooltip>
-        <el-tooltip content="保存" placement="bottom">
-            <el-button>
-                <IconFront iconName="save"></IconFront>
-            </el-button>
-        </el-tooltip>
-    </el-button-group>
-    <input
-        type="file"
-        id="xlsxFile"
-        @change="importXlsx"
-        style="display: none"
-    />
-</template>
-
-<style></style>
+export { projectNew, projectOpen, projectImportCilck, projectImport, projectSave }

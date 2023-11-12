@@ -68,6 +68,20 @@ const useConfigStore = defineStore('config', {
                         },
                     },
                 },
+                membrane: {
+                    sizePx: 0.5,
+                    color: {
+                        selected: CONSTANT.VIEW.COLOR.MESH.MEMBRANE.DEFAULT,
+                        unselected: {
+                            lock: CONSTANT.VIEW.COLOR.MESH.MEMBRANE.DEFAULT,
+                            free: CONSTANT.VIEW.COLOR.MESH.MEMBRANE.DEFAULT,
+                        },
+                        calculated: {
+                            deformed: CONSTANT.VIEW.COLOR.MESH.MEMBRANE.DEFAULT,
+                            undeformed: CONSTANT.VIEW.COLOR.MESH.MEMBRANE.DEFAULT,
+                        },
+                    },
+                },
                 text: {
                     node: {
                         font: '',
@@ -138,8 +152,8 @@ const useConfigStore = defineStore('config', {
                 ],
                 result: {
                     query: {
-                        count: 500,
-                        delaySecond: 5,
+                        count: 50,
+                        delaySecond: 2,
                         timeoutSecond: 5,
                         retry: 100000,
                     }

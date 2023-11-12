@@ -27,3 +27,14 @@ body {
 .el-tabs--border-card > .el-tabs__content {
     padding: 0px;
 }
+.dialog-submit-wrapper{
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    margin: 10px 10px;
+}
+.dialog-submit-wrapper .el-button {
+    border: 0;
+    flex: 1;
+    max-width: 160px;
+}

@@ -1,3 +1,4 @@
+import { markRaw } from 'vue'
 import { defineStore } from 'pinia'
 import { CONSTANT } from './constant'
 import { useConfigStore } from './config'
@@ -7,8 +8,11 @@ const useStatusStore = defineStore('status', {
         return {
             mode: 0,
             ui: {
-                project: {
-                    importing: false
+                dialog:{
+                    show: false,
+                    title: '', 
+                    width: 0,
+                    component: markRaw({is: null}),
                 },
                 tab: {
                     main: {
@@ -22,6 +26,7 @@ const useStatusStore = defineStore('status', {
                 },
             },
             view: {
+                loading: false,
                 size: {
                     width: 0,
                     height: 0
@@ -82,24 +87,6 @@ const useStatusStore = defineStore('status', {
                         node: { prep: new Set([]), rslt: new Set([]) },
                         elem: { prep: new Set([]), rslt: new Set([]) },
                     },
-                    // todo: {
-                    //     activate: {
-                    //         node: { prep: new Set([]), rslt: new Set([]) },
-                    //         elem: { prep: new Set([]), rslt: new Set([]) },
-                    //     },
-                    //     freeze: {
-                    //         node: { prep: new Set([]), rslt: new Set([]) },
-                    //         elem: { prep: new Set([]), rslt: new Set([]) },
-                    //     },
-                    //     draw: {
-                    //         node: { prep: new Set([]), rslt: new Set([]) },//只能画节点编号
-                    //         elem: { prep: new Set([]), rslt: new Set([]) },//只能画单元编号
-                    //     },
-                    //     clear: {
-                    //         node: { prep: new Set([]), rslt: new Set([]) },
-                    //         elem: { prep: new Set([]), rslt: new Set([]) },
-                    //     },
-                    // },
                 },
             },
             task: {

@@ -18,9 +18,9 @@ const columns = [
     { key: 'type', title: '类型', dataKey: 'type', width: cellWidth },
     { key: 'femType', title: '类型', dataKey: 'femType', width: cellWidth },
     { key: 'mat', title: '材料', dataKey: 'mat', width: cellWidth },
-    { key: 'sec', title: '截面', dataKey: 'mat', width: cellWidth },
-    { key: 'iNode', title: 'i节点', dataKey: 'mat', width: cellWidth },
-    { key: 'jNode', title: 'j节点', dataKey: 'mat', width: cellWidth }
+    { key: 'sec', title: '截面', dataKey: 'sec', width: cellWidth },
+    { key: 'iNode', title: 'i节点', dataKey: 'iNode', width: cellWidth },
+    { key: 'jNode', title: 'j节点', dataKey: 'jNode', width: cellWidth }
 ]
 </script>
 

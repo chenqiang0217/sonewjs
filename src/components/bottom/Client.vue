@@ -8,7 +8,6 @@ const submit = () => {
     messages.add({ to: 'client', level: 'info', content: input.value })
     input.value = ''
 }
-
 </script>
 
 <template>
@@ -19,16 +18,25 @@ const submit = () => {
         view-class="view-wrap"
     >
         <div class="align-items-end">
-            <p v-for="message in messages.client">
+            <p
+                v-for="(message, i) in messages.client"
+                v-bind:key="i"
+            >
                 {{ '[' + message.time + '] ' + message.content }}
             </p>
         </div>
     </el-scrollbar>
-    <el-input
+    <!-- <el-input
         v-model="input"
         placeholder="请输入内容"
+        clearable
         @keyup.enter="submit"
-    ></el-input>
+    ></el-input> -->
+    <input
+        type="text"
+        v-model="input"
+        @keyup.enter="submit"
+    />
 </template>
 <style scoped>
 .align-items-end {
@@ -42,5 +50,22 @@ const submit = () => {
 .view-wrap {
     height: 100%;
     position: relative;
+}
+input {
+    height: 30px;
+    margin: 0 10px;
+    border-radius: 5px;
+}
+input:focus{
+    border: 1px solid var(--el-color-primary);
+}
+::v-deep(.el-input__wrapper) {
+    padding: 0;
+    border: 0;
+}
+::v-deep(.el-input__inner) {
+    border-radius: 15px;
+    padding: 0;
+    border: 1px solid var(--el-color-primary-light-7);
 }
 </style>

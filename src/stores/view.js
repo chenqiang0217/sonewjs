@@ -1,6 +1,6 @@
 import {
     Engine, Scene, AxesViewer, ArcRotateCamera, Camera, Vector3, Vector2, MeshBuilder, Mesh, StandardMaterial, VertexBuffer,
-    Color3
+    Color3, Color4
 } from "@babylonjs/core"
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui"
 import { watch } from 'vue'
@@ -17,6 +17,17 @@ const view = {
     pickBox: null,
     material: {
         point: {
+            selected: null,
+            unselected: {
+                lock: null,
+                free: null,
+            },
+            calculated: {
+                deformed: null,
+                undeformed: null,
+            },
+        },
+        membrane: {
             selected: null,
             unselected: {
                 lock: null,
@@ -92,6 +103,18 @@ const createScene = (canvas) => {
     view.material.point.unselected.free.emissiveColor = config.view.node.color.unselected.free
     view.material.point.calculated.deformed.emissiveColor = config.view.node.color.calculated.deformed
     view.material.point.calculated.undeformed.emissiveColor = config.view.node.color.calculated.undeformed
+
+    view.material.membrane.selected = new StandardMaterial('pointeMatSelected', view.scene)
+    view.material.membrane.unselected.lock = new StandardMaterial('pointeMatLock', view.scene)
+    view.material.membrane.unselected.free = new StandardMaterial('pointeMatFree', view.scene)
+    view.material.membrane.calculated.deformed = new StandardMaterial('pointeMatDeformed', view.scene)
+    view.material.membrane.calculated.undeformed = new StandardMaterial('pointeMatUndeformed', view.scene)
+    view.material.membrane.selected.emissiveColor = config.view.membrane.color.selected
+    view.material.membrane.unselected.lock.emissiveColor = config.view.membrane.color.unselected.lock
+    view.material.membrane.unselected.free.emissiveColor = config.view.membrane.color.unselected.free
+    view.material.membrane.calculated.deformed.emissiveColor = config.view.membrane.color.calculated.deformed
+    view.material.membrane.calculated.undeformed.emissiveColor = config.view.membrane.color.calculated.undeformed
+
 
     // BABYLON.SceneLoader.Load("./", "mesh.obj", view.scene, function (scene) {
     //     // do something with the scene", "batman.obj", engine, function (scene) {
@@ -609,7 +632,8 @@ const drawPointsInScene = (nos, prefix = CONSTANT.VIEW.PREFIX.MESH.NODE.PREP, st
         }
         // point.position = new Vector3(node.x, node.y, node.z)
         let node = nodes.find(node => node.no == no)
-        point.position = new Vector3(node.y, node.z, node.x)
+        // point.position = new Vector3(node.y, node.z, node.x)
+        point.position = node.positionInScene
         point.isVisible = true
     })
 }
@@ -666,7 +690,26 @@ const drawLinesInScene = (nos, linePrefix = CONSTANT.VIEW.PREFIX.MESH.ELEM.PREP)
             line.isVisible = true
         }
     })
+}
 
+/** 
+* @function 添加单元至视图
+* @param {Number[]} nos elem数组或集合
+* @param {String} prefix line名称前缀 'l'|'rl'
+* @return void
+*/
+const drawRibbonInScene = (facets, Meshrefix = CONSTANT.VIEW.PREFIX.MESH.MEMBRANE.PREP) => {
+    const model = useModelStore()
+    facets.forEach(facet => {
+        const facetName = Meshrefix + facet.no
+        const points = facet.node.map(no =>
+            model.node.find(node => node.no == no).positionInScene
+        )
+        let ribbon = MeshBuilder.CreateRibbon(facetName,
+            { pathArray: [points], closePath: true, sideOrientation: Mesh.DOUBLESIDE }
+        )
+        ribbon.material = view.material.membrane.unselected.lock
+    })
 }
 
 /** 
@@ -806,6 +849,6 @@ function resetCamera(boundingInfo) {
 }
 
 export {
-    view, createScene, resetCamera, resetViewRatio, drawPointsInScene, drawLinesInScene, linkTextsWithMeshs,
+    view, createScene, resetCamera, resetViewRatio, drawPointsInScene, drawLinesInScene, drawRibbonInScene, linkTextsWithMeshs,
     clearMeshsInScene, clearTextsInScene, setGadientColorForLines, setTextToMeshNo,
 }
