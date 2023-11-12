@@ -5,6 +5,9 @@ import { useConfigStore } from '../../../stores/config'
 import { useStatusStore } from '../../../stores/status'
 import { CONSTANT } from '../../../stores/constant'
 import { task } from '../../../api/request'
+import Config from './Config.vue'
+import Result from './Result.vue'
+
 import {
     SetOperation,
     sortNumber,
@@ -14,12 +17,10 @@ import {
 
 const showDialogSolutionconfig = () => {
     const status = useStatusStore()
-    import('./Config.vue').then(component => {
-        status.ui.dialog.component.is = component.default
-        status.ui.dialog.show = true
-        status.ui.dialog.title = '设置'
-        status.ui.dialog.width = 450
-    })
+    status.ui.dialog.component.is = Config
+    status.ui.dialog.show = true
+    status.ui.dialog.title = '设置'
+    status.ui.dialog.width = 450
 }
 const solutionRun = () => {
     const model = useModelStore()
@@ -64,13 +65,10 @@ const showSolutionProgress = () => {
 }
 const showDialogSolutionResult = () => {
     const status = useStatusStore()
-    import('./Result.vue').then(component => {
-        status.ui.dialog.component.is = component.default
-        status.ui.dialog.component.action = component.default
+        status.ui.dialog.component.is = Result
         status.ui.dialog.show = true
         status.ui.dialog.title = '结果查看'
         status.ui.dialog.width = 250
-    })
 }
 
 const formData = () => {
