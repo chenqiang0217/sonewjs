@@ -30,7 +30,7 @@ app.mount('#app')
 // 初始化git
 // git init
 // git add .
-// git commit -m 'message'
+// git commit -m '...'
 // git remote add sonewjs https://github.com/chenqiang0217/sonewjs.git
 // git pull --rebase sonewjs master
 // git push -u sonewjs master
