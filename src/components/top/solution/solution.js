@@ -32,9 +32,9 @@ const solutionRun = () => {
     model.result = []
     status.task.run = CONSTANT.TASK.RUN.START
 
-    const uuid = config.task.uuid
-    // const uuid = uuidv4()
-    // config.task.uuid = uuid
+    // const uuid = config.task.uuid
+    const uuid = uuidv4()
+    config.task.uuid = uuid
 
     messages.add({
         to: 'server',
@@ -42,19 +42,19 @@ const solutionRun = () => {
         content: '开始计算:' + uuid
     })
 
-    // task.run(formData())
-    //     .then(function (response) {
-    //         //计算完成
-    //         status.task.run = CONSTANT.TASK.RUN.SUCCESS
-    //         messages.add({ to: 'server', level: 'sucess', content: '计算完成' })
-    //     })
-    //     .catch(function (error) {
-    //         //计算错误
-    //         // status.task.run = CONSTANT.TASK.RUN.ABORT
-    //         messages.add({ to: 'server', level: 'error', content: '计算错误' })
-    //     })
-    //     .finally(function () {
-    //     })
+    task.run(formData())
+        .then(function (response) {
+            //计算完成
+            status.task.run = CONSTANT.TASK.RUN.SUCCESS
+            messages.add({ to: 'server', level: 'sucess', content: '计算完成' })
+        })
+        .catch(function (error) {
+            //计算错误
+            // status.task.run = CONSTANT.TASK.RUN.ABORT
+            messages.add({ to: 'server', level: 'error', content: '计算错误' })
+        })
+        .finally(function () {
+        })
     showSolutionProgress()
     let delay = config.task.result.query.delaySecond
     sleep(delay).then(queryResult({ uuid }))

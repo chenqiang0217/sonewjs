@@ -10,6 +10,7 @@ const useStatusStore = defineStore('status', {
             ui: {
                 dialog:{
                     show: false,
+                    apply: false,
                     title: '', 
                     width: 0,
                     component: markRaw({is: null}),

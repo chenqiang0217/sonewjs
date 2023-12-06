@@ -43,6 +43,21 @@ const position = computed(() => ({
                 <p>{{ title }}</p>
             </div>
             <div class="modal"><slot></slot></div>
+            <div class="dialog-submit-wrapper">
+                <el-button
+                    type="primary"
+                    plain
+                    @click="status.ui.dialog.apply = true"
+                >
+                    应用</el-button
+                >
+                <el-button
+                    type="primary"
+                    plain
+                    @click="status.ui.dialog.show = false"
+                    >关闭</el-button
+                >
+            </div>
         </div>
     </Teleport>
 </template>
@@ -64,11 +79,11 @@ const position = computed(() => ({
     padding-left: 10px;
 }
 .header:hover {
-        background: var(--el-color-primary);
-        p {
-            color: white;
-        }
+    background: var(--el-color-primary);
+    p {
+        color: white;
     }
+}
 .dialog .modal {
     padding: 10px;
     padding-bottom: 0;

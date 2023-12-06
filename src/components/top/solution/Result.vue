@@ -67,7 +67,15 @@ watch(
         }
     }
 )
-
+watch(
+    () => status.ui.dialog.apply,
+    (apply) => {
+        if(apply){
+            status.ui.dialog.apply = false
+            viewResultSecne()
+        }
+    }
+)
 const viewResultSecne = () => {
     // //表单验证
     // if ((option.nodeTag.show && !option.nodeTag.key)
@@ -381,21 +389,6 @@ const viewResultTable = mesh => {
             </div>
         </el-form-item>
     </el-form>
-    <div class="dialog-submit-wrapper">
-        <el-button
-            type="primary"
-            plain
-            @click="viewResultSecne"
-        >
-            应用</el-button
-        >
-        <el-button
-            type="primary"
-            plain
-            @click="status.ui.dialog.show = false"
-            >关闭</el-button
-        >
-    </div>
 </template>
 
 <style scoped>

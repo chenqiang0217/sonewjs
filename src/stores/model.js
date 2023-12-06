@@ -126,7 +126,7 @@ const useModelStore = defineStore('model', {
         cnstType: (state) => Array.from(new Set(state.cnst.map(cnst => cnst.type))).sort(sortNumber),
         nodeShapeType: (state) => Array.from(new Set(state.nodeShape.map(shape => parseInt(shape.type / 16)))).sort(sortNumber),
         elemShapeType: (state) => Array.from(new Set(state.elemShape.map(shape => parseInt(shape.type / 16)))).sort(sortNumber),
-        elemForceType: (state) => Array.from(new Set(state.elemShape.map(force => parseInt(force.type / 16)))).sort(sortNumber),
+        elemForceType: (state) => Array.from(new Set(state.elemForce.map(force => parseInt(force.type / 16)))).sort(sortNumber),
 
         summarized: (state) => {
             const nodeType = [{ no: 0, label: 'lock', size: 0 }, { no: 1, label: 'free', size: 0 }]

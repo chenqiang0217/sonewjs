@@ -54,8 +54,6 @@ import Account from './account/Account.vue'
 import About from './about/About.vue'
 import Dialog from './Dialog.vue'
 
-
-
 const status = useStatusStore()
 const toolBars = ref([
     [
@@ -304,7 +302,12 @@ const toolBars = ref([
         >
             <div
                 :class="
-                    i === toolBars.length - 1 && j === 0 ? 'justify-right' :  i === toolBars.length - 1 && j === toolBarGroup.length-1 ? 'justify-end' : ''
+                    i === toolBars.length - 1 && j === 0
+                        ? 'justify-right'
+                        : i === toolBars.length - 1 &&
+                          j === toolBarGroup.length - 1
+                        ? 'justify-end'
+                        : ''
                 "
             >
                 <el-tooltip
@@ -318,7 +321,10 @@ const toolBars = ref([
                 </el-tooltip>
             </div>
         </template>
-        <el-divider direction="vertical" v-if="i < toolBars.length - 2"/>
+        <el-divider
+            direction="vertical"
+            v-if="i < toolBars.length - 2"
+        />
     </template>
     <input
         type="file"

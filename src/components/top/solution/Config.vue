@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { useStatusStore } from '../../../stores/status'
 import { useConfigStore } from '../../../stores/config'
 const config = useConfigStore()
@@ -29,6 +29,14 @@ const tableCellEditCompleted = scope => {
     tableCellIndex.value.row = undefined
     tableCellIndex.value.column = undefined
 }
+watch(
+    () => status.ui.dialog.apply,
+    (apply) => {
+        if(apply){
+            status.ui.dialog.apply = false
+        }
+    }
+)
 </script>
 
 <template>
@@ -228,21 +236,6 @@ const tableCellEditCompleted = scope => {
             </template>
         </el-table-column>
     </el-table>
-    <div class="dialog-submit-wrapper">
-        <el-button
-            type="primary"
-            plain
-            @click="status.ui.dialog.show = false"
-        >
-            应用</el-button
-        >
-        <el-button
-            type="primary"
-            plain
-            @click="status.ui.dialog.show = false"
-            >关闭</el-button
-        >
-    </div>
 </template>
 
 <style lang="scss" scoped>
