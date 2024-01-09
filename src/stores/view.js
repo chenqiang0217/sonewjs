@@ -91,7 +91,7 @@ const createScene = (canvas) => {
     // yAxis.color = Color3.Green()
     // zAxis.color = Color3.Blue()
     //为便于旋转视图，以蓝色（z）为x轴，以红色（x）为y轴，以绿色（y）为z轴。
-    new AxesViewer(view.scene, viewSize / 10)
+    // new AxesViewer(view.scene, viewSize / 10)
 
     view.material.point.selected = new StandardMaterial('pointeMatSelected', view.scene)
     view.material.point.unselected.lock = new StandardMaterial('pointeMatLock', view.scene)

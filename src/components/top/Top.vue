@@ -305,7 +305,7 @@ const toolBars = ref([
                     i === toolBars.length - 1 && j === 0
                         ? 'justify-right'
                         : i === toolBars.length - 1 &&
-                          j === toolBarGroup.length - 1
+                        j === toolBarGroup.length - 1
                         ? 'justify-end'
                         : ''
                 "

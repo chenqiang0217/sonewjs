@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            http-equiv="X-UA-Compatible"
+            content="IE=edge"
+        />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
+        <title>sonew - 张力结构形态构建工具</title>
+        <!-- Google Fonts -->
+        <link
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        />
+    </head>
+
+    <body>
+        <nav
+            id="nav"
+            class="navbar navbar-expand-lg bg-primary navbar-dark fixed-top scrollednav py-0"
+        >
+            <div class="container">
+                <a
+                    href="#"
+                    class="navbar-brand fs-1 fw-bold link-secondary"
+                >
+                    <img
+                        width="32px"
+                        src="static/img/sonew.svg"
+                        class="rounded img-fluid"
+                    />
+                    sonew
+                </a>
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navmenu"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div
+                    class="collapse navbar-collapse"
+                    id="navmenu"
+                >
+                    <ul class="navbar-nav ms-auto">
+                        <!--margin start = margin left-->
+                        <li class="nav-item">
+                            <div class="nav-link">
+                                <i class="bi bi-file-earmark-text-fill"></i
+                                >&thinsp;文档
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <div class="nav-link">
+                                <i class="bi bi-info-square-fill"></i
+                                >&thinsp;关于
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <section class="p-3 text-light">
+            <div class="container-xl">
+                <div
+                    class="row align-items-center justify-content-center page"
+                    style="align-content: center"
+                >
+                    <div class="col-md-5">
+                        <h2 class="display-6 text-white-50">
+                            首款通用性、一体化、多目标、渐进式
+                        </h2>
+                        <h1 class="display-5 fw-bold">张力结构</h1>
+                        <h1 class="display-5 fw-bold">形态构建工具</h1>
+
+                        <div class="container-fluid">
+                            <div class="row p-md-5 p-sm-0">
+                                <div
+                                    class="col-6 d-flex justify-content-around p-0"
+                                >
+                                    <a
+                                        class="px-2 btn btn-primary fs-5"
+                                        data-bs-toggle="collapse"
+                                        href="#demo"
+                                        role="button"
+                                        aria-expanded="false"
+                                        aria-controls="demo"
+                                        ><i class="bi bi-cassette-fill"></i>
+                                        查看示例
+                                    </a>
+                                </div>
+
+                                <div
+                                    class="col-6 d-flex justify-content-around p-0"
+                                >
+                                    <a
+                                        href="/project/"
+                                        class="btn btn-primary fs-5 px-2"
+                                    >
+                                        <i class="bi bi-calculator-fill"></i>
+                                        开始试用
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7 d-none d-md-block">
+                        <img
+                            src="static/img/bg-1.png"
+                            class="rounded img-fluid"
+                        />
+                    </div>
+                    <!-- 点击收缩面板 -->
+                    <div class="col">
+                        <div
+                            class="collapse"
+                            id="demo"
+                        >
+                            <!-- 分割线 -->
+                            <div
+                                class="mt-3 w-100 bg-white opacity-50"
+                                style="height: 1px"
+                            ></div>
+                            <div
+                                class="card card-body px-0 bg-primary"
+                                style="border: none"
+                            >
+                                <div class="container-fluid">
+                                    <div class="row g-0">
+                                        <!-- 示例一 -->
+                                        <div class="col-md-4">
+                                            <div class="bg-primary">
+                                                <img
+                                                    src="static/img/demo-1.png"
+                                                    class="card-img-top px-4 px-sm-4 px-md-5"
+                                                />
+                                                <div class="px-0 pt-0">
+                                                    <p
+                                                        class="text-center text-white-50"
+                                                    >
+                                                        <span
+                                                            class="align-middle"
+                                                            >平面正交索网</span
+                                                        >
+                                                        <a
+                                                            href="static/demo/demo-1.xlsx"
+                                                            download
+                                                            class="btn text-white-50 px-1"
+                                                        >
+                                                            <i
+                                                                class="bi bi-file-earmark-excel"
+                                                            ></i
+                                                            >下载
+                                                        </a>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- 示例二 -->
+                                        <div class="col-md-4">
+                                            <div class="bg-primary">
+                                                <img
+                                                    src="static/img/demo-2.png"
+                                                    class="card-img-top px-4 px-sm-4 px-md-5"
+                                                />
+                                                <div class="px-0 pt-0">
+                                                    <p
+                                                        class="text-center text-white-50"
+                                                    >
+                                                        <span
+                                                            class="align-middle"
+                                                            >单双层组合索网</span
+                                                        >
+                                                        <a
+                                                            href="static/demo/demo-2.xlsx"
+                                                            download
+                                                            class="btn text-white-50 px-1"
+                                                        >
+                                                            <i
+                                                                class="bi bi-file-earmark-excel"
+                                                            ></i
+                                                            >下载
+                                                        </a>
+                                                        <a
+                                                            class="btn text-white-50 px-1"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#video-demo-2"
+                                                        >
+                                                            <i
+                                                                class="bi bi-file-earmark-play"
+                                                            ></i
+                                                            >演示
+                                                        </a>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- 示例三 -->
+                                        <div class="col-md-4">
+                                            <div class="bg-primary">
+                                                <img
+                                                    src="static/img/demo-3.png"
+                                                    class="card-img-top px-4 px-sm-4 px-md-5"
+                                                />
+                                                <div class="px-0 pt-0">
+                                                    <p
+                                                        class="text-center text-white-50"
+                                                    >
+                                                        <span
+                                                            class="align-middle"
+                                                            >双层鱼腹式索网</span
+                                                        >
+                                                        <a
+                                                            href="static/demo/demo-3.xlsx"
+                                                            download
+                                                            class="btn text-white-50 px-1"
+                                                        >
+                                                            <i
+                                                                class="bi bi-file-earmark-excel"
+                                                            ></i
+                                                            >下载
+                                                        </a>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 示例end -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- <svg
+            class="divider"
+            viewBox="0 0 1000 90"
+        >
+            <path d="M 0 10 C 300 50, 700 50, 1000 10 V 120 H 0 Z"></path>
+        </svg> -->
+        <div><div class="wave"></div></div>
+
+        <section class="p-3 text-light">
+            <div class="container-xl">
+                <div
+                    class="row align-items-center justify-content-between page"
+                >
+                    <div class="col-md-5">
+                        <h2 class="display-4">
+                            <i class="bi bi-1-square-fill fs-1"></i> 通用性
+                        </h2>
+                        <p class="fs-3">
+                            &nbsp;&nbsp;&nbsp;&nbsp;基于力密度法，无需材料、截面信息，以凸优化算法求解控制方程，构建结果可直接导入常规结构分析、设计软件。
+                            适用于车辐式索网、索穹顶、悬索桥等任意张力结构
+                        </p>
+                    </div>
+                    <div class="col-md-7 d-none d-md-block">
+                        <img
+                            src="static/img/bg-2.png"
+                            class="rounded img-fluid"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- <svg
+            class="divider"
+            viewBox="0 0 1000 100"
+        >
+            <path d="M 0 10 C 300 50, 700 50, 1000 10 V 120 H 0 Z"></path>
+        </svg> -->
+        <div><div class="wave"></div></div>
+
+        <section class="p-3 text-light">
+            <div class="container-xl">
+                <div
+                    class="row align-items-center justify-content-between page"
+                >
+                    <div class="col-md-5">
+                        <h2 class="display-4">
+                            <i class="bi bi-2-square-fill fs-1"></i> 一体化
+                        </h2>
+                        <p class="fs-3">
+                            &nbsp;&nbsp;&nbsp;&nbsp;采用
+                            <a
+                                href="http://epub.cnipa.gov.cn/"
+                                class="fw-light fst-italic text-white text-decoration-none"
+                                ><i class="bi bi-file-pdf"></i
+                                >张力结构找形找力一体化设计</a
+                            >
+                            专利方法，克服找形、找力功能目标设置困难，交替求解繁复、不易收敛的缺点，实现形与力的统一
+                        </p>
+                    </div>
+                    <div class="col-md-7 d-none d-md-block">
+                        <img
+                            src="static/img/bg-3.png"
+                            class="rounded img-fluid"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- <svg
+            class="divider"
+            viewBox="0 0 1000 90"
+        >
+            <path d="M 0 10 C 300 50, 700 50, 1000 10 V 120 H 0 Z"></path>
+        </svg> -->
+        <div><div class="wave"></div></div>
+
+        <section class="p-3 text-light">
+            <div class="container-xl">
+                <div
+                    class="row align-items-center justify-content-between page"
+                >
+                    <div class="col-md-5">
+                        <h2 class="display-4">
+                            <i class="bi bi-3-square-fill fs-1"></i> 多目标
+                        </h2>
+                        <p class="fs-3">
+                            &nbsp;&nbsp;&nbsp;&nbsp;预设3类，共18种功能目标，覆盖形态构建全场景
+                        </p>
+                        <ul class="list-unstyled fs-3">
+                            <li>
+                                <i class="bi bi-check-circle"></i>
+                                &nbsp;节点坐标&nbsp;<span
+                                    class="fs-5 fw-light text-white-50 fst-italic"
+                                    >如单个节点坐标及两个节点差值、比值</span
+                                >
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle"></i>
+                                &nbsp;单元长度&nbsp;<span
+                                    class="fs-5 fw-light text-white-50 fst-italic"
+                                    >如单个单元投影长度及两个单元投影长度差值、比值</span
+                                >
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle"></i>
+                                &nbsp;单元力&nbsp;<span
+                                    class="fs-5 fw-light text-white-50 fst-italic"
+                                    >如单个单元力密度（或力投影）及两个单元力密度（或力投影）差值、比值</span
+                                >
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle"></i>
+                                &nbsp;整体预应力水平
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-7 d-none d-md-block">
+                        <img
+                            src="static/img/bg-4.png"
+                            class="rounded img-fluid"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- <svg
+            class="divider"
+            viewBox="0 0 1000 90"
+        >
+            <path d="M 0 10 C 300 50, 700 50, 1000 10 V 90 H 0 Z"></path>
+        </svg> -->
+        <div><div class="wave"></div></div>
+
+        <section class="p-3 text-light">
+            <div class="container-xl">
+                <div
+                    class="row align-items-center justify-content-between page"
+                >
+                    <div class="col-md-5">
+                        <h2 class="display-4">
+                            <i class="bi bi-4-square-fill fs-1"></i> 渐进式
+                        </h2>
+                        <p class="fs-3">
+                            &nbsp;&nbsp;&nbsp;&nbsp;设置有大量非线性功能目标的复杂结构求解困难时，采取由浅入深、先易后难的策略
+                        </p>
+                        <ul class="list-unstyled fs-3 fw-light">
+                            <li>
+                                <i class="bi bi-check-circle"></i>
+                                &nbsp;附加不等式功能目标，增强求解健壮性
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle"></i>
+                                &nbsp;前置简单、线性功能目标，构建近似结构，以近似结构求解复杂结构
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-7 d-none d-md-block">
+                        <img
+                            src="static/img/bg-5.png"
+                            class="rounded img-fluid"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- <svg
+            id="sss"
+            class="divider"
+            viewBox="0 0 1000 90"
+        >
+            <path d="M 0 10 C 300 50, 700 50, 1000 10 V 90 H 0 Z"></path>
+        </svg> -->
+        <div style="background-color: rgb(var(--bs-dark-rgb))">
+            <div class="wave"></div>
+        </div>
+
+        <footer class="bg-dark text-white-50 small text-center">
+            <div class="container">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-12 p-0">
+                        <p class="small mb-1">©cswadi 2024</p>
+                        <p class="small mb-1">powered by ccj3</p>
+                        <p class="small mb-1">
+                            意见反馈：
+                            <i class="bi bi-envelope-fill"></i>
+                            <a
+                                href="mailto:419788322@qq.com"
+                                class="text-white-50 text-decoration-none"
+                                >419788322@qq.com</a
+                            >
+                        </p>
+                    </div>
+                    <div class="col-md-12 p-0">
+                        <a
+                            href="http://beian.miit.gov.cn/"
+                            class="text-white-50 small text-decoration-none"
+                            >渝ICP备2023000276号-1</a
+                        >
+                        &nbsp;
+                        <a
+                            href="https://beian.mps.gov.cn/#/query/webSearch?code=51019002006075"
+                            class="text-white-50 small text-decoration-none"
+                            >川公网安备51019002006075</a
+                        >
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Modal video -->
+        <div
+            class="modal fade"
+            id="video-demo-2"
+            tabindex="-1"
+        >
+            <div class="modal-dialog modal-fullscreen-xl-down modal-xl">
+                <div
+                    class="modal-content"
+                    style="border: none; border-radius: 0"
+                >
+                    <div
+                        class="modal-header p-0 position-absolute top-0 end-0 border-0"
+                        style="z-index: 2000"
+                    >
+                        <button
+                            type="button"
+                            class="btn border-0 rounded-0 px-2 py-0 fs-3"
+                            data-bs-dismiss="modal"
+                        >
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <video
+                            controls
+                            controlslist="nodownload"
+                            crossorigin="anonymous"
+                            preload="metadata"
+                            style="
+                                width: 100%;
+                                height: 100%;
+                                object-fit: scale-down;
+                            "
+                        >
+                            <source
+                                src="static/demo/demo-2.mp4"
+                                type="video/mp4"
+                            />
+                            <p>Your browser doesn't support HTML5 video</p>
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://kit.fontawesome.com/09a47edcfb.js"
+            crossorigin="anonymous"
+        ></script>
+        <script>
+            document.addEventListener('scroll', event => {
+                if (window.scrollY == 0) {
+                    document.getElementById('nav').classList.remove('bg-light')
+                    document
+                        .getElementById('nav')
+                        .classList.remove('navbar-light')
+                    document.getElementById('nav').classList.add('bg-primary')
+                    document.getElementById('nav').classList.add('navbar-dark')
+                } else {
+                    document
+                        .getElementById('nav')
+                        .classList.remove('bg-primary')
+                    document
+                        .getElementById('nav')
+                        .classList.remove('navbar-dark')
+                    document.getElementById('nav').classList.add('bg-light')
+                    document.getElementById('nav').classList.add('navbar-light')
+                }
+            })
+            window.onload = function () {
+                drawWave()
+            }
+            window.addEventListener('resize', drawWave)
+            function drawWave() {
+                const elements = document.getElementsByClassName('wave')
+                for (let i = 0; i < elements.length; i++) {
+                    let element = elements[i]
+                    let parent = element.parentNode
+                    let width = element.clientWidth
+                    let height = Math.floor(width * 0.05)
+                    element.style.height = height + 'px'
+                    parent.style.height = height + 'px'
+                    element.style.clipPath =
+                        "path('M 0 0 C " +
+                        width * 0.3 +
+                        ' ' +
+                        height * 1.0 +
+                        ',' +
+                        width * 0.7 +
+                        ' ' +
+                        height * 1.0 +
+                        ',' +
+                        +width +
+                        " 0 Z')"
+                    element.style.webkitClipPath = element.style.clipPath
+                }
+            }
+        </script>
+    </body>
+    <style>
+        :root {
+            --bs-primary-rgb: 65, 21, 132;
+            --bs-secondary-rgb: 13, 110, 253;
+            --bs-dark-rgb: 33, 37, 41;
+        }
+        section:nth-of-type(odd) {
+            background-color: rgb(var(--bs-primary-rgb));
+        }
+        section:nth-of-type(even) {
+            background-color: rgb(var(--bs-secondary-rgb));
+        }
+        .page {
+            /* height: 100vh; */
+            min-height: max(100vh, 400px);
+        }
+        svg.divider:nth-of-type(odd) {
+            background-color: rgb(var(--bs-primary-rgb));
+            fill: rgb(var(--bs-secondary-rgb));
+        }
+        svg.divider:nth-of-type(even) {
+            background-color: rgb(var(--bs-secondary-rgb));
+            fill: rgb(var(--bs-primary-rgb));
+        }
+        svg.divider:nth-last-of-type(1) {
+            fill: rgb(var(--bs-dark-rgb));
+        }
+
+        div:has(.wave) {
+            width: 100%;
+            height: 80px;
+            position: relative;
+            z-index: 0;
+        }
+        div:has(.wave):nth-of-type(odd) {
+            background-color: rgb(var(--bs-secondary-rgb));
+        }
+        div:has(.wave):nth-of-type(odd) > .wave {
+            background-color: rgb(var(--bs-primary-rgb));
+        }
+        div:has(.wave):nth-of-type(even) {
+            background-color: rgb(var(--bs-primary-rgb));
+        }
+        div:has(.wave):nth-of-type(even) > .wave {
+            background-color: rgb(var(--bs-secondary-rgb));
+        }
+        /* div:has(.wave):nth-last-of-type(1) {
+            background-color: rgb(var(--bs-dark-rgb));
+        } */
+        .wave {
+            width: 100%;
+            height: 80px;
+            position: absolute;
+            z-index: -1;
+        }
+    </style>
+</html>
