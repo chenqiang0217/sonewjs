@@ -41,13 +41,29 @@
             <div class="container">
                 <a
                     href="#"
-                    class="navbar-brand fs-1 fw-bold link-secondary"
+                    class="navbar-brand fs-1 fw-bold"
                 >
-                    <img
-                        width="32px"
-                        src="https://cdn.jsdelivr.net/gh/chenqiang0217/sonewjs/pages/static/img/sonew.svg"
-                        class="rounded img-fluid"
-                    />
+                    <!-- <img
+                        width="60px"
+                        src="static/img/sonew.svg"
+                        style="fill: #ffffff; color: white"
+                    /> -->
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        viewBox="0 0 24 24"
+                        fill="#ffffff"
+                        width="60"
+                    >
+                        <path
+                            d="M 6.59 4.4l 0 12.09, 4.16, -2.4, 0 -12.09, z"
+                        />
+                        <path
+                            d="M 2.81 19.6l 4.16 2.4, 9.64, -5.56, -4.16 -2.4, z"
+                        />
+                        <path d="M 11.55 7.79l 0 4.8, 9.64, 5.56, 0 -4.8, z" />
+                    </svg>
                     sonew
                 </a>
                 <button
@@ -82,7 +98,7 @@
             </div>
         </nav>
 
-        <section class="p-3 text-light">
+        <section class="text-light">
             <div class="container-xl">
                 <div
                     class="row align-items-center justify-content-center page"
@@ -165,7 +181,7 @@
                                                             >平面正交索网</span
                                                         >
                                                         <a
-                                                            href="https://cdn.jsdelivr.net/gh/chenqiang0217/sonewjs/pages/static/demo/demo-1.xlsx"
+                                                            href="static/demo/demo-1.xlsx"
                                                             download
                                                             class="btn text-white-50 px-1"
                                                         >
@@ -194,7 +210,7 @@
                                                             >单双层组合索网</span
                                                         >
                                                         <a
-                                                            href="https://cdn.jsdelivr.net/gh/chenqiang0217/sonewjs/pages/static/demo/demo-2.xlsx"
+                                                            href="static/demo/demo-2.xlsx"
                                                             download
                                                             class="btn text-white-50 px-1"
                                                         >
@@ -233,7 +249,7 @@
                                                             >双层鱼腹式索网</span
                                                         >
                                                         <a
-                                                            href="https://cdn.jsdelivr.net/gh/chenqiang0217/sonewjs/pages/static/demo/demo-3.xlsx"
+                                                            href="static/demo/demo-3.xlsx"
                                                             download
                                                             class="btn text-white-50 px-1"
                                                         >
@@ -265,7 +281,7 @@
         </svg> -->
         <div><div class="wave"></div></div>
 
-        <section class="p-3 text-light">
+        <section class="text-light even">
             <div class="container-xl">
                 <div
                     class="row align-items-center justify-content-between page"
@@ -295,9 +311,9 @@
         >
             <path d="M 0 10 C 300 50, 700 50, 1000 10 V 120 H 0 Z"></path>
         </svg> -->
-        <div><div class="wave"></div></div>
+        <div class="even"><div class="wave even"></div></div>
 
-        <section class="p-3 text-light">
+        <section class="text-light">
             <div class="container-xl">
                 <div
                     class="row align-items-center justify-content-between page"
@@ -335,7 +351,7 @@
         </svg> -->
         <div><div class="wave"></div></div>
 
-        <section class="p-3 text-light">
+        <section class="text-light">
             <div class="container-xl">
                 <div
                     class="row align-items-center justify-content-between page"
@@ -393,7 +409,7 @@
         </svg> -->
         <div><div class="wave"></div></div>
 
-        <section class="p-3 text-light">
+        <section class="text-light">
             <div class="container-xl">
                 <div
                     class="row align-items-center justify-content-between page"
@@ -506,7 +522,7 @@
                             "
                         >
                             <source
-                                src="https://cdn.jsdelivr.net/gh/chenqiang0217/sonewjs/pages/static/demo/demo-2.mp4"
+                                src="http://127.0.0.1:8000/video/?target=demo-2.mp4"
                                 type="video/mp4"
                             />
                             <p>Your browser doesn't support HTML5 video</p>
@@ -521,30 +537,43 @@
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"
         ></script>
-        <script
+        <!-- <script
             src="https://kit.fontawesome.com/09a47edcfb.js"
             crossorigin="anonymous"
-        ></script>
+        ></script> -->
         <script>
-            document.addEventListener('scroll', event => {
-                if (window.scrollY == 0) {
-                    document.getElementById('nav').classList.remove('bg-light')
-                    document
-                        .getElementById('nav')
-                        .classList.remove('navbar-light')
-                    document.getElementById('nav').classList.add('bg-primary')
-                    document.getElementById('nav').classList.add('navbar-dark')
-                } else {
-                    document
-                        .getElementById('nav')
-                        .classList.remove('bg-primary')
-                    document
-                        .getElementById('nav')
-                        .classList.remove('navbar-dark')
-                    document.getElementById('nav').classList.add('bg-light')
-                    document.getElementById('nav').classList.add('navbar-light')
-                }
-            })
+            document.addEventListener(
+                'scroll',
+                event => {
+                    const nav = document.getElementById('nav')
+                    const sections = document.getElementsByTagName('section')
+                    const waves = document.getElementsByClassName('wave')
+                    const gaps = [0]
+                    let i
+                    for (let i = 0; i < sections.length; i++) {
+                        gaps.push(
+                            sections[i].clientHeight + waves[i].clientHeight
+                        )
+                        gaps[i + 1] += gaps[i]
+                    }
+                    const y = window.scrollY + nav.clientHeight
+                    for (i = 0; i < gaps.length - 1; i++) {
+                        if (gaps[i] < y && gaps[i + 1] >= y) {
+                            break
+                        }
+                    }
+                    if (i % 2 == 0) {
+                        // 奇数页
+                        nav.classList.add('bg-primary')
+                        nav.classList.remove('bg-secondary')
+                    } else {
+                        // 偶数页
+                        nav.classList.add('bg-secondary')
+                        nav.classList.remove('bg-primary')
+                    }
+                },
+                200
+            )
             window.onload = function () {
                 drawWave()
             }
