@@ -3,7 +3,6 @@ import Top from './components/top/Top.vue'
 import Main from './components/main/Main.vue'
 import Right from './components/right/Right.vue'
 import Bottom from './components/bottom/Bottom.vue'
-
 </script>
 
 <template>
@@ -23,9 +22,7 @@ import Bottom from './components/bottom/Bottom.vue'
     </div>
 </template>
 
-
-
-<style >
+<style>
 * {
     margin: 0px;
     padding: 0px;
@@ -34,7 +31,7 @@ import Bottom from './components/bottom/Bottom.vue'
 .container {
     display: grid;
     grid-template-columns: 1fr 250px;
-    grid-template-rows: 32px 1fr 200px;
+    grid-template-rows: auto 1fr 200px;
     grid-template-areas:
         'header header'
         'main   right'
@@ -45,6 +42,7 @@ import Bottom from './components/bottom/Bottom.vue'
 .header {
     grid-area: header;
     display: flex;
+    flex-wrap: wrap;
 }
 
 .main {
@@ -63,4 +61,7 @@ import Bottom from './components/bottom/Bottom.vue'
 .el-color-picker__trigger {
     width: 120px;
 }
+
+
+
 </style>

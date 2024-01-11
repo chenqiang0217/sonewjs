@@ -292,24 +292,44 @@ const toolBars = ref([
 </script>
 
 <template>
-    <template
-        v-for="(toolBarGroup, i) in toolBars"
-        v-bind:key="i"
-    >
+    <div style="display: flex; flex-wrap: wrap; flex: 1">
         <template
-            v-for="(toolBar, j) in toolBarGroup"
-            v-bind:key="j"
+            v-for="(toolBarGroup, i) in toolBars"
+            v-bind:key="i"
         >
             <div
-                :class="
-                    i === toolBars.length - 1 && j === 0
-                        ? 'justify-right'
-                        : i === toolBars.length - 1 &&
-                        j === toolBarGroup.length - 1
-                        ? 'justify-end'
-                        : ''
-                "
+                v-if="i < toolBars.length - 1"
+                style="display: flex"
             >
+                <template
+                    v-for="(toolBar, j) in toolBarGroup"
+                    v-bind:key="j"
+                >
+                    <div>
+                        <el-tooltip
+                            :content="toolBar.label"
+                            placement="bottom"
+                            effect="light"
+                        >
+                            <el-button @click="toolBar.action">
+                                <IconFront :iconName="toolBar.icon"></IconFront>
+                            </el-button>
+                        </el-tooltip>
+                    </div>
+                </template>
+                <el-divider
+                    direction="vertical"
+                    v-if="i < toolBars.length - 2"
+                />
+            </div>
+        </template>
+    </div>
+    <div style="display: flex; justify-content: end">
+        <template
+            v-for="(toolBar, j) in toolBars.at(-1)"
+            v-bind:key="j"
+        >
+            <div>
                 <el-tooltip
                     :content="toolBar.label"
                     placement="bottom"
@@ -321,11 +341,8 @@ const toolBars = ref([
                 </el-tooltip>
             </div>
         </template>
-        <el-divider
-            direction="vertical"
-            v-if="i < toolBars.length - 2"
-        />
-    </template>
+    </div>
+
     <input
         type="file"
         id="xlsxFile"
@@ -349,11 +366,5 @@ const toolBars = ref([
 }
 .el-divider {
     margin: 6px;
-}
-.justify-right {
-    margin-left: auto;
-}
-.justify-end {
-    margin-right: 10px;
 }
 </style>
