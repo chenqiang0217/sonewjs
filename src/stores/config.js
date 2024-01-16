@@ -27,7 +27,7 @@ const useConfigStore = defineStore('config', {
             },
             view: {
                 node: {
-                    sizePx: 0.5,
+                    sizePx: 3,
                     color: {
                         selected: CONSTANT.VIEW.COLOR.MESH.NODE.SELECTED,
                         unselected: {

@@ -1,6 +1,6 @@
 <script setup>
 import { watch, reactive, markRaw } from 'vue'
-import View from './View.vue'
+import View from './view/View.vue'
 import Node from './table/Node.vue'
 import Elem from './table/Elem.vue'
 import Cnst from './table/Cnst.vue'

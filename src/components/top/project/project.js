@@ -3,6 +3,8 @@ import { useStatusStore } from '../../../stores/status'
 import { CONSTANT } from '../../../stores/constant'
 import { drawPointsInScene, drawLinesInScene, linkTextsWithMeshs } from '../../../stores/view'
 import * as XLSX from 'xlsx/xlsx.mjs'
+import { view } from '../../../stores/view'
+
 import { sleep } from '../../../api/utils'
 
 
@@ -24,6 +26,8 @@ const projectImport = async (e) => {
         const file = files[0]
         readLocalFile(file, function (workbook) {
             readWorkbook(workbook)
+            const model = useModelStore()
+            view.scene.activeCamera.setView({direction: 'z', bounding: model.bounding})
         })
     }
     status.view.loading = false

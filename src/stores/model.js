@@ -349,7 +349,28 @@ const useModelStore = defineStore('model', {
                 elemForce: elemForce,
             }
         },
-
+        bounding(state) {
+            let min, max
+            if(state.node.length == 0){
+                min = Vector3.Zero()
+                max = Vector3.Zero()
+            }
+            else{
+                const p = state.node[0].position
+                min = p.clone()
+                max = p.clone()
+            }
+            state.node.forEach(node => {
+                const p = node.position
+                if (min.x > p.x) min.x = p.x
+                if (min.y > p.y) min.y = p.y
+                if (min.z > p.z) min.z = p.z
+                if (max.x < p.x) max.x = p.x
+                if (max.y < p.y) max.y = p.y
+                if (max.z < p.z) max.z = p.z
+            })
+            return { min, max }
+        },
     },
     actions: {
         insertNode(no, arr) {
@@ -369,34 +390,6 @@ const useModelStore = defineStore('model', {
         },
         insertElemForce(no, arr) {
             this.elemForce.push(new ElemForce([no, ...arr]))
-        },
-        boundingInfo() {
-            if (this.node.length == 0) {
-                return {
-                    xMin: 0, xMax: 0,
-                    yMin: 0, yMax: 0,
-                    zMin: 0, zMax: 0,
-                }
-            }
-            else {
-                let i = 0
-                let iNode = this.node[i]
-                let bdg = {
-                    xMin: iNode.x, xMax: iNode.x,
-                    yMin: iNode.y, yMax: iNode.y,
-                    zMin: iNode.z, zMax: iNode.z,
-                }
-                for (i = 1; i < this.node.length; i++) {
-                    iNode = this.node[i]
-                    if (bdg.xMin > iNode.x) bdg.xMin = iNode.x
-                    if (bdg.xMax < iNode.x) bdg.xMax = iNode.x
-                    if (bdg.yMin > iNode.y) bdg.yMin = iNode.y
-                    if (bdg.yMax < iNode.y) bdg.yMax = iNode.y
-                    if (bdg.zMin > iNode.z) bdg.zMin = iNode.z
-                    if (bdg.zMax < iNode.z) bdg.zMax = iNode.z
-                }
-                return bdg
-            }
         },
         clearResult() {
             this.result = []

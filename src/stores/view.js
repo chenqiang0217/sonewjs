@@ -1,6 +1,5 @@
 import {
-    Engine, Scene, AxesViewer, ArcRotateCamera, Camera, Vector3, Vector2, MeshBuilder, Mesh, StandardMaterial, VertexBuffer,
-    Color3, Color4
+    Engine, Scene, Vector3, Vector2, MeshBuilder, Mesh, StandardMaterial, VertexBuffer, Color3
 } from "@babylonjs/core"
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui"
 import { watch } from 'vue'
@@ -11,8 +10,15 @@ import { useStatusStore } from "./status"
 import { CONSTANT } from './constant'
 import { SetOperation } from '../api/utils'
 
+import { AxisScene } from '../components/main/view/axisScene'
+import { OrthoCamera } from '../components/main/view/camera'
+
+
+
 const view = {
+    engine: null,
     scene: null,
+    axisScene: null,
     camera: null,
     pickBox: null,
     material: {
@@ -53,6 +59,7 @@ const createScene = (canvas) => {
     engine.premultipliedAlpha = false
     engine.enableOfflineSupport = false
     engine.doNotHandleContextLost = true
+    view.engine = engine
     view.scene = new Scene(engine)
     view.scene.clearColor = new Color3(1.00, 1.00, 1.00)
     view.scene.useRightHandedSystem = true
@@ -61,37 +68,10 @@ const createScene = (canvas) => {
     view.scene.gravity = new Vector3(0, 0, 0)
     view.scene.collisionsEnabled = false
 
-    view.camera = new ArcRotateCamera("camera1", 0.5, 0.5, 1000, Vector3.Zero(), view.scene)
-    view.camera.setPosition(new Vector3(0, 0, 1000))
-    view.camera.setTarget(Vector3.Zero())
-    view.camera.attachControl(false)
-    view.camera.mode = Camera.ORTHOGRAPHIC_CAMERA
-    const viewSize = 100
-    const ratio = canvas.width / canvas.height
-    view.camera.orthoLeft = -viewSize / 2 * ratio
-    view.camera.orthoRight = viewSize / 2 * ratio
-    view.camera.orthoTop = viewSize / 2
-    view.camera.orthoBottom = -viewSize / 2
-    // view.camera.orthoLeft = -status.view.size.width / 2
-    // view.camera.orthoRight = status.view.size.width / 2
-    // view.camera.orthoTop = status.view.size.height / 2
-    // view.camera.orthoBottom = -status.view.size.height / 2
-    view.camera.panningSensibility = 100
-    view.camera.inertia = 0.0
-    //  view.camera.speed = 5.0
-    //  view.camera.inputs.removeMouseWheel()
-    view.camera.nodeViewSize = viewSize * config.view.node.sizePx / canvas.width
-
-    // var worldOrigin = Vector3.Zero()
-    // var xAxis = MeshBuilder.CreateLines("x", {points: [worldOrigin, (Axis.X).scale(viewSize/2)]}, view.scene)
-    // var yAxis = MeshBuilder.CreateLines("y", {points: [worldOrigin, (Axis.Y).scale(viewSize/2)]}, view.scene)
-    // var zAxis = MeshBuilder.CreateLines("z", {points: [worldOrigin, (Axis.Z).scale(viewSize/2)]}, view.scene)
-    // // var cAxis = MeshBuilder.CreateDashedLines("c", {points: [ view.camera.target,  view.camera.position], updatable: true}, view.scene)
-    // xAxis.color = Color3.Red()
-    // yAxis.color = Color3.Green()
-    // zAxis.color = Color3.Blue()
-    //为便于旋转视图，以蓝色（z）为x轴，以红色（x）为y轴，以绿色（y）为z轴。
-    // new AxesViewer(view.scene, viewSize / 10)
+    const camera = new OrthoCamera( view.scene)
+    camera.attachControl(false)
+    camera.setView({direction: 'z', bounding: model.bounding})
+    view.axisScene = new AxisScene(engine)
 
     view.material.point.selected = new StandardMaterial('pointeMatSelected', view.scene)
     view.material.point.unselected.lock = new StandardMaterial('pointeMatLock', view.scene)
@@ -116,58 +96,31 @@ const createScene = (canvas) => {
     view.material.membrane.calculated.undeformed.emissiveColor = config.view.membrane.color.calculated.undeformed
 
 
-    // BABYLON.SceneLoader.Load("./", "mesh.obj", view.scene, function (scene) {
-    //     // do something with the scene", "batman.obj", engine, function (scene) {
-    //     // do something with the scene
-    // });
 
-    // nodeIconManager = new SpriteManager("nodeIconManager", "./public/node.png", MAXDNODEICON, 59, view.scene)
     //pickBox尺寸不能在camera外面，否则不显示。
-    view.pickBox = MeshBuilder.CreateBox("box", { width: 1, height: 1, depth: 900 }, view.scene)
+    view.pickBox = MeshBuilder.CreateBox("box", { width: 1, height: 1, depth: 1 }, view.scene)
     view.pickBox.visibility = 0.0
-    // pickBox.checkCollisions = false
-    // pickBox.billboardMode = 7
 
+    const resizeObserver = new ResizeObserver(() => {
+        camera.setView()
+        view.axisScene.updateViewport()
+        view.axisScene.updateTextSize()
+    })
+    resizeObserver.observe(canvas)
 
-    canvas.addEventListener("wheel", (evt) => {
-        if ('wheelDelta' in evt) {
-            let alpha = 1.2
-            if (evt.wheelDelta > 1.0) {
-                alpha = 1.0 / alpha
-            }
-            view.camera.orthoLeft /= alpha
-            view.camera.orthoRight /= alpha
-            view.camera.orthoTop /= alpha
-            view.camera.orthoBottom /= alpha
-            view.scene.meshes.filter(mesh => mesh.name.includes('n')).map(mesh => {
-                mesh.scaling = mesh.scaling.scale(1 / alpha)
-            })
-        }
+    canvas.addEventListener("wheel", evt => {
+        camera.zoom(evt)
     })
 
     view.ui = AdvancedDynamicTexture.CreateFullscreenUI("ui", true, view.scene)
 
-
-    // model.node.push(new Node([1, 0, 0, 0]))
-    // model.node.push(new Node([2, 100, 0, 0]))
-    // model.node.push(new Node([3, 100, 100, 100]))
-    // model.elem.push(new Elem([1, 0, 1, 1, 1, 1, 2]))
-    // model.elem.push(new Elem([2, 0, 1, 1, 1, 2, 3]))
-    // model.elem.push(new Elem([3, 0, 1, 1, 1, 1, 3]))
-
-    // drawPointsInScene(model.categorized.node.all)
-    // drawLinesInScene(model.categorized.elem.all)
-    // linkTextsWithMeshs(
-    //     Array.from(model.categorized.node.all).map(no => ({ no })),
-    //     CONSTANT.VIEW.PREFIX.MESH.NODE.PREP
-    // )
-    // linkTextsWithMeshs(
-    //     Array.from(model.categorized.elem.all).map(no => ({ no })),
-    //     CONSTANT.VIEW.PREFIX.MESH.ELEM.PREP
-    // )
-
     engine.runRenderLoop(() => {
         view.scene.render()
+    })
+    view.scene.registerAfterRender(() => {
+        view.axisScene.render()
+        view.axisScene.activeCamera.alpha = view.scene.activeCamera.alpha
+        view.axisScene.activeCamera.beta = view.scene.activeCamera.beta
     })
 
 
@@ -348,7 +301,7 @@ const createScene = (canvas) => {
             CONSTANT.VIEW.PREFIX.MESH.ELEM.RSLT,
         ]
         if (mode === CONSTANT.VIEW.ROTATING) {
-            view.camera.attachControl(false)
+            view.scene.activeCamera.attachControl(false)
             view.pickBox.visibility = 0.0
             view.scene.onPointerDown = () => {
                 //旋转过程全部隐藏
@@ -393,7 +346,7 @@ const createScene = (canvas) => {
             }
         }
         else {
-            view.camera.detachControl()
+            view.scene.activeCamera.detachControl()
             view.scene.onPointerDown = onSelectPointerDown
             view.scene.onPointerUp = onSelectPointerUp
             switch (mode) {
@@ -408,7 +361,7 @@ const createScene = (canvas) => {
                 case CONSTANT.VIEW.SELECTING.NONE:
                     status.view.mesh.selected.node.clear()
                     status.view.mesh.selected.elem.clear()
-                    view.camera.attachControl(false)
+                    view.scene.activeCamera.attachControl(false)
                     view.scene.onPointerDown = null
                     view.scene.onPointerUp = null
                     status.view.mode = CONSTANT.VIEW.ROTATING
@@ -457,11 +410,6 @@ const createScene = (canvas) => {
     })
 }
 
-const resetViewRatio = ({ width, height }) => {
-    view.camera.orthoRight = view.camera.orthoTop / height * width
-    view.camera.orthoLeft = - view.camera.orthoRight
-}
-
 
 const activateMeshs = (nos, meshPrefix) => {
     nos.forEach(no => {
@@ -496,7 +444,7 @@ const alignTextWithMesh = () => {
             let points = mesh.getVerticesData(VertexBuffer.PositionKind)
             let aPoint = Vector3.FromArray(points, 0)
             let bPoint = Vector3.FromArray(points, 3)
-            let { x, y } = Vector3.TransformNormal(bPoint.subtract(aPoint), view.camera.getViewMatrix())
+            let { x, y } = Vector3.TransformNormal(bPoint.subtract(aPoint), view.scene.activeCamera.getViewMatrix())
             let v1 = new Vector2(x, y)
             v1.normalize()
             if (v1.x < 0) {
@@ -509,18 +457,18 @@ const alignTextWithMesh = () => {
         })
 }
 const onSelectPointerDown = (evt, pickInfo) => {
-    //  view.camera.alpha:绕y轴的角度，从x轴起算
-    //  view.camera.beta：绕x轴的角度，从y轴起算
+    //  view.scene.activeCamera.alpha:绕y轴的角度，从x轴起算
+    //  view.scene.activeCamera.beta：绕x轴的角度，从y轴起算
     const status = useStatusStore()
-    // viewMatrix =  view.camera.getViewMatrix(true)
-    view.pickBox.rotation.x = -Math.PI / 2 + view.camera.beta
-    view.pickBox.rotation.y = Math.PI / 2 - view.camera.alpha
+    // viewMatrix =  view.scene.activeCamera.getViewMatrix(true)
+    view.pickBox.rotation.x = -Math.PI / 2 + view.scene.activeCamera.beta
+    view.pickBox.rotation.y = Math.PI / 2 - view.scene.activeCamera.alpha
 
     // view.status.pointer[0] = { x: view.scene.pointerX, y: view.scene.pointerY }
     status.view.pointer[0] = { x: view.scene.pointerX, y: view.scene.pointerY }
 
     let pickResult = view.scene.pick(view.scene.pointerX, view.scene.pointerY)
-    view.pickBox.position = pickResult.ray.origin.add(pickResult.ray.direction.scale(200))
+    view.pickBox.position = pickResult.ray.origin.add(pickResult.ray.direction.scale(view.scene.activeCamera.radius))
     view.scene.onPointerMove = onSelectPointerMove
     view.scene.onPointerDown = null
 }
@@ -535,15 +483,16 @@ const onSelectPointerMove = (evt, pickInfo) => {
     let pick1 = view.scene.pick(status.view.pointer[0].x, status.view.pointer[0].y)
     let pick2 = view.scene.pick(status.view.pointer[1].x, status.view.pointer[1].y)
 
-    let position1 = pick1.ray.origin.add(pick1.ray.direction.scale(view.camera.radius))
-    let position2 = pick2.ray.origin.add(pick2.ray.direction.scale(view.camera.radius))
+    let position1 = pick1.ray.origin.add(pick1.ray.direction.scale(view.scene.activeCamera.radius))
+    let position2 = pick2.ray.origin.add(pick2.ray.direction.scale(view.scene.activeCamera.radius))
     view.pickBox.position = position1.add(position2).scale(0.5)
-    const viewMatrix = view.camera.getViewMatrix(true)
+    const viewMatrix = view.scene.activeCamera.getViewMatrix(true)
     let v1 = Vector3.TransformCoordinates(pick1.ray.origin, viewMatrix)
     let v2 = Vector3.TransformCoordinates(pick2.ray.origin, viewMatrix)
     let v3 = v2.subtract(v1)
     view.pickBox.scaling.x = v3.x
     view.pickBox.scaling.y = v3.y
+    view.pickBox.scaling.z = view.scene.activeCamera.radius * 2.0
     // view.status.selected.region[0] = v1
     // view.status.selected.region[1] = v2
     status.view.mesh.selected.region[0] = v1
@@ -599,9 +548,8 @@ const onSelectPointerUp = () => {
 
 const drawPointsInScene = (nos, prefix = CONSTANT.VIEW.PREFIX.MESH.NODE.PREP, step = 0) => {
     const model = useModelStore()
-    const config = useConfigStore()
     const freeNode = model.categorized.node.free
-    let sizePx = config.view.node.sizePx
+    let sizePx = view.scene.activeCamera.nodeSize
     let option = { height: 1, width: 1, sideOrientation: Mesh.DOUBLESIDE }
     let nodes
     if (prefix === CONSTANT.VIEW.PREFIX.MESH.NODE.PREP) {
@@ -615,7 +563,7 @@ const drawPointsInScene = (nos, prefix = CONSTANT.VIEW.PREFIX.MESH.NODE.PREP, st
         let point = view.scene.getMeshByName(pointName)
         if (!point) {
             //point不存在
-            point = MeshBuilder.CreatePlane(pointName, option)
+            point = MeshBuilder.CreatePlane(pointName, option, view.scene)
             point.scaling = point.scaling.scale(sizePx)
             point.billboardMode = 7
             if (prefix === CONSTANT.VIEW.PREFIX.MESH.NODE.PREP) {
@@ -663,7 +611,7 @@ const drawLinesInScene = (nos, linePrefix = CONSTANT.VIEW.PREFIX.MESH.ELEM.PREP)
             let line = view.scene.getMeshByName(lineName)
             let meta = { no }
             if (line) {
-                line = MeshBuilder.CreateLines(null, { points, instance: line })
+                line = MeshBuilder.CreateLines(null, { points, instance: line }, view.scene)
                 line.refreshBoundingInfo()
             }
             else {
@@ -706,7 +654,7 @@ const drawRibbonInScene = (facets, Meshrefix = CONSTANT.VIEW.PREFIX.MESH.MEMBRAN
             model.node.find(node => node.no == no).positionInScene
         )
         let ribbon = MeshBuilder.CreateRibbon(facetName,
-            { pathArray: [points], closePath: true, sideOrientation: Mesh.DOUBLESIDE }
+            { pathArray: [points], closePath: true, sideOrientation: Mesh.DOUBLESIDE }, view.scene
         )
         ribbon.material = view.material.membrane.unselected.lock
     })
@@ -826,29 +774,7 @@ const clearTextsInScene = (nos, meshPrefix) => {
     })
 }
 
-function resetCamera(boundingInfo) {
-    let v1 = new Vector3(boundingInfo.xMin, boundingInfo.yMin, boundingInfo.zMin)
-    let v2 = new Vector3(boundingInfo.xMax, boundingInfo.yMax, boundingInfo.zMax)
-    let target = v2.add(v1).scale(0.5)
-    let r = v2.subtract(v1).length()
-    let position = target.add(new Vector3(0, 0, r))
-    // view.pickBox.position = target
-    view.pickBox.scaling.z = 1.5 * r
-
-    view.camera.setTarget(target)
-    view.camera.setPosition(position)
-    let sx = v2.subtract(v1).x / (view.camera.orthoRight - view.camera.orthoLeft)
-    let sy = v2.subtract(v1).y / (view.camera.orthoTop - view.camera.orthoBottom)
-    let s = sx
-    if (sx < sy) s = sy
-    view.camera.orthoLeft *= s
-    view.camera.orthoRight *= s
-    view.camera.orthoTop *= s
-    view.camera.orthoBottom *= s
-    view.camera.nodeViewSize *= s
-}
-
 export {
-    view, createScene, resetCamera, resetViewRatio, drawPointsInScene, drawLinesInScene, drawRibbonInScene, linkTextsWithMeshs,
+    view, createScene, drawPointsInScene, drawLinesInScene, drawRibbonInScene, linkTextsWithMeshs,
     clearMeshsInScene, clearTextsInScene, setGadientColorForLines, setTextToMeshNo,
 }

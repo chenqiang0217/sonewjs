@@ -468,7 +468,9 @@
                                 >419788322@qq.com</a
                             >
                         </p>
-                        <p class="small mb-1">建议采用谷歌浏览器（Google Chrome）</p>
+                        <p class="small mb-1">
+                            建议采用谷歌浏览器（Google Chrome）
+                        </p>
                     </div>
                     <div class="col-md-12 p-0">
                         <a
@@ -495,10 +497,10 @@
         >
             <div
                 id="container-video"
-                class="modal-dialog modal-fullscreen-sm-down modal-xl h-100 modal-dialog-centered my-0 p-3"
+                class="modal-dialog modal-fullscreen-xl-down modal-xl h-100 modal-dialog-centered my-0 p-3 overflow-hidden"
             >
                 <div
-                    class="modal-content h-100 justify-content-center p-0 bg-transparent "
+                    class="modal-content h-100 justify-content-center p-0 bg-transparent overflow-hidden p-0"
                     style="border: none; border-radius: 0"
                 >
                     <div
@@ -509,29 +511,30 @@
                             type="button"
                             class="btn px-1 py-0 fs-3 text-white-50 close"
                             data-bs-dismiss="modal"
+                            onclick="videoPause()"
                         >
                             <i class="bi bi-x-circle"></i>
                         </button>
                     </div>
-                        <video
-                            controls
-                            controlslist="nodownload"
-                            crossorigin="anonymous"
-                            preload="none"
-                            class="m-0 p-0"
-                            id="video"
-                            style="
-                                width: 100%;
-                                height: 100%;
-                                object-fit: scale-down;
-                            "
-                        >
-                            <source
-                                src="video/?target=demo-2.mp4"
-                                type="video/mp4"
-                            />
-                            <p>Your browser doesn't support HTML5 video</p>
-                    </div>
+                    <video
+                        controls
+                        controlslist="nodownload"
+                        crossorigin="anonymous"
+                        preload="none"
+                        class="m-0 p-0 bg-transparent"
+                        id="video"
+                        style="
+                            width: 100%;
+                            height: 100%;
+                            object-fit: scale-down;
+                        "
+                    >
+                        <source
+                            src="video/?target=demo-2.mp4"
+                            type="video/mp4"
+                        />
+                        <p>Your browser doesn't support HTML5 video</p>
+                    </video>
                 </div>
             </div>
         </div>
@@ -584,12 +587,15 @@
                 const resizeObserver = new ResizeObserver(resetVideoSize)
                 resizeObserver.observe(target)
             }
-            window.addEventListener('resize', ()=>{
-                drawWave()
-            }, 200)
+            window.addEventListener(
+                'resize',
+                () => {
+                    drawWave()
+                },
+                200
+            )
             function drawWave() {
-                const elements = 
-                document.getElementsByClassName('wave')
+                const elements = document.getElementsByClassName('wave')
                 for (let i = 0; i < elements.length; i++) {
                     let element = elements[i]
                     let parent = element.parentNode
@@ -627,6 +633,10 @@
                     video.style.width = Math.floor(height * ratio) + 'px'
                     video.style.height = height + 'px'
                 }
+            }
+            function videoPause(){
+                const video = document.getElementById('video')
+                video.pause()
             }
         </script>
     </body>
