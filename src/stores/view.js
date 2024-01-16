@@ -490,11 +490,7 @@ const onSelectPointerMove = (evt, pickInfo) => {
     let v1 = Vector3.TransformCoordinates(pick1.ray.origin, viewMatrix)
     let v2 = Vector3.TransformCoordinates(pick2.ray.origin, viewMatrix)
     let v3 = v2.subtract(v1)
-    view.pickBox.scaling.x = v3.x
-    view.pickBox.scaling.y = v3.y
-    view.pickBox.scaling.z = view.scene.activeCamera.radius * 2.0
-    // view.status.selected.region[0] = v1
-    // view.status.selected.region[1] = v2
+    view.pickBox.scaling = new Vector3(v3.x, v3.y, view.scene.activeCamera.radius * 2.0)
     status.view.mesh.selected.region[0] = v1
     status.view.mesh.selected.region[1] = v2
 }

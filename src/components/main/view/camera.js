@@ -6,7 +6,6 @@ import { useConfigStore } from '../../../stores/config'
 
 class OrthoCamera extends ArcRotateCamera {
     constructor(scene, alpha = Math.PI, beta = 0, radius = 1, target = Vector3.Zero()) {
-        // this.camera = new ArcRotateCamera('camera', alpha, beta, radius, target, scene)
         super('camera', alpha, beta, radius, target, scene)
         this.mode = ArcRotateCamera.ORTHOGRAPHIC_CAMERA
         this.panningSensibility = 100
@@ -27,7 +26,7 @@ class OrthoCamera extends ArcRotateCamera {
             bdg = bounding.max.subtract(bounding.min)
             const target = Vector3.Center(bounding.min, bounding.max)
             this.target = new Vector3(target.y, target.z, target.x)
-            this.radiusStatic = bdg.length() == 0 ? 2.0 : bdg.length() * 2.0
+            this.radiusStatic = bdg.length() == 0 ? 4.0 : bdg.length() * 4.0
             this.radius = this.radiusStatic
             switch (direction) {
                 case 'x':
