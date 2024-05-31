@@ -6,6 +6,7 @@ export const useMessageStore = defineStore('message', {
             maxClientId: 0,
             maxServerId: 0,
             client: [
+                {content: 'welcome to sonew, build at 2024.0531', level:'info'},
                 // {content: '欢迎使用', level:'info'},
                 // {content: '输入正确', level:'success'},
                 // {content: '输入错误', level:'warning'},
