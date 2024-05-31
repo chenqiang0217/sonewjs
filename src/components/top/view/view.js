@@ -1,38 +1,47 @@
 import { useModelStore } from '../../../stores/model'
-import { useStatusStore } from '../../../stores/status'
-import { view } from '../../../stores/view'
+import { useView } from '../../../api/view/index'
+import { alignTextWithLines } from '../../../api/view/control'
 
 
-
-const viewMove = (e) => {
-    const status = useStatusStore()
+const viewMove = () => {
+    const view = useView()
+    const constant = view.scene.metadata.constant
+    const status = view.scene.metadata.useStatus()
+    status.mode = constant.ROTATING
 }
-const viewRotate = (e) => {
-    const status = useStatusStore()
+const viewRotate = () => {
+    const view = useView()
+    const constant = view.scene.metadata.constant
+    const status = view.scene.metadata.useStatus()
+    status.mode = constant.ROTATING
 }
-const viewIsometric = (e) => {
-    const model = useModelStore()
+const viewIsometric = () => {
+    const view = useView()
     view.scene.activeCamera.setView(
-        { direction: 'persp', bounding: model.bounding }
+        { direction: 'persp', bounding: view.bounding }
     )
+    alignTextWithLines()
 }
-const viewTop = (e) => {
-    const model = useModelStore()
+const viewTop = () => {
+    const view = useView()
     view.scene.activeCamera.setView(
-        { direction: 'z', bounding: model.bounding }
+        { direction: 'z', bounding: view.bounding }
     )
+    alignTextWithLines()
 }
-const viewFront = (e) => {
-    const model = useModelStore()
+const viewFront = () => {
+    const view = useView()
     view.scene.activeCamera.setView(
-        { direction: 'y', bounding: model.bounding }
+        { direction: 'y', bounding: view.bounding }
     )
+    alignTextWithLines()
 }
-const viewRight = (e) => {
-    const model = useModelStore()
+const viewRight = () => {
+    const view = useView()
     view.scene.activeCamera.setView(
-        { direction: 'x', bounding: model.bounding }
+        { direction: 'x', bounding: view.bounding }
     )
+    alignTextWithLines()
 }
 
 export { viewMove, viewRotate, viewIsometric, viewTop, viewFront, viewRight }

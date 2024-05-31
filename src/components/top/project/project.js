@@ -1,21 +1,14 @@
+import * as XLSX from 'xlsx/xlsx.mjs'
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
-import { CONSTANT } from '../../../stores/constant'
-import { drawPointsInScene, drawLinesInScene, linkTextsWithMeshs } from '../../../stores/view'
-import * as XLSX from 'xlsx/xlsx.mjs'
-import { view } from '../../../stores/view'
-
+import { useView } from '../../../api/view/index'
 import { sleep } from '../../../api/utils'
 
 
 const projectNew = (e) => {
-
 }
 const projectOpen = (e) => {
 
-}
-const projectImportCilck = async (e) => {
-    document.getElementById('xlsxFile').click()
 }
 const projectImport = async (e) => {
     const status = useStatusStore()
@@ -26,8 +19,8 @@ const projectImport = async (e) => {
         const file = files[0]
         readLocalFile(file, function (workbook) {
             readWorkbook(workbook)
-            const model = useModelStore()
-            view.scene.activeCamera.setView({direction: 'z', bounding: model.bounding})
+            const view = useView()
+            view.scene.activeCamera.setView({direction: 'z', bounding: view.bounding})
         })
     }
     status.view.loading = false
@@ -42,12 +35,12 @@ const readLocalFile = (file, callback) => {
             XLSX.read(e.target.result, { type: 'binary' })
         )
     }
-    reader.readAsBinaryString(file)
+    reader.readAsArrayBuffer(file)
 }
 
 function readWorkbook(workbook) {
+    const view = useView()
     const model = useModelStore()
-    const status = useStatusStore()
     const labels = ['node', 'elem', 'constraint', 'nodeShape', 'elemShape', 'elemForce']
     const funcs = [model.insertNode, model.insertElem, model.insertCnst,
     model.insertNodeShape, model.insertElemShape, model.insertElemForce]
@@ -59,29 +52,16 @@ function readWorkbook(workbook) {
         sheet.shift()
         for (let lines of sheet) {
             if (lines.length) {
-                callFunc(func, Number(lines.shift()), lines.map(item => Number(item)))
+                callFunc(func, lines.map(item => Number(item)))
             } else { break }
         }
     }
-    //为避免通过放入todo，lines先于points执行导致错误，直接执行mesh。
-    drawPointsInScene(model.categorized.node.all)
-    drawLinesInScene(model.categorized.elem.all)
-    status.view.mesh.activated.node.prep = new Set(model.categorized.node.all)
-    status.view.mesh.activated.elem.prep = new Set(model.categorized.elem.all)
-    linkTextsWithMeshs(
-        Array.from(model.categorized.node.all).map(no => ({ no })),
-        CONSTANT.VIEW.PREFIX.MESH.NODE.PREP
-    )
-    linkTextsWithMeshs(
-        Array.from(model.categorized.elem.all).map(no => ({ no })),
-        CONSTANT.VIEW.PREFIX.MESH.ELEM.PREP
-    )
-    status.view.text.activated.node.prep = new Set(model.categorized.node.all)
-    status.view.text.activated.elem.prep = new Set(model.categorized.elem.all)
+    model.node.forEach(node => view.createPoint(node))
+    model.elem.forEach(elem => view.createLine(elem))
 }
 
-function callFunc(func, no, data) {
-    func(no, data)
+function callFunc(func, data) {
+    func(data)
 }
 
-export { projectNew, projectOpen, projectImportCilck, projectImport, projectSave }
+export { projectNew, projectOpen, projectImport, projectSave }

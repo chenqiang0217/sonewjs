@@ -10,12 +10,12 @@ import { useStatusStore } from "./status"
 import { CONSTANT } from './constant'
 import { SetOperation } from '../api/utils'
 
-import { AxisScene } from '../components/main/view/axisScene'
-import { OrthoCamera } from '../components/main/view/camera'
+import { AxisScene } from '../api/view/axisScene'
+import { OrthoCamera } from '../api/view/camera'
 
 
 
-const view = {
+const view2 = {
     engine: null,
     scene: null,
     axisScene: null,
@@ -68,7 +68,7 @@ const createScene = (canvas) => {
     view.scene.gravity = new Vector3(0, 0, 0)
     view.scene.collisionsEnabled = false
 
-    const camera = new OrthoCamera( view.scene)
+    const camera = new OrthoCamera(view.scene)
     camera.attachControl(false)
     camera.setView({direction: 'z', bounding: model.bounding})
     view.axisScene = new AxisScene(engine)
@@ -101,16 +101,6 @@ const createScene = (canvas) => {
     view.pickBox = MeshBuilder.CreateBox("box", { width: 1, height: 1, depth: 1 }, view.scene)
     view.pickBox.visibility = 0.0
 
-    const resizeObserver = new ResizeObserver(() => {
-        camera.setView()
-        view.axisScene.updateViewport()
-        view.axisScene.updateTextSize()
-    })
-    resizeObserver.observe(canvas)
-
-    canvas.addEventListener("wheel", evt => {
-        camera.zoom(evt)
-    })
 
     view.ui = AdvancedDynamicTexture.CreateFullscreenUI("ui", true, view.scene)
 
@@ -545,8 +535,8 @@ const onSelectPointerUp = () => {
 const drawPointsInScene = (nos, prefix = CONSTANT.VIEW.PREFIX.MESH.NODE.PREP, step = 0) => {
     const model = useModelStore()
     const freeNode = model.categorized.node.free
-    let sizePx = view.scene.activeCamera.nodeSize
-    let option = { height: 1, width: 1, sideOrientation: Mesh.DOUBLESIDE }
+    const sizePx = view.scene.activeCamera.nodeSize
+    const option = { height: 1, width: 1, sideOrientation: Mesh.DOUBLESIDE }
     let nodes
     if (prefix === CONSTANT.VIEW.PREFIX.MESH.NODE.PREP) {
         nodes = model.node
@@ -771,6 +761,6 @@ const clearTextsInScene = (nos, meshPrefix) => {
 }
 
 export {
-    view, createScene, drawPointsInScene, drawLinesInScene, drawRibbonInScene, linkTextsWithMeshs,
+    createScene, drawPointsInScene, drawLinesInScene, drawRibbonInScene, linkTextsWithMeshs,
     clearMeshsInScene, clearTextsInScene, setGadientColorForLines, setTextToMeshNo,
 }

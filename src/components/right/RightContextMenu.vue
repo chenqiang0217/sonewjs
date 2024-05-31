@@ -1,13 +1,12 @@
 <script setup>
-import { ref } from "vue"
-import { view } from "../../stores/view"
-import { CONSTANT } from "../../stores/constant"
-
-import { useModelStore } from "../../stores/model"
-import { useStatusStore } from "../../stores/status"
+import { ref } from 'vue'
+import { useViewStatusStore, VIEWCONSTANT } from '../../api/view/index'
+import { useModelStore } from '../../stores/model'
+import { useStatusStore } from '../../stores/status'
 
 const model = useModelStore()
 const status = useStatusStore()
+const viewStatus = useViewStatusStore()
 const props = defineProps({
     x: {
         type: Number,
@@ -22,11 +21,11 @@ const props = defineProps({
         required: true,
         default: {
             view: {
-                from: "",
-                mesh: "",
-                label: "",
+                from: '',
+                mesh: '',
+                label: '',
             },
-            table: "",
+            table: '',
         },
     },
     minWidth: {
@@ -37,32 +36,32 @@ const props = defineProps({
     theme: {
         type: String,
         required: false,
-        default: "flat",
+        default: 'flat',
     },
 })
 const show = ref(false)
 defineExpose({ show })
-const onClick = (action, mode, {view, table}) => {
+const onClick = (action, mode, { view, table }) => {
     let meshList, mesh
     switch (action) {
         case `select`:
-            meshList = model.filter(view)
+            meshList = filter(view)
             mesh = view.mesh
             switch (mode) {
-                case CONSTANT.VIEW.SELECTING.S:
-                    status.view.mesh.selected[mesh].clear()
+                case VIEWCONSTANT.SELECTING.S:
+                    viewStatus.mesh.selected[mesh].clear()
                     meshList.forEach((item) =>
-                        status.view.mesh.selected[mesh].add(item)
+                        viewStatus.mesh.selected[mesh].add(item.no)
                     )
                     break
-                case CONSTANT.VIEW.SELECTING.A:
+                case VIEWCONSTANT.SELECTING.A:
                     meshList.forEach((item) =>
-                        status.view.mesh.selected[mesh].add(item)
+                        viewStatus.mesh.selected[mesh].add(item.no)
                     )
                     break
-                case CONSTANT.VIEW.SELECTING.U:
+                case VIEWCONSTANT.SELECTING.U:
                     meshList.forEach((item) =>
-                        status.view.mesh.selected[mesh].delete(item)
+                        viewStatus.mesh.selected[mesh].delete(item.no)
                     )
                     break
             }
@@ -73,64 +72,95 @@ const onClick = (action, mode, {view, table}) => {
             status.addMainTab(table)
             break
     }
-};
+}
+
+const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
+    switch (mesh) {
+        case 'node':
+            switch (from) {
+                case 'type': {
+                    switch (label) {
+                        case 'free':
+                            return model.categorized.node.free
+                        case 'lock':
+                            return model.categorized.node.lock
+                    }
+                }
+                case 'cnst': {
+                    return model.categorized.cnst
+                        .find(cnst => cnst.dim === type).node
+                }
+                case 'nodeShape': {
+                    return model.categorized.target.nodeShape
+                        .find(shape => shape.group === group.no && shape.equality === type)
+                        .node
+                }
+            }
+        case 'elem':
+            switch (from) {
+                case 'type':
+                    switch (label) {
+                        case 'free':
+                            return model.categorized.elem.free
+                        case 'lock':
+                            return model.categorized.elem.lock
+                    }
+                case 'femType':
+                    return model.categorized.elem[from].find(i => i.no === label).node
+                case 'mat':
+                    return model.categorized.elem[from].find(i => i.no === label).elem
+                case 'sec':
+                    return model.categorized.elem[from].find(i => i.no === label).elem
+                case 'elemShape':
+                    return model.categorized.target.elemShape
+                        .find(shape => shape.group === group.no && shape.equality === type)
+                        .elem
+                case 'elemForce':
+                    return model.categorized.target.elemForce
+                        .find(force => force.group === group.no && force.equality === type)
+                        .elem
+            }
+    }
+}
 </script>
 
 <template>
-    <ContextMenu v-model:show="show" :options="{ x, y, minWidth, theme }">
-        <ContextMenuItem
-            label="选择"
-            @click="onClick(`select`, CONSTANT.VIEW.SELECTING.S, tag)"
-        >
+    <ContextMenu v-model:show='show' :options='{ x, y, minWidth, theme }'>
+        <ContextMenuItem label='选择' @click='onClick(`select`, VIEWCONSTANT.SELECTING.S, tag)'>
             <template #icon>
-                <IconFront iconName="select-s" size="small" />
+                <IconFront iconName='select-s' size='small' />
             </template>
         </ContextMenuItem>
-        <ContextMenuItem
-            label="再选择"
-            @click="onClick(`select`, CONSTANT.VIEW.SELECTING.A, tag)"
-        >
+        <ContextMenuItem label='再选择' @click='onClick(`select`, VIEWCONSTANT.SELECTING.A, tag)'>
             <template #icon>
-                <IconFront iconName="select-a" size="small" />
+                <IconFront iconName='select-a' size='small' />
             </template>
         </ContextMenuItem>
-        <ContextMenuItem
-            label="解除选择"
-            @click="onClick(`select`, CONSTANT.VIEW.SELECTING.U, tag)"
-        >
+        <ContextMenuItem label='解除选择' @click='onClick(`select`, VIEWCONSTANT.SELECTING.U, tag)'>
             <template #icon>
-                <IconFront iconName="select-u" size="small" />
+                <IconFront iconName='select-u' size='small' />
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem
-            label="激活"
-            
-        >
+        <ContextMenuItem label='激活'>
             <template #icon>
-                <IconFront iconName="active" size="small" />
+                <IconFront iconName='active' size='small' />
             </template>
         </ContextMenuItem>
-        <ContextMenuItem
-            label="再激活"
-            
-        >
+        <ContextMenuItem label='再激活'>
             <template #icon>
-                <IconFront iconName="active" size="small" />
+                <IconFront iconName='active' size='small' />
             </template>
         </ContextMenuItem>
-        <ContextMenuItem
-            label="冻结"
-            
-        >
+        <ContextMenuItem label='冻结'>
             <template #icon>
-                <IconFront iconName="frezone" size="small" />
+                <IconFront iconName='frezone' size='small' />
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem label="表格" @click="onClick(`table`, 0, tag)">
+        <ContextMenuItem label='表格' @click='onClick(`table`, 0, tag)'>
             <template #icon>
-                <IconFront iconName="import" size="small" />
+                <IconFront iconName='import' size='small' />
             </template>
         </ContextMenuItem>
     </ContextMenu>

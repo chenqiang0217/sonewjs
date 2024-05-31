@@ -1,38 +1,27 @@
 <script setup>
-import { onMounted, watch } from 'vue'
-import { createScene } from '../../../stores/view'
-import { useStatusStore } from "../../../stores/status"
-import { debounce } from "../../../api/utils"
+import { onMounted } from 'vue'
+import { useView } from '../../../api/view/index'
+import { useStatusStore } from '../../../stores/status'
+import { useModelStore } from '../../../stores/model'
 
-const props = defineProps({
-    width: {
-        type: Number,
-        required: true
-    },
-    height: {
-        type: Number,
-        required: true
-    },
-})
+
+
 const status = useStatusStore()
-
 onMounted(() => {
-    createScene(canvas)
-    // watch(() => ({ width: props.width, height: props.height }), ({ width, height }) => {
-    //     status.view.size.width = width
-    //     status.view.size.height = height
-    //     debounce(function () {
-    //         resetViewRatio({ width, height })
-    //     })()
-    // }, { deep: true })
+    const view = useView()
+    const config = view.scene.metadata.useConfig()
+    config.canvas = `canvas`
+    view.model = useModelStore
 })
-
 </script>
 
 <template>
     <!-- 必须加div包裹canvas,并设置其宽度为100%，因为canvas是有高宽比例的 -->
-    <div id="canvasWrapper" v-loading="status.view.loading">
-        <canvas id="canvas" :width="width" :height="height"></canvas>
+    <div
+        id="canvasWrapper"
+        v-loading="status.view.loading"
+    >
+        <canvas id="canvas"></canvas>
     </div>
 </template>
 

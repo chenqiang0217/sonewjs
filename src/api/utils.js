@@ -1,5 +1,8 @@
-const sortNumber = (a, b) => {
+const byNumAsec = (a, b) => {
     return a - b
+}
+const byNoAsec = (a, b) => {
+    return a.no - b.no
 }
 const SetOperation = (aSet, bSet, type) => {
     let aArr = Array.from(aSet)
@@ -39,4 +42,4 @@ function base64ToFloat64Array(base64String) {
 }
 
 
-export { sortNumber, SetOperation, debounce, sleep, base64ToFloat64Array }
+export { byNumAsec, byNoAsec, SetOperation, debounce, sleep, base64ToFloat64Array }

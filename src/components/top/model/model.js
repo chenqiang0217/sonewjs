@@ -1,8 +1,9 @@
-import { useModelStore, Node, Elem } from '../../../stores/model'
+import { useModelStore} from '../../../stores/model'
+import { Node, Elem } from '../../../api/model/index'
 import { useStatusStore } from '../../../stores/status'
 import { Dcel } from '../../../stores/dcel'
 import { drawPointsInScene, drawLinesInScene, drawRibbonInScene, linkTextsWithMeshs } from '../../../stores/view'
-import { sortNumber } from '../../../api/utils'
+import { byNumAsec } from '../../../api/utils'
 import { CONSTANT } from '../../../stores/constant'
 import { sleep } from '../../../api/utils'
 const showDialogNode = () => {
@@ -55,7 +56,7 @@ const drawFacets = async() => {
     status.view.loading = true
     await sleep(0.1)
     //计算已存在的facet最大编号
-    let maxFacetNo = model.facet.map(facet => facet.no).sort(sortNumber).pop()
+    let maxFacetNo = model.facet.map(facet => facet.no).sort(byNumAsec).pop()
     if (maxFacetNo === undefined) {
         maxFacetNo = 0
     }
@@ -74,8 +75,8 @@ const drawPyramids = async () => {
     const height = -3
     const dcel = generateDcelBySelectedElem()
     //计算已存在的facet最大编号
-    let maxNodeNo = model.node.map(node => node.no).sort(sortNumber).pop()
-    let maxElemNo = model.elem.map(elem => elem.no).sort(sortNumber).pop()
+    let maxNodeNo = model.node.map(node => node.no).sort(byNumAsec).pop()
+    let maxElemNo = model.elem.map(elem => elem.no).sort(byNumAsec).pop()
     const nodes = []
     const elems = []
     const pairs = Array.from(new Set(dcel.faces.map(face => face.elems).flat())).map(elem => ({

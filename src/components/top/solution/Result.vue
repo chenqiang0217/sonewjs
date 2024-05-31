@@ -1,18 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useModelStore } from '../../../stores/model'
-import { useConfigStore } from '../../../stores/config'
 import { useStatusStore } from '../../../stores/status'
-import {
-    drawPointsInScene,
-    drawLinesInScene,
-    linkTextsWithMeshs,
-    setGadientColorForLines
-} from '../../../stores/view'
+import { useView } from '../../../api/view/index'
 import { CONSTANT } from '../../../stores/constant'
 
 const model = useModelStore()
-const config = useConfigStore()
 const status = useStatusStore()
 const option = ref({
     step: {
@@ -46,7 +39,11 @@ const option = ref({
         digits: 0
     }
 })
-const isMeshRsltExisted = ref(false)
+watch(() => option.value.elemTag.show, show => {
+    if(show === false){
+        option.value.contour.show = false
+    }
+})
 
 //保证荷载步的选择更新后，后续子步、迭代步的有效性。
 watch(
@@ -95,101 +92,58 @@ const viewResultSecne = () => {
         return
     }
     status.mode = CONSTANT.MODE.RSLT
-    drawPointsInScene(
-        model.categorized.node.free,
-        CONSTANT.VIEW.PREFIX.MESH.NODE.RSLT,
-        step
+    const view = useView()
+    const result = model.result.find(res => res.step == step)
+    const nodes = result.node
+    nodes.forEach(node => 
+        view.points.rslt.find(point => point.mesh.metadata.no == node.no).position = node.position
     )
-    drawLinesInScene(
-        model.categorized.elem.free,
-        CONSTANT.VIEW.PREFIX.MESH.ELEM.RSLT
-    )
-    if (!isMeshRsltExisted.value) {
-        //所有节点freeze
-        status.view.mesh.todo.freeze.node.prep = new Set(
-            model.categorized.node.all
-        )
-        status.view.mesh.todo.freeze.node.rslt = new Set(
-            model.categorized.node.free
-        )
-        //所有节点freeze
-        status.view.mesh.todo.freeze.elem.prep = new Set(
-            model.categorized.elem.free
-        )
-        //隐藏mesh text
-        status.view.text.visible.node = false
-        status.view.text.visible.elem = false
-        //为rslt mesh生成编号
-        linkTextsWithMeshs(
-            Array.from(model.categorized.node.free).map(no => {
-                return { no }
-            }),
-            CONSTANT.VIEW.PREFIX.MESH.NODE.RSLT
-        )
-        linkTextsWithMeshs(
-            Array.from(model.categorized.elem.free).map(no => {
-                return { no }
-            }),
-            CONSTANT.VIEW.PREFIX.MESH.ELEM.RSLT
-        )
-        //激活rslt mesh text
-        status.view.text.activated.node.prep.clear()
-        status.view.text.activated.elem.prep.clear()
-        status.view.text.activated.node.rslt = new Set(
-            model.categorized.node.free
-        )
-        status.view.text.activated.elem.rslt = new Set(
-            model.categorized.elem.free
-        )
-        isMeshRsltExisted.value = true
-    }
+    view.lines.rslt.forEach(line => line.updatePosition())
     //text内容
     if (option.value.nodeTag.show) {
+        view.control.hideText('node', 'prep')
         const key = option.value.nodeTag.key
         const digits = option.value.nodeTag.digits
-        linkTextsWithMeshs(
-            Array.from(model.categorized.node.free).map(no => {
-                return {
-                    no,
-                    text: model.result
-                        .find(res => res.step === step)
-                        .node.find(node => node.no == no)
-                        [key].toFixed(digits)
-                }
-            }),
-            CONSTANT.VIEW.PREFIX.MESH.NODE.RSLT
-        )
-        status.view.text.visible.node = true
+
+        view.points.rslt.forEach(point => {
+            point.text =  point.mesh.metadata[key].toFixed(digits)
+        })
+        view.control.showText('node', 'rslt')
     } else {
-        status.view.text.visible.node = false
+        view.control.hideText('node', 'all')
     }
     if (option.value.elemTag.show) {
+        view.control.hideText('elem', 'prep')
+        const config = view.scene.metadata.useConfig()
         const key = option.value.elemTag.key
         const magnification = option.value.elemTag.magnification
         const digits = option.value.elemTag.digits
-        linkTextsWithMeshs(
-            Array.from(model.categorized.elem.free).map(no => {
-                return {
-                    no,
-                    text: (
-                        model.result
-                            .find(res => res.step === step)
-                            .elem.find(elem => elem.no == no)[key] *
-                        magnification
-                    ).toFixed(digits)
-                }
-            }),
-            CONSTANT.VIEW.PREFIX.MESH.ELEM.RSLT
-        )
-        status.view.text.visible.elem = true
-        //为单元设置渐变色
-        config.view.elem.color.calculated.gadient.by = key
-        setGadientColorForLines(model.categorized.elem.free, step)
+        config.mesh.elem.color.rslt.contour.by = key
+        const nSec = config.mesh.elem.color.rslt.contour.nSec
+        const elems = result.elem
+        const {min, max} = result.summarized.elem[key]
+        const colors = config.contour
+        view.lines.rslt.forEach(line => {
+            const v = elems.find(elem => elem.no == line.no)[key]
+            line.text = (v * magnification).toFixed(digits)
+            if (option.value.contour.show) {
+                let i = Math.round(
+                    (v - min) / (max - min) * (nSec - 1)
+                )
+                line.updateMeshColor(colors[i])
+            }
+            else {
+                line.updateMeshColor()
+            }
+        })
+        view.control.showText('elem', 'rslt')
     } else {
-        status.view.text.visible.elem = false
+        view.control.hideText('elem', 'all')
+        view.lines.rslt.forEach(line => {
+            line.updateMeshColor()
+        })
     }
 }
-
 const viewResultTable = mesh => {
     const step = model.result.find(
         res =>
@@ -322,10 +276,11 @@ const viewResultTable = mesh => {
             <div
                 class="grid-Wrapper1"
                 v-show="option.elemTag.show"
-            >
+            >   
                 <div class="align-right">类别：</div>
                 <div>
                     <el-select v-model="option.elemTag.key">
+                        <!-- l,q,f为model.result.elem对应key -->
                         <el-option
                             label="请选择："
                             value=""
@@ -333,7 +288,7 @@ const viewResultTable = mesh => {
                         ></el-option>
                         <el-option
                             label="单元长度"
-                            value="length"
+                            value="l"
                         ></el-option>
                         <el-option
                             label="单元力密度"
@@ -371,7 +326,7 @@ const viewResultTable = mesh => {
         <el-form-item label="显示控制">
             <div class="grid-Wrapper2">
                 <div style="flex: 1">
-                    <el-checkbox v-model="option.contour.show"
+                    <el-checkbox v-model="option.contour.show" :disabled="!option.elemTag.show"
                         >等值线</el-checkbox
                     >
                     <el-button size="small">...</el-button>

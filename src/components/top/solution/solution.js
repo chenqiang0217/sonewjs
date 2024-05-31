@@ -1,21 +1,17 @@
-import { v4 as uuidv4 } from 'uuid'
-import { useModelStore, Node } from '../../../stores/model'
-import { useMessageStore } from '../../../stores/message'
-import { useConfigStore } from '../../../stores/config'
-import { useStatusStore } from '../../../stores/status'
-import { CONSTANT } from '../../../stores/constant'
-import { task } from '../../../api/request'
+import {v4 as uuidv4} from 'uuid'
+import {Node} from '../../../api/model/index'
+import {useModelStore} from '../../../stores/model'
+import {useMessageStore} from '../../../stores/message'
+import {useConfigStore} from '../../../stores/config'
+import {useStatusStore} from '../../../stores/status'
+import {CONSTANT} from '../../../stores/constant'
+import {task} from '../../../api/request'
+import {useView} from '../../../api/view/index'
+import {byNoAsec, sleep, base64ToFloat64Array} from '../../../api/utils'
 import Config from './Config.vue'
 import Result from './Result.vue'
 
-import {
-    SetOperation,
-    sortNumber,
-    sleep,
-    base64ToFloat64Array
-} from '../../../api/utils'
-
-const showDialogSolutionconfig = () => {
+const showDialogSolutionConfig = () => {
     const status = useStatusStore()
     status.ui.dialog.component.is = Config
     status.ui.dialog.show = true
@@ -32,9 +28,9 @@ const solutionRun = () => {
     model.result = []
     status.task.run = CONSTANT.TASK.RUN.START
 
-    // const uuid = config.task.uuid
+    // const uuid = status.task.uuid
     const uuid = uuidv4()
-    config.task.uuid = uuid
+    status.task.uuid = uuid
 
     messages.add({
         to: 'server',
@@ -46,18 +42,17 @@ const solutionRun = () => {
         .then(function (response) {
             //计算完成
             status.task.run = CONSTANT.TASK.RUN.SUCCESS
-            messages.add({ to: 'server', level: 'sucess', content: '计算完成' })
+            messages.add({to: 'server', level: 'sucess', content: '计算完成'})
         })
         .catch(function (error) {
             //计算错误
             // status.task.run = CONSTANT.TASK.RUN.ABORT
-            messages.add({ to: 'server', level: 'error', content: '计算错误' })
+            messages.add({to: 'server', level: 'error', content: '计算错误'})
         })
-        .finally(function () {
-        })
+        .finally(function () {})
     showSolutionProgress()
     let delay = config.task.result.query.delaySecond
-    sleep(delay).then(queryResult({ uuid }))
+    sleep(delay).then(queryResult({uuid}))
 }
 const showSolutionProgress = () => {
     const status = useStatusStore()
@@ -65,30 +60,85 @@ const showSolutionProgress = () => {
 }
 const showDialogSolutionResult = () => {
     const status = useStatusStore()
-        status.ui.dialog.component.is = Result
-        status.ui.dialog.show = true
-        status.ui.dialog.title = '结果查看'
-        status.ui.dialog.width = 250
+    status.ui.dialog.component.is = Result
+    status.ui.dialog.show = true
+    status.ui.dialog.title = '结果查看'
+    status.ui.dialog.width = 250
+    resultViewInit()
+}
+
+const resultViewInit = () => {
+    const model = useModelStore()
+    const view = useView()
+    if (view.points.rslt.length == 0 || view.lines.rslt.length == 0) {
+        view.points.prep
+            .filter(point =>
+                model.categorized.node.free.find(
+                    node => point.mesh.metadata === node
+                )
+            )
+            .forEach(point => point.hide())
+        view.lines.prep
+            .filter(line =>
+                model.categorized.elem.free.find(
+                    elem => line.mesh.metadata === elem
+                )
+            )
+            .forEach(line => line.hide())
+        model.categorized.node.free.forEach(node => {
+            view.createPoint(node.clone(), 'rslt')
+        })
+        const freeNode = view.points.rslt.map(point => point.mesh.metadata)
+        model.categorized.elem.free.forEach(elem => {
+            const iNode = freeNode.find(node => node.no == elem.iNode.no)
+            const jNode = freeNode.find(node => node.no == elem.jNode.no)
+            const el = elem.clone()
+            el.iNode = iNode
+            el.jNode = jNode
+            view.createLine(el, 'rslt')
+        })
+    }
 }
 
 const formData = () => {
     const model = useModelStore()
     const config = useConfigStore()
+    const status = useStatusStore()
     const taskConfig = {
-        uuid: config.task.uuid,
+        uuid: status.task.uuid,
         loadStep: config.task.loadStep
     }
-    const node = new Float64Array(model.node.map(node => node.toArray()).flat())
-    const elem = new Float64Array(model.elem.map(elem => elem.toArray()).flat())
-    const cnst = new Float64Array(model.cnst.map(cnst => cnst.toArray()).flat())
+    const node = new Float64Array(
+        model.categorized.node.free
+            .sort(byNoAsec)
+            .map(node => node.toArray())
+            .flat()
+    )
+    const elem = new Float64Array(
+        model.categorized.elem.free
+            .sort(byNoAsec)
+            .map(elem => elem.toArrayShort())
+            .flat()
+    )
+    const cnst = new Float64Array(
+        model.cnst
+            .sort((a, b) => a.node.no - b.node.no)
+            .map(cnst => cnst.toArray())
+            .flat()
+    )
     const nodeShape = new Float64Array(
-        model.nodeShape.map(shape => shape.toArray()).flat()
+        model.target.nodeShape.map(shape => shape.toArray()).flat()
     )
     const elemShape = new Float64Array(
-        model.elemShape.map(shape => shape.toArray()).flat()
+        model.target.elemShape.map(shape => shape.toArray()).flat()
     )
     const elemForce = new Float64Array(
-        model.elemForce.map(force => force.toArray()).flat()
+        model.target.elemForce.map(force => force.toArray()).flat()
+    )
+    const elemForceInit = new Float64Array(
+        model.categorized.elem.free
+            .sort(byNoAsec)
+            .map(elem => (elem.femType == 1 ? 1.0 : -1))
     )
     const formData = new FormData()
     formData.append('config', JSON.stringify(taskConfig))
@@ -98,9 +148,10 @@ const formData = () => {
     formData.append('nodeShape', new Blob([nodeShape.buffer]))
     formData.append('elemShape', new Blob([elemShape.buffer]))
     formData.append('elemForce', new Blob([elemForce.buffer]))
+    formData.append('elemForceInit', new Blob([elemForceInit.buffer]))
+
     return formData
 }
-
 
 const queryResult = async opt => {
     const status = useStatusStore()
@@ -131,7 +182,7 @@ const queryResult = async opt => {
             iterativeStep +
             ')'
     })
-    const options = { uuid, step, loadStep, subStep, iterativeStep, count }
+    const options = {uuid, step, loadStep, subStep, iterativeStep, count}
     const formData = new FormData()
     formData.append('options', JSON.stringify(options))
     let response
@@ -190,27 +241,19 @@ const queryResult = async opt => {
 const handleResult = result => {
     const model = useModelStore()
     const status = useStatusStore()
-    const fixedNode = new Set(
-        model.categorized.cnst.map(cnst => cnst.node).flat()
-    )
-    const deformedNode = Array.from(
-        SetOperation(model.categorized.node.free, fixedNode, 'delete')
-    ).sort(sortNumber)
-    const freeElem = Array.from(model.categorized.elem.free).sort(sortNumber)
-    const index = freeElem.map(no => {
-        let elem = model.elem.find(elem => elem.no == no)
-        return [
-            [...deformedNode, ...fixedNode].findIndex(no => no == elem.iNode),
-            [...deformedNode, ...fixedNode].findIndex(no => no == elem.jNode)
-        ]
-    })
+    const fixedNode = Array.from(
+        new Set(model.categorized.cnst.map(cnst => cnst.node).flat())
+    ).sort(byNoAsec)
+    const deformedNode = model.categorized.node.free
+        .filter(node => !fixedNode.find(fixedNode => fixedNode === node))
+        .sort(byNoAsec)
+    const freeElem = model.categorized.elem.free.sort(byNoAsec)
     let isCompleted = false
     let step, loadStep, subStep, iterativeStep, rsdl, rou, mu, nu
     const n = deformedNode.length
     result.forEach(res => {
         let p = [].slice.call(base64ToFloat64Array(res.x))
         let d = [].slice.call(base64ToFloat64Array(res.q))
-        let node = []
         isCompleted = res.isCompleted
         step = res.step
         loadStep = res.loadStep
@@ -220,30 +263,24 @@ const handleResult = result => {
         rou = [].slice.call(base64ToFloat64Array(res.rou)).shift()
         mu = [].slice.call(base64ToFloat64Array(res.mu)).shift()
         nu = [].slice.call(base64ToFloat64Array(res.nu)).shift()
-        deformedNode.forEach((no, i) =>
-            node.push(new Node([no, p[i], p[n + i], p[2 * n + i]]))
+        const node = deformedNode.map(
+            (node, i) => new Node([node.no, p[i], p[n + i], p[2 * n + i]])
         )
-        fixedNode.forEach(no =>
-            node.push(model.node.find(node => node.no == no))
-        )
-        const elem = freeElem.map((no, k) => {
-            let [iRow, jRow] = index[k]
-            let iNode = node[iRow]
-            let jNode = node[jRow]
-            let length = Math.sqrt(
-                (iNode.x - jNode.x) ** 2 +
-                (iNode.y - jNode.y) ** 2 +
-                (iNode.z - jNode.z) ** 2
-            )
-            let q = d.shift()
-            let f = q * length
-            return { no, length, q, f }
+        const freeNode = [...node, ...fixedNode]
+        const elem = freeElem.map(elem => {
+            const iNode = freeNode.find(node => node.no === elem.iNode.no)
+            const jNode = freeNode.find(node => node.no === elem.jNode.no)
+            const l = jNode.position.subtract(iNode.position).length()
+            const q = d.shift()
+            const f = q * l
+            return {no: elem.no, l, q, f}
         })
         //q,f归一化
-        let [lMax, lMin, qMax, qMin, fMax, fMin] = [0, 0, 0, 0, 0, 0]
+        const {l, q, f} = elem[0]
+        let [lMax, lMin, qMax, qMin, fMax, fMin] = [l, l, q, q, f, f]
         elem.forEach(elem => {
-            if (elem.length > lMax) lMax = elem.length
-            if (elem.length < lMin) lMin = elem.length
+            if (elem.l > lMax) lMax = elem.l
+            if (elem.l < lMin) lMin = elem.l
             if (elem.q > qMax) qMax = elem.q
             if (elem.q < qMin) qMin = elem.q
             if (elem.f > fMax) fMax = elem.f
@@ -255,8 +292,8 @@ const handleResult = result => {
             elem.q /= qMax
             elem.f /= fMax
         })
-        const summarized = {
-            length: {
+        const elemSummarized = {
+            l: {
                 min: lMin,
                 max: lMax
             },
@@ -277,7 +314,9 @@ const handleResult = result => {
             iterativeStep,
             node,
             elem,
-            summarized,
+            summarized: {
+                elem: elemSummarized
+            },
             rsdl,
             rou,
             mu,
@@ -296,4 +335,9 @@ const handleResult = result => {
     return isCompleted
 }
 
-export { showDialogSolutionconfig, solutionRun, showSolutionProgress, showDialogSolutionResult }
+export {
+    showDialogSolutionConfig,
+    solutionRun,
+    showSolutionProgress,
+    showDialogSolutionResult
+}

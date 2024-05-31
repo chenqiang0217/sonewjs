@@ -1,8 +1,26 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { Target } from '../../api/model/index'
 import { useModelStore } from '../../stores/model'
 import RightContextMenu from './RightContextMenu.vue'
 
+const equality = [
+    {
+        no: Target.EQUALITY.EQ,
+        label: '等于',
+        icon: 'tag',
+    },
+    {
+        no: Target.EQUALITY.GT,
+        label: '大于',
+        icon: 'tag',
+    },
+    {
+        no: Target.EQUALITY.LT,
+        label: '小于',
+        icon: 'tag',
+    }
+]
 const model = useModelStore()
 const modelTreeView = computed(() => [
     {
@@ -13,7 +31,7 @@ const modelTreeView = computed(() => [
                 label: '节点',
                 icon: `node`,
                 children: [{
-                    label: '自由: ' + model.summarized.node[1].size,
+                    label: '自由: ' + model.categorized.node.free.length,
                     icon: `unlock`,
                     tag: {
                         view: {
@@ -24,7 +42,7 @@ const modelTreeView = computed(() => [
                         table: 'node',
                     },
                 }, {
-                    label: '锁定: ' + model.summarized.node[0].size,
+                    label: '锁定: ' + model.categorized.node.lock.length,
                     icon: `lock`,
                     tag: {
                         view: {
@@ -39,7 +57,7 @@ const modelTreeView = computed(() => [
                 label: '单元',
                 icon: `element`,
                 children: [{
-                    label: '自由: ' + model.summarized.elem.type[1].size,
+                    label: '自由: ' + model.categorized.elem.free.length,
                     icon: `unlock`,
                     tag: {
                         view: {
@@ -50,7 +68,7 @@ const modelTreeView = computed(() => [
                         table: 'elem',
                     },
                 }, {
-                    label: '锁定: ' + model.summarized.elem.type[0].size,
+                    label: '锁定: ' + model.categorized.elem.lock.length,
                     icon: `lock`,
                     tag: {
                         view: {
@@ -67,11 +85,11 @@ const modelTreeView = computed(() => [
         label: '特征值',
         icon: `character`,
         children: [{
-            label: '类型: ' + model.summarized.elem.femType.length,
+            label: '类型: ' + model.categorized.elem.femType.length,
             icon: `femType`,
-            children: model.summarized.elem.femType.map((femType) => {
+            children: model.categorized.elem.femType.map((femType) => {
                 return {
-                    label: femType.label + ': ' + femType.size,
+                    label: femType.label + ': ' + femType.elem.length,
                     icon: `tag`,
                     tag: {
                         view: {
@@ -84,11 +102,11 @@ const modelTreeView = computed(() => [
                 }
             }),
         }, {
-            label: '材料: ' + model.summarized.elem.mat.length,
+            label: '材料: ' + model.categorized.elem.mat.length,
             icon: `mat`,
-            children: model.summarized.elem.mat.map((mat, i) => {
+            children: model.categorized.elem.mat.map(mat => {
                 return {
-                    label: mat.label + ': ' + mat.size,
+                    label: mat.label + ': ' + mat.elem.length,
                     icon: `tag`,
                     tag: {
                         view: {
@@ -101,11 +119,11 @@ const modelTreeView = computed(() => [
                 }
             }),
         }, {
-            label: '截面: ' + model.summarized.elem.sec.length,
+            label: '截面: ' + model.categorized.elem.sec.length,
             icon: `sec`,
-            children: model.summarized.elem.sec.map((sec, i) => {
+            children: model.categorized.elem.sec.map(sec => {
                 return {
-                    label: sec.label + ': ' + sec.size,
+                    label: sec.label + ': ' + sec.elem.length,
                     icon: `tag`,
                     tag: {
                         view: {
@@ -121,94 +139,101 @@ const modelTreeView = computed(() => [
     }, {
         label: '支座',
         icon: `constraint`,
-        children: model.summarized.cnst.map((cnst) => {
+        children: model.categorized.cnst.map((cnst) => {
             return {
-                label: '固定节点: ' + cnst.size,
+                label: '固定节点: ' + cnst.node.length,
                 icon: `tag`,
                 tag: {
                     view: {
                         mesh: 'node',
                         from: 'cnst',
-                        type: cnst.type,
+                        type: cnst.dim,
                     },
                     table: 'cnst',
                 },
             }
         }),
-    }, {
-        label: '节点几何功能目标',
+    },
+    {
+        label: '功能目标',
         icon: `node-shape`,
-        children: model.summarized.nodeShape.map((group) => {
-            return {
-                label: group.label + ': ' + group.type.length,
+        children: [{
+            label: '节点几何',
+            icon: `node-shape`,
+            children: model.target.group.map(group => ({
+                label: group.label,
                 icon: `node-shape`,
-                children: group.type.map((type) => {
+                children: equality.map(eqlt => {
+                    const nodeShape = model.categorized.target.nodeShape.find(nodeShape => nodeShape.group === group.no
+                        && nodeShape.equality === eqlt.no)
                     return {
-                        label: type.label + ': ' + type.size,
-                        icon: `tag`,
+                        nodeSize: nodeShape.node.length,
+                        label: eqlt.label + ': ' + nodeShape.node.length,
+                        icon: eqlt.icon,
                         tag: {
                             view: {
                                 mesh: 'node',
                                 from: 'nodeShape',
-                                group: group.no,
-                                type: type.no,
+                                group,
+                                type: eqlt.no,
                             },
                             table: 'nodeShape',
                         },
                     }
-                })
-            }
-        }),
-    },{
-        label: '单元几何功能目标',
-        icon: `element-shape`,
-        children: model.summarized.elemShape.map((group) => {
-            return {
-                label: group.label + ': ' + group.type.length,
-                icon: `element-shape`,
-                children: group.type.map((type) => {
+                }).filter(i => i.nodeSize > 0)
+            })),
+        },{
+            label: '单元几何',
+            icon: `elem-shape`,
+            children: model.target.group.map(group => ({
+                label: group.label,
+                icon: `elem-shape`,
+                children: equality.map(eqlt => {
+                    const elemShape = model.categorized.target.elemShape.find(elemShape => elemShape.group === group.no
+                        && elemShape.equality === eqlt.no)
                     return {
-                        label: type.label + ': ' + type.size,
-                        icon: `tag`,
+                        elemSize: elemShape.elem.length,
+                        label: eqlt.label + ': ' + elemShape.elem.length,
+                        icon: eqlt.icon,
                         tag: {
                             view: {
                                 mesh: 'elem',
                                 from: 'elemShape',
-                                group: group.no,
-                                type: type.no,
+                                group,
+                                type: eqlt.no,
                             },
                             table: 'elemShape',
                         },
                     }
-                })
-            }
-        }),
-    },{
-        label: '单元力功能目标',
-        icon: `element-force`,
-        children: model.summarized.elemForce.map((group) => {
-            return {
-                label: group.label + ': ' + group.type.length,
-                icon: `element-force`,
-                children: group.type.map((type) => {
+                }).filter(i => i.elemSize > 0)
+            })),
+        },{
+            label: '单元预应力',
+            icon: `elem-force`,
+            children: model.target.group.map(group => ({
+                label: group.label,
+                icon: `elem-force`,
+                children: equality.map(eqlt => {
+                    const elemForce = model.categorized.target.elemForce.find(elemForce => elemForce.group === group.no
+                        && elemForce.equality === eqlt.no)
                     return {
-                        label: type.label + ': ' + type.size,
-                        icon: `tag`,
+                        elemSize: elemForce.elem.length,
+                        label: eqlt.label + ': ' + elemForce.elem.length,
+                        icon: eqlt.icon,
                         tag: {
                             view: {
                                 mesh: 'elem',
                                 from: 'elemForce',
-                                group: group.no,
-                                type: type.no,
+                                group,
+                                type: eqlt.no,
                             },
                             table: 'elemForce',
                         },
                     }
-                })
-            }
-        }),
-    },
-    
+                }).filter(i => i.elemSize > 0)
+            })),
+        }]
+    }
 ])
 const contextMenuRef = ref()
 const options = ref({
@@ -239,44 +264,26 @@ const onContextmenu = (event, object, node, element) => {
     <el-tabs type="border-card" class="right-tabs">
         <el-tab-pane>
             <template #label>
-                <span >
-                    <IconFront iconName="tree" ></IconFront>
+                <span>
+                    <IconFront iconName="tree"></IconFront>
                     <span>树形菜单</span>
                 </span>
             </template>
-            <el-scrollbar
-                always
-                noresize
-                wrap-class="scroll-wrap"
-                view-class="view-wrap"
-            >
-                <el-tree
-                    :data="modelTreeView"
-                    highlight-current
-                    @node-contextmenu="onContextmenu"
-                >
+            <el-scrollbar always noresize wrap-class="scroll-wrap" view-class="view-wrap">
+                <el-tree :data="modelTreeView" highlight-current @node-contextmenu="onContextmenu">
                     <!-- <template #default="scope">
                         <DocumentAdd v-if="true" class="icon"></DocumentAdd>
                         <span>{{ scope.node.label }}</span>
                     </template> -->
                     <template #default="{ node, data }">
                         <span>
-                            <IconFront
-                                :iconName="data.icon"
-                                color="gray"
-                                size="small"
-                            ></IconFront>
+                            <IconFront :iconName="data.icon" color="gray" size="small"></IconFront>
                             <span>{{ node.label }}</span>
                         </span>
                     </template>
                 </el-tree>
             </el-scrollbar>
-            <RightContextMenu
-                ref="contextMenuRef"
-                :x="options.x"
-                :y="options.y"
-                :tag="options.tag"
-            />
+            <RightContextMenu ref="contextMenuRef" :x="options.x" :y="options.y" :tag="options.tag" />
         </el-tab-pane>
     </el-tabs>
 </template>

@@ -1,20 +1,27 @@
 
-import { useStatusStore } from '../../../stores/status'
-import { CONSTANT } from '../../../stores/constant'
-const meshSelect = (e) => {
-    const status = useStatusStore()
-    status.view.mode = CONSTANT.VIEW.SELECTING.S
+import { useView } from '../../../api/view/index'
+const meshSelect = () => {
+    const view = useView()
+    const constant = view.scene.metadata.constant
+    const status = view.scene.metadata.useStatus()
+    status.mode = constant.SELECTING.S
 }
-const meshSelectAddition = (e) => {
-    const status = useStatusStore()
-    status.view.mode = CONSTANT.VIEW.SELECTING.A
+const meshSelectAddition = () => {
+    const view = useView()
+    const constant = view.scene.metadata.constant
+    const status = view.scene.metadata.useStatus()
+    status.mode = constant.SELECTING.A
 }
-const meshUnselect = (e) => {
-    const status = useStatusStore()
-    status.view.mode = CONSTANT.VIEW.SELECTING.U
+const meshUnselect = () => {
+    const view = useView()
+    const constant = view.scene.metadata.constant
+    const status = view.scene.metadata.useStatus()
+    status.mode = constant.SELECTING.U
 }
-const meshClearselect = (e) => {
-    const status = useStatusStore()
-    status.view.mode = CONSTANT.VIEW.SELECTING.NONE
+const meshClearselect = () => {
+    const view = useView()
+    const constant = view.scene.metadata.constant
+    const status = view.scene.metadata.useStatus()
+    status.mode = constant.SELECTING.NONE
 }
 export { meshSelect, meshSelectAddition, meshUnselect, meshClearselect }

@@ -1,8 +1,9 @@
 import {
-    ArcRotateCamera, Vector3
+    ArcRotateCamera, Vector2, Vector3
 } from "@babylonjs/core"
 
-import { useConfigStore } from '../../../stores/config'
+import { useViewConfigStore } from './config'
+
 
 class OrthoCamera extends ArcRotateCamera {
     constructor(scene, alpha = Math.PI, beta = 0, radius = 1, target = Vector3.Zero()) {
@@ -11,57 +12,59 @@ class OrthoCamera extends ArcRotateCamera {
         this.panningSensibility = 100
         this.inertia = 0.0
         this.radiusStatic = this.radius
+        const canvas = this.getEngine().getRenderingCanvas()
+        this.resizeObserver = new ResizeObserver(() => {
+            this.setView()
+        })
+        this.resizeObserver.observe(canvas)
     }
     get nodeSize() {
-        const config = useConfigStore()
+        const config = useViewConfigStore()
         const width = this.orthoRight - this.orthoLeft
         const scene = this.getScene()
         const engine = scene.getEngine()
         const canvas = engine.getRenderingCanvas()
-        return width * config.view.node.sizePx / canvas.width
+        return width * config.mesh.node.sizePx / canvas.width
     }
     setView({ direction, bounding } = {}) {
-        let bdg, width, height
+        let bdg3, bdg2
         if (direction && bounding) {
-            bdg = bounding.max.subtract(bounding.min)
+            bdg3 = bounding.max.subtract(bounding.min)
             const target = Vector3.Center(bounding.min, bounding.max)
             this.target = new Vector3(target.y, target.z, target.x)
-            this.radiusStatic = bdg.length() == 0 ? 4.0 : bdg.length() * 4.0
+            this.radiusStatic = bdg3.length() == 0 ? 4.0 : bdg3.length() * 4.0
             this.radius = this.radiusStatic
             switch (direction) {
                 case 'x':
                     this.alpha = Math.PI * 0.5
                     this.beta = Math.PI * 0.5
-                    width = bdg.y
-                    height = bdg.z
+                    bdg2 = new Vector2(bdg3.y, bdg3.z)
                     break
                 case 'y':
                     this.alpha = Math.PI * 1.0
                     this.beta = Math.PI * 0.5
-                    width = bdg.x
-                    height = bdg.z
+                    bdg2 = new Vector2(bdg3.x, bdg3.z)
                     break
                 case 'z':
                     this.alpha = Math.PI * 1.0
                     this.beta = 0
-                    width = bdg.x
-                    height = bdg.y
+                    bdg2 = new Vector2(bdg3.x, bdg3.y)
                     break
                 case 'persp':
                     this.alpha = Math.PI * 1.20
                     this.beta = Math.PI * 0.4
-                    width = bdg.length()
-                    height = bdg.length()
+                    bdg2 = Vector2.One().scale(bdg3.length()*0.5)
                     break
             }
-            width *= 1.05
-            height *= 1.05
+            if (bdg2.length() == 0) {
+                bdg2 = new Vector2(1, 0)
+            }
+            bdg2 = bdg2.scale(1.05)
         }
         else {
-            height = this.orthoTop - this.orthoBottom
-            width = 0
+            bdg2 = new Vector2.Zero()
         }
-        this.resetSize(width, height)
+        this.resetSize(bdg2.x, bdg2.y)
         this.resetNodeSize()
     }
     zoom(evt) {
@@ -85,17 +88,23 @@ class OrthoCamera extends ArcRotateCamera {
         const engine = scene.getEngine()
         engine.resize(true)
         const ratio = engine.getAspectRatio(this)
-        if (width > ratio * height) {
-            this.orthoLeft = -width
-            this.orthoRight = width
-            this.orthoTop = width / ratio
-            this.orthoBottom = -width / ratio
+        if (width == 0 && height == 0) {
+            this.orthoLeft = -this.orthoTop * ratio
+            this.orthoRight = this.orthoTop * ratio
         }
         else {
-            this.orthoLeft = -height * ratio
-            this.orthoRight = height * ratio
-            this.orthoTop = height
-            this.orthoBottom = -height
+            if (width > ratio * height) {
+                this.orthoLeft = -width
+                this.orthoRight = width
+                this.orthoTop = width / ratio
+                this.orthoBottom = -width / ratio
+            }
+            else {
+                this.orthoLeft = -height * ratio
+                this.orthoRight = height * ratio
+                this.orthoTop = height
+                this.orthoBottom = -height
+            }
         }
     }
     resetNodeSize() {

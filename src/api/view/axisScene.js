@@ -28,6 +28,7 @@ class AxisScene extends Scene {
         this.activeCamera.orthoRight = this.axisHelperSize * 1.5
         this.activeCamera.orthoTop = this.axisHelperSize * 1.5
         this.activeCamera.orthoBottom = - this.axisHelperSize * 1.5
+        this.activeCamera.resizeObserver.disconnect()
 
         new AxesViewer(this, 0.60 * this.axisHelperSize, undefined, undefined, undefined, undefined, 4)
         this.ui = AdvancedDynamicTexture.CreateFullscreenUI("axisUi", true, this)
@@ -50,6 +51,11 @@ class AxisScene extends Scene {
             axis.convertToUnIndexedMesh()
             axis.freezeNormals()
         }
+        const resizeObserver = new ResizeObserver(() => {
+            this.updateViewport()
+            this.updateTextSize()
+        })
+        resizeObserver.observe(this.canvas)
     }
     updateViewport(w = 100, h = 100, left = 5, bottom = -5) {
         this.activeCamera.viewport = new Viewport(left / this.canvas.width, 1 - (bottom + this.canvas.height) / this.canvas.height,

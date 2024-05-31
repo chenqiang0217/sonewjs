@@ -8,7 +8,7 @@ defineProps({
     height: {
         type: Number,
         required: true
-    },
+    }
 })
 const model = useModelStore()
 const cellWidth = 150
@@ -19,14 +19,20 @@ const columns = [
     { key: 'femType', title: '类型', dataKey: 'femType', width: cellWidth },
     { key: 'mat', title: '材料', dataKey: 'mat', width: cellWidth },
     { key: 'sec', title: '截面', dataKey: 'sec', width: cellWidth },
-    { key: 'iNode', title: 'i节点', dataKey: 'iNode', width: cellWidth },
-    { key: 'jNode', title: 'j节点', dataKey: 'jNode', width: cellWidth }
+    { key: 'iNode', title: 'i节点', dataKey: 'iNode.no', width: cellWidth },
+    { key: 'jNode', title: 'j节点', dataKey: 'jNode.no', width: cellWidth }
 ]
 </script>
 
 <template>
-    <el-table-v2 :columns="columns" :data="model.elem" :width="width" :height="height" :row-height="30" fixed />
+    <el-table-v2
+        :columns="columns"
+        :data="model.elem"
+        :width="width"
+        :height="height"
+        :row-height="30"
+        fixed
+    />
 </template>
 
 <style></style>
-

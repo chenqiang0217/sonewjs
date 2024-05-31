@@ -4,7 +4,6 @@ import { useStatusStore } from '../../stores/status'
 import {
     projectNew,
     projectOpen,
-    projectImportCilck,
     projectImport,
     projectSave
 } from './project/project'
@@ -23,7 +22,7 @@ import {
     showDialogTargetElemForce
 } from './target/target'
 import {
-    showDialogSolutionconfig,
+    showDialogSolutionConfig,
     solutionRun,
     showSolutionProgress,
     showDialogSolutionResult
@@ -50,8 +49,10 @@ import {
     switchLabelElemVisibility,
     meshViewConfig
 } from './visibility/visibility'
-import Account from './account/Account.vue'
-import About from './about/About.vue'
+import { account } from './account/account'
+import { about } from './about/about'
+import { test } from './test/test'
+
 import Dialog from './Dialog.vue'
 
 const status = useStatusStore()
@@ -72,7 +73,9 @@ const toolBars = ref([
         {
             label: '导入',
             icon: 'import',
-            action: projectImportCilck,
+            action: () => {
+                document.getElementById('xlsxFile').click()
+            },
             clicked: false
         },
         {
@@ -150,7 +153,7 @@ const toolBars = ref([
         {
             label: '求解设置',
             icon: 'run-setting',
-            action: showDialogSolutionconfig,
+            action: showDialogSolutionConfig,
             clicked: false
         },
         {
@@ -278,13 +281,19 @@ const toolBars = ref([
         {
             label: '账号',
             icon: 'account',
-            action: freezeMesh,
+            action: account,
             clicked: false
         },
         {
             label: '关于',
             icon: 'about',
-            action: activeMesh,
+            action: about,
+            clicked: false
+        },
+        {
+            label: '测试',
+            icon: 'about',
+            action: test,
             clicked: false
         }
     ]

@@ -18,7 +18,7 @@ const elem = model.result.find(res => res.step == status.result.option.step).ele
 const cellWidth = 150
 const columns = [
     { key: '1', title: '单元号', dataKey: 'no', width: cellWidth },
-    { key: '2', title: '长度', dataKey: 'length', width: cellWidth },
+    { key: '2', title: '长度', dataKey: 'l', width: cellWidth },
     { key: '3', title: '力密度', dataKey: 'q', width: cellWidth },
     { key: '4', title: '内力', dataKey: 'f', width: cellWidth },
 ]
