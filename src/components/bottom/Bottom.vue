@@ -8,11 +8,23 @@ const status = useStatusStore()
 
 <template>
     <el-tabs v-model="status.ui.tab.message.active" class="footer-tabs" type="border-card" tab-position="bottom">
-        <el-tab-pane name="client" label="命令信息">
+        <el-tab-pane name="client">
+            <template #label>
+                <span>
+                    <IconFront iconName="interactive"></IconFront>
+                    <span>命令信息</span>
+                </span>
+            </template>
             <Client />
         </el-tab-pane>
 
-        <el-tab-pane name="server" label="分析信息">
+        <el-tab-pane name="server">
+            <template #label>
+                <span>
+                    <IconFront iconName="network"></IconFront>
+                    <span>分析信息</span>
+                </span>
+            </template>
             <Server />
         </el-tab-pane>
     </el-tabs>

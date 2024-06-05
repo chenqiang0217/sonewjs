@@ -24,43 +24,43 @@ const useConfigStore = defineStore('config', {
                         subStep: [
                             {
                                 no: 1,
-                                nIterativeStep: 10,
+                                nIterativeStep: 20,
                                 alpha: 1.0e2,
-                                rsdl: 1.0e-6,
+                                rsdl: 1.0e-5,
                             },
                             {
                                 no: 2,
-                                nIterativeStep: 20,
+                                nIterativeStep: 30,
                                 alpha: 1.0e1,
-                                rsdl: 1.0e-6,
+                                rsdl: 1.0e-5,
                             },
                             {
                                 no: 3,
-                                nIterativeStep: 20,
+                                nIterativeStep: 30,
                                 alpha: 1.0e0,
                                 rsdl: 1.0e-6,
                             },
                             {
                                 no: 4,
-                                nIterativeStep: 20,
+                                nIterativeStep: 30,
                                 alpha: 1.0e-1,
                                 rsdl: 1.0e-6,
                             },
                             {
                                 no: 5,
-                                nIterativeStep: 50,
+                                nIterativeStep: 60,
                                 alpha: 1.0e-3,
                                 rsdl: 1.0e-6,
                             },
                             {
                                 no: 6,
-                                nIterativeStep: 50,
+                                nIterativeStep: 60,
                                 alpha: 1.0e-5,
                                 rsdl: 1.0e-6,
                             },
                             {
                                 no: 7,
-                                nIterativeStep: 50,
+                                nIterativeStep: 60,
                                 alpha: 0,
                                 rsdl: 1.0e-6,
                             },
@@ -70,7 +70,7 @@ const useConfigStore = defineStore('config', {
                 result: {
                     query: {
                         count: 50,
-                        delaySecond: 2,
+                        delaySecond: 5,
                         timeoutSecond: 5,
                         retry: 100000,
                     }

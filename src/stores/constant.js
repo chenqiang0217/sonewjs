@@ -6,9 +6,10 @@ const CONSTANT = {
     TASK: {
         RUN: {
             NONE: 0b00000000,
-            START: 0b00000001,
+            PROGRESS: 0b00000001,
             SUCCESS: 0b00000010,
-            ABORT: -1,
+            FAIL: 0b00000011,
+            ABORT: 0b00000100,
         },
     },
 }

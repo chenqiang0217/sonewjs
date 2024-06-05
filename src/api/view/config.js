@@ -27,8 +27,8 @@ const useViewConfigStore = defineStore('viewConfig', {
                         prep: {
                             binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.TYPE,
                             type: new Map([
-                                [0, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.LOCK],
-                                [1, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.FREE],
+                                [1, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.LOCK],
+                                [0, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.FREE],
                             ]),
                             femType: new Map(),
                             mat: new Map(),
@@ -37,8 +37,8 @@ const useViewConfigStore = defineStore('viewConfig', {
                         rslt: {
                             binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.TYPE,
                             type: new Map([
-                                [0, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.LOCK],
-                                [1, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.FREE],
+                                [1, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.LOCK],
+                                [0, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.FREE],
                             ]),
                             contour: {
                                 by: 'f',

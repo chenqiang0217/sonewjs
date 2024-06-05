@@ -184,10 +184,10 @@ const modelTreeView = computed(() => [
             })),
         },{
             label: '单元几何',
-            icon: `elem-shape`,
+            icon: `element-shape`,
             children: model.target.group.map(group => ({
                 label: group.label,
-                icon: `elem-shape`,
+                icon: `element-shape`,
                 children: equality.map(eqlt => {
                     const elemShape = model.categorized.target.elemShape.find(elemShape => elemShape.group === group.no
                         && elemShape.equality === eqlt.no)
@@ -209,10 +209,10 @@ const modelTreeView = computed(() => [
             })),
         },{
             label: '单元预应力',
-            icon: `elem-force`,
+            icon: `element-force`,
             children: model.target.group.map(group => ({
                 label: group.label,
-                icon: `elem-force`,
+                icon: `element-force`,
                 children: equality.map(eqlt => {
                     const elemForce = model.categorized.target.elemForce.find(elemForce => elemForce.group === group.no
                         && elemForce.equality === eqlt.no)

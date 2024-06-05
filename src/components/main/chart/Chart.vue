@@ -1,10 +1,11 @@
 <script setup>
-import { useModelStore } from "../../../stores/model"
-import { useStatusStore } from "../../../stores/status"
-import { useConfigStore } from "../../../stores/config"
-import { onMounted, watch } from "vue"
-import * as echarts from "echarts/core"
-import { LineChart, BarChart } from "echarts/charts"
+import { useModelStore } from '../../../stores/model'
+import { useStatusStore } from '../../../stores/status'
+import { useConfigStore } from '../../../stores/config'
+import { CONSTANT } from '../../../stores/constant'
+import { onMounted, watch, computed } from 'vue'
+import * as echarts from 'echarts/core'
+import { LineChart, BarChart } from 'echarts/charts'
 import {
     TitleComponent,
     ToolboxComponent,
@@ -14,12 +15,12 @@ import {
     DatasetComponent,
     TransformComponent,
     MarkPointComponent,
-} from "echarts/components"
-import { LabelLayout, UniversalTransition } from "echarts/features"
-import { CanvasRenderer } from "echarts/renderers"
+    MarkLineComponent,
+} from 'echarts/components'
+import { LabelLayout, UniversalTransition } from 'echarts/features'
+import { CanvasRenderer } from 'echarts/renderers'
 
 let chart
-const elProgressHeight = 6
 const model = useModelStore()
 const status = useStatusStore()
 const config = useConfigStore()
@@ -33,7 +34,6 @@ const props = defineProps({
         required: true,
     },
 })
-const tolerance = config.task.loadStep[0].subStep[0].rsdl
 const option = {
     title: {},
     toolbox: {
@@ -44,7 +44,7 @@ const option = {
         },
     },
     tooltip: {
-        trigger: "axis",
+        trigger: 'axis',
     },
     legend: {
         top: 40,
@@ -66,19 +66,24 @@ const option = {
     xAxis: [
         {
             gridIndex: 0,
-            type: "value",
+            type: 'value',
             min: 1,
-            name: "迭代步",
-            nameLocation: "center",
-            nameGap: -30,
+            max: 'dataMax',
+            name: '迭代步',
+            nameLocation: 'center',
+            nameGap: 25,
             nameTextStyle: {
-                fontFamily: "Microsoft YaHei",
+                fontFamily: 'Microsoft YaHei',
                 fontSize: 12,
             },
+            splitLine: {
+                show: false
+            },
+            data: []
         },
         {
             gridIndex: 1,
-            type: "value",
+            type: 'value',
             show: false,
             max: 100,
         },
@@ -86,8 +91,9 @@ const option = {
     yAxis: [
         {
             gridIndex: 0,
-            min: tolerance / 10,
-            type: "log",
+            min: 'dataMin',
+            type: 'log',
+            splitNumber: 10,
             axisLabel: {
                 formatter: function (value) {
                     return value.toExponential(2)
@@ -96,9 +102,9 @@ const option = {
         },
         {
             gridIndex: 1,
-            type: "category",
+            type: 'category',
             show: false,
-            data: [""],
+            data: [''],
         },
     ],
 }
@@ -106,12 +112,46 @@ const series = [
     {
         xAxisIndex: 0,
         yAxisIndex: 0,
-        name: "误差",
-        type: "line",
+        name: '误差',
+        type: 'line',
         showSymbol: false,
         smooth: true,
         data: [],
-        color: "blue",
+        itemStyle: {
+            color: 'rgb(0, 0, 255)',
+        },
+        tooltip: {
+            valueFormatter: function (value) {
+                return value.toExponential(2)
+            },
+        },
+        markLine: {
+            silent: true,
+            symbol: ['none', 'none'],
+            label: { show: false },
+            lineStyle: {
+                width: 1,
+                color: 'rgb(220, 223, 230)',
+                type: 'solid'
+            },
+            data: []
+        }
+
+    },
+    {
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        name: '梯度因子',
+        type: 'line',
+        showSymbol: false,
+        smooth: true,
+        data: [],
+        itemStyle: {
+            color: 'rgb(110, 110, 110)',
+        },
+        lineStyle: {
+            width: 1,
+        },
         tooltip: {
             valueFormatter: function (value) {
                 return value.toExponential(2)
@@ -121,12 +161,14 @@ const series = [
     {
         xAxisIndex: 0,
         yAxisIndex: 0,
-        name: "误差限值",
-        type: "line",
+        name: '误差限值',
+        type: 'line',
         showSymbol: false,
         smooth: true,
         data: [],
-        color: "red",
+        itemStyle: {
+            color: 'rgb(255, 0, 0)',
+        },
         tooltip: {
             valueFormatter: function (value) {
                 return value.toExponential(2)
@@ -136,34 +178,34 @@ const series = [
     {
         xAxisIndex: 1,
         yAxisIndex: 1,
-        name: "计算进度",
-        type: "bar",
+        name: '计算进度',
+        type: 'bar',
         barWidth: 20,
         data: [],
-        color: "green",
+        color: 'green',
         showBackground: true,
         backgroundStyle: {
-            color: "rgba(180, 180, 180, 0.2)",
+            color: 'rgba(180, 180, 180, 0.2)',
         },
         markPoint: {
-            symbol: "pin",
+            symbol: 'pin',
             symbolSize: 50,
             symbolOffset: [0, -10],
             data: [
                 {
-                    name: "maximum",
-                    type: "max",
+                    name: 'maximum',
+                    type: 'max',
                 },
             ],
             label: {
                 formatter: function (component) {
-                    return Math.round(component.value) + "%"
+                    return Math.round(component.value) + '%'
                 },
             },
         },
         tooltip: {
             valueFormatter: function (value) {
-                return Math.round(value) + "%"
+                return Math.round(value) + '%'
             },
         },
     },
@@ -181,28 +223,51 @@ onMounted(() => {
         LineChart,
         BarChart,
         MarkPointComponent,
+        MarkLineComponent,
         LabelLayout,
         UniversalTransition,
         CanvasRenderer,
     ])
-    const canvas = document.getElementById("chart")
+    const canvas = document.getElementById('chart')
     chart = echarts.init(canvas, null, { width: 0, height: 0 })
     chart.setOption(option)
-    model.result.forEach(res => {
-        series[0].data.push([res.step, res.rsdl])
-        series[1].data.push([res.step, tolerance])
+    model.result.forEach(result => {
+        series[0].data.push([result.step, result.rsdl])
+        series[1].data.push([result.step, result.mu])
+        series[2].data.push([result.step, config.task.loadStep
+            .find(ls => ls.no == result.loadStep).subStep
+            .find(ss => ss.no == result.subStep).rsdl
+        ])
     })
-    series[2].data.pop()
-    series[2].data.push(status.taskQueryProgress * 100)
+    series[3].data.pop()
+    series[3].data.push(progress.value * 100)
     chart.setOption({ series })
     start = model.result.length - 1
+})
+const progress = computed(() => {
+    let totalStep = 0
+    config.task.loadStep.forEach((loadStep) => {
+        loadStep.subStep.forEach(subStep => totalStep += subStep.nIterativeStep)
+    })
+    switch (status.task.run) {
+        case CONSTANT.TASK.RUN.NONE:
+            return 0.0
+        case CONSTANT.TASK.RUN.ABORT:
+            return 0.0
+        case CONSTANT.TASK.RUN.PROGRESS:
+            return totalStep ? (status.task.query.step / totalStep) : 0.0
+        case CONSTANT.TASK.RUN.SUCCESS:
+            return 1.0
+        default:
+            return 0.0
+    }
 })
 watch(
     () => model.result.length,
     (now, pre) => {
         if (now == 0) {
             series.forEach((item) => (item.data = []))
-            series[2].data.push(0)
+            series[3].data.push(0)
         } else {
             if (start != 0) {
                 start = pre
@@ -210,12 +275,21 @@ watch(
             for (let i = start; i < now; i++) {
                 let result = model.result[i]
                 series[0].data.push([result.step, result.rsdl])
-                series[1].data.push([result.step, tolerance])
+                series[1].data.push([result.step, result.mu])
+                series[2].data.push([result.step, config.task.loadStep
+                    .find(ls => ls.no == result.loadStep).subStep
+                    .find(ss => ss.no == result.subStep).rsdl])
             }
             start = now
+            const subSteps = model.result.filter((item, index, self) =>
+                index === self.findIndex(obj => obj.loadStep === item.loadStep && obj.subStep === item.subStep)
+            )
+            series[0].markLine.data = subSteps.map(item => (
+                { xAxis: model.result.findLast(res => res.loadStep == item.loadStep && res.subStep == item.subStep).step }
+            ))
         }
-        series[2].data.pop()
-        series[2].data.push(status.taskQueryProgress * 100)
+        series[3].data.pop()
+        series[3].data.push(progress.value * 100)
         chart.setOption({ series })
     }
 )
@@ -224,10 +298,11 @@ watch(
     ([height, width]) => {
         chart.resize({ height, width })
     }
-);
+)
+
 </script>
 <template>
-    <div id="chart"></div>
+    <div id='chart'></div>
 </template>
 
 <style></style>

@@ -292,7 +292,7 @@ const toolBars = ref([
         },
         {
             label: '测试',
-            icon: 'about',
+            icon: 'help',
             action: test,
             clicked: false
         }
@@ -302,48 +302,25 @@ const toolBars = ref([
 
 <template>
     <div style="display: flex; flex-wrap: wrap; flex: 1">
-        <template
-            v-for="(toolBarGroup, i) in toolBars"
-            v-bind:key="i"
-        >
-            <div
-                v-if="i < toolBars.length - 1"
-                style="display: flex"
-            >
-                <template
-                    v-for="(toolBar, j) in toolBarGroup"
-                    v-bind:key="j"
-                >
+        <template v-for="(toolBarGroup, i) in toolBars" v-bind:key="i">
+            <div v-if="i < toolBars.length - 1" style="display: flex">
+                <template v-for="(toolBar, j) in toolBarGroup" v-bind:key="j">
                     <div>
-                        <el-tooltip
-                            :content="toolBar.label"
-                            placement="bottom"
-                            effect="light"
-                        >
+                        <el-tooltip :content="toolBar.label" placement="bottom" effect="light">
                             <el-button @click="toolBar.action">
                                 <IconFront :iconName="toolBar.icon"></IconFront>
                             </el-button>
                         </el-tooltip>
                     </div>
                 </template>
-                <el-divider
-                    direction="vertical"
-                    v-if="i < toolBars.length - 2"
-                />
+                <el-divider direction="vertical" v-if="i < toolBars.length - 2" />
             </div>
         </template>
     </div>
     <div style="display: flex; justify-content: end">
-        <template
-            v-for="(toolBar, j) in toolBars.at(-1)"
-            v-bind:key="j"
-        >
+        <template v-for="(toolBar, j) in toolBars.at(-1)" v-bind:key="j">
             <div>
-                <el-tooltip
-                    :content="toolBar.label"
-                    placement="bottom"
-                    effect="light"
-                >
+                <el-tooltip :content="toolBar.label" placement="bottom" effect="light">
                     <el-button @click="toolBar.action">
                         <IconFront :iconName="toolBar.icon"></IconFront>
                     </el-button>
@@ -352,17 +329,8 @@ const toolBars = ref([
         </template>
     </div>
 
-    <input
-        type="file"
-        id="xlsxFile"
-        @change="projectImport"
-        style="display: none"
-    />
-    <Dialog
-        :title="status.ui.dialog.title"
-        :width="status.ui.dialog.width"
-        :show="status.ui.dialog.show"
-    >
+    <input type="file" id="xlsxFile" @change="projectImport" style="display: none" />
+    <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" :show="status.ui.dialog.show">
         <component :is="status.ui.dialog.component.is" />
     </Dialog>
 </template>
@@ -373,6 +341,7 @@ const toolBars = ref([
     padding: 0 5px;
     border: 0;
 }
+
 .el-divider {
     margin: 6px;
 }

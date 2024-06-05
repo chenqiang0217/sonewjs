@@ -1,7 +1,6 @@
 import { markRaw } from 'vue'
 import { defineStore } from 'pinia'
 import { CONSTANT } from './constant'
-import { useConfigStore } from './config'
 
 const useStatusStore = defineStore('status', {
     state: () => {
@@ -57,23 +56,6 @@ const useStatusStore = defineStore('status', {
         }
     },
     getters: {
-        taskQueryProgress: (state) => {
-            const config = useConfigStore()
-            let totalStep = 0
-            config.task.loadStep.forEach((loadStep) => {
-                loadStep.subStep.forEach(subStep => totalStep += subStep.nIterativeStep)
-            })
-            switch (state.task.run) {
-                case CONSTANT.TASK.RUN.NONE:
-                    return 0
-                case CONSTANT.TASK.RUN.ABORT:
-                    return 0
-                case CONSTANT.TASK.RUN.START:
-                    return totalStep ? (state.task.query.step / totalStep) : 0
-                case CONSTANT.TASK.RUN.SUCCESS:
-                    return 1
-            }
-        },
     },
     actions: {
         addMainTab(tableName) {

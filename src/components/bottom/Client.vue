@@ -22,7 +22,7 @@ const submit = () => {
                 v-for="(message, i) in messages.client"
                 v-bind:key="i"
             >
-                {{ '[' + message.time + '] ' + message.content }}
+                {{ '[' + message.time + '] ' + message.text }}
             </p>
         </div>
     </el-scrollbar>
@@ -43,6 +43,7 @@ const submit = () => {
     max-height: 100%;
     position: absolute;
     bottom: 0;
+    font-size: 14px;
 }
 .scroll-wrap {
     height: 100%;
