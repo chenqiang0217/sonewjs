@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="张力结构形态构建工具" />
+        <meta
+            name="keywords"
+            content="张力结构,索结构,索杆结构,找形,找力,功能目标,形态构建" />
+        <meta name="robots" content="all" />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href="https://cdn.jsdelivr.net/gh/chenqiang0217/sonewjs/pages/static/img/sonew.svg" />
+        <title>sonew - code</title>
+        <!-- Google Fonts -->
+        <link
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            rel="stylesheet" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/css/jetbrains-mono.min.css"
+            rel="stylesheet" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous" />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <link
+            rel="stylesheet"
+            data-name="vs/editor/editor.main"
+            href="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/editor/editor.main.css" />
+        <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
+    </head>
+    <body>
+        <div id="page" class="page">
+            <nav id="nav" class="navbar bg-primary navbar-dark py-0">
+                <div class="container-fluid flex">
+                    <div class="px-4">
+                        <a href="#" class="navbar-brand fs-4 fw-bold">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink"
+                                viewBox="0 0 24 24"
+                                fill="#ffffff"
+                                width="30">
+                                <path
+                                    d="M 6.59 4.4l 0 12.09, 4.16, -2.4, 0 -12.09, z" />
+                                <path
+                                    d="M 2.81 19.6l 4.16 2.4, 9.64, -5.56, -4.16 -2.4, z" />
+                                <path
+                                    d="M 11.55 7.79l 0 4.8, 9.64, 5.56, 0 -4.8, z" />
+                            </svg>
+                            sonew
+                        </a>
+                    </div>
+                    <div class="px-4">
+                        <a
+                            class="px-2 btn fs-5 text-white"
+                            role="button"
+                            title="新建"
+                            ><i class="bi bi-file-earmark"></i>
+                        </a>
+                        <a
+                            class="px-2 btn fs-5 text-white"
+                            role="button"
+                            title="打开"
+                            ><i class="bi bi-folder2-open"></i>
+                        </a>
+                        <a
+                            class="px-2 btn fs-5 text-white"
+                            role="button"
+                            title="保存"
+                            ><i class="bi bi-floppy"></i>
+                        </a>
+                        <a
+                            class="px-2 btn fs-5 text-white"
+                            role="button"
+                            title="下载"
+                            ><i class="bi bi-download"></i>
+                        </a>
+                        <a
+                            class="px-2 btn fs-5 text-white"
+                            role="button"
+                            title="提交"
+                            onclick="submit()"
+                            ><i class="bi bi-arrow-return-left"></i>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <section id="section" class="text-light">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+            </section>
+
+            <footer
+                id="footer"
+                class="bg-dark text-white-50 small text-center pt-2">
+                <div>
+                    <div class="row align-items-center justify-content-between">
+                        <div class="col-12 p-0">
+                            <p class="small mb-1">
+                                ©cswadi 2024, powered by ccj3
+                            </p>
+                            <p class="small mb-1">
+                                意见反馈：
+                                <i class="bi bi-envelope-fill"></i>
+                                <a
+                                    href="mailto:419788322@qq.com"
+                                    class="text-white-50 text-decoration-none"
+                                    >419788322@qq.com</a
+                                >
+                            </p>
+                            <p class="small mb-1">
+                                建议采用谷歌浏览器（Google Chrome）
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        <script>
+            var editor, channel
+            window.addEventListener('load', onWindowLoad)
+            function onWindowLoad() {
+                onWindowResize()
+                channel = new BroadcastChannel('sonewEditor')
+                channel.postMessage({
+                    action: 'createWindow'
+                })
+                channel.onmessage = function (event) {
+                    switch (event.data.action) {
+                        case 'editorInit':
+                            Editor('editor', event.data.value)
+                            break
+                    }
+                }
+                window.addEventListener('resize', () => onWindowResize(), 200)
+                window.addEventListener('unload', function () {
+                    channel.postMessage({
+                        action: 'closeWindow'
+                    })
+                    channel.close()
+                    window.removeEventListener('load', onWindowLoad)
+                })
+            }
+            function onWindowResize() {
+                const page = document.getElementById('page')
+                const nav = document.getElementById('nav')
+                const editor = document.getElementById('editor')
+                const footer = document.getElementById('footer')
+                editor.style.height =
+                    window.innerHeight -
+                    nav.clientHeight -
+                    footer.clientHeight +
+                    'px'
+            }
+            function Editor(id, doc) {
+                window.MonacoEnvironment = {
+                    getWorkerUrl: function (moduleId, label) {
+                        return `data:text/javascript;charset=utf-8, ${encodeURIComponent(`
+                            self.MonacoEnvironment = {
+                            baseUrl: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/'
+                            };
+                            importScripts('https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/base/worker/workerMain.js');
+                        `)}`
+                    }
+                }
+                require.config({
+                    paths: {
+                        vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs'
+                    }
+                })
+                require(['vs/editor/editor.main'], function () {
+                    editor = monaco.editor.create(document.getElementById(id), {
+                        value: doc,
+                        language: 'javascript',
+                        automaticLayout: true,
+                        tabSize: 4,
+                        wordWrap: true,
+                        wordWrapColumn: 80,
+                        // domReadOnly: true,
+                        // readOnly: true,
+                        cursorBlinking: 'blink',
+                        cursorWidth: 0,
+                        fontFamily: 'JetBrains Mono',
+                        fontSize: 16
+                    })
+                })
+            }
+            function submit() {
+                channel.postMessage({
+                    action: 'submit',
+                    value: editor.getValue()
+                })
+            }
+        </script>
+    </body>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .page {
+            min-height: 400px;
+            overflow: hidden;
+        }
+        :root {
+            --bs-primary-rgb: 65, 21, 132;
+            --bs-secondary-rgb: 13, 110, 253;
+            --bs-dark-rgb: 33, 37, 41;
+        }
+    </style>
+</html>

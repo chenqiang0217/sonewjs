@@ -40,7 +40,8 @@ const size = computed(() => {
     height: v-bind('size');
     position: relative;
     vertical-align: -2px;
-    fill: v-bind('props.color');
+    /* fill: v-bind('props.color'); */
     /* fill: var(--el-color-primary-light-3); */
+    fill: currentColor;
 }
 </style>

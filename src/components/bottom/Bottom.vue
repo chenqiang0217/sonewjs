@@ -21,7 +21,7 @@ const status = useStatusStore()
         <el-tab-pane name="server">
             <template #label>
                 <span>
-                    <IconFront iconName="network"></IconFront>
+                    <IconFront iconName="yun"></IconFront>
                     <span>分析信息</span>
                 </span>
             </template>
@@ -39,15 +39,13 @@ const status = useStatusStore()
     border-right: 0;
 }
 
-.footer-tabs>.el-tab-pane {
+.el-tab-pane {
     height: 100%;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr auto;
 }
 
-::v-deep(.el-tabs__content) {
-    padding: 2px 0;
-}
+
 ::v-deep(.el-tabs__header, .is-bottom) {
     margin: 0;
 }

@@ -286,7 +286,7 @@ const toolBars = ref([
         },
         {
             label: '关于',
-            icon: 'about',
+            icon: 'info',
             action: about,
             clicked: false
         },
@@ -308,7 +308,9 @@ const toolBars = ref([
                     <div>
                         <el-tooltip :content="toolBar.label" placement="bottom" effect="light">
                             <el-button @click="toolBar.action">
-                                <IconFront :iconName="toolBar.icon"></IconFront>
+                                <div class="iconFront">
+                                    <IconFront :iconName="toolBar.icon"></IconFront>
+                                </div>
                             </el-button>
                         </el-tooltip>
                     </div>
@@ -322,7 +324,9 @@ const toolBars = ref([
             <div>
                 <el-tooltip :content="toolBar.label" placement="bottom" effect="light">
                     <el-button @click="toolBar.action">
-                        <IconFront :iconName="toolBar.icon"></IconFront>
+                        <div class="iconFront">
+                            <IconFront :iconName="toolBar.icon"></IconFront>
+                        </div>
                     </el-button>
                 </el-tooltip>
             </div>
@@ -344,5 +348,9 @@ const toolBars = ref([
 
 .el-divider {
     margin: 6px;
+}
+
+.iconFront {
+    color: var(--el-color-primary-light-3);
 }
 </style>

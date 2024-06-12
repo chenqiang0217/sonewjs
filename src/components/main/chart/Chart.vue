@@ -182,10 +182,10 @@ const series = [
         type: 'bar',
         barWidth: 20,
         data: [],
-        color: 'green',
+        color: 'rgb(103, 194, 58)',
         showBackground: true,
         backgroundStyle: {
-            color: 'rgba(180, 180, 180, 0.2)',
+            color: 'rgb(220, 223, 230)',
         },
         markPoint: {
             symbol: 'pin',

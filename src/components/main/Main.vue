@@ -115,15 +115,11 @@ const removeTab = (tableName) => {
 </template>
 
 
-<style lang="scss" scope>
+<style scope>
 .wrapper {
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr;
     border-right: 0;
-}
-
-::v-deep(.el-tabs__content) {
-    padding: 0px;
 }
 </style>
