@@ -27,7 +27,7 @@ body {
 
 .el-tabs {
     --el-tabs-header-height: 32px;
-    border: 1;
+    border: 0;
     /* background-color: var(--el-color-primary-light-9); */
 }
 
@@ -50,4 +50,9 @@ body {
     border: 0;
     flex: 1;
     max-width: 160px;
+}
+
+.el-table-v2 {
+    height: 100%;
+    width: 100%;
 }

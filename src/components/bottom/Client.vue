@@ -32,7 +32,7 @@ const execute = async (code) => {
     })
 }
 const newWindow = () => {
-    window.open('/editor', '_blank', 'popup')
+    window.open('/editor.html', '_blank', 'popup')
     const channel = new BroadcastChannel('sonewEditor')
     channel.onmessage = function (event) {
         switch (event.data.action) {

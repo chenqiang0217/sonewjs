@@ -293,6 +293,7 @@ const onContextmenu = (event, object, node, element) => {
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr;
+    border: 1px 0px 0px 0px;
 }
 
 .el-tab-pane {

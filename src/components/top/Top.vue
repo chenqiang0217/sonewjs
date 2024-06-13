@@ -301,7 +301,7 @@ const toolBars = ref([
 </script>
 
 <template>
-    <div style="display: flex; flex-wrap: wrap; flex: 1">
+    <div style="display: flex; flex-wrap: wrap; flex: 1;">
         <template v-for="(toolBarGroup, i) in toolBars" v-bind:key="i">
             <div v-if="i < toolBars.length - 1" style="display: flex">
                 <template v-for="(toolBar, j) in toolBarGroup" v-bind:key="j">

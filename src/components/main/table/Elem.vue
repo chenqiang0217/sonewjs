@@ -12,7 +12,6 @@ defineProps({
 })
 const model = useModelStore()
 const cellWidth = 150
-const cellHeight = 30
 const columns = [
     { key: 'no', title: '单元号', dataKey: 'no', width: cellWidth },
     { key: 'type', title: '类型', dataKey: 'type', width: cellWidth },
@@ -35,4 +34,5 @@ const columns = [
     />
 </template>
 
-<style></style>
+<style scoped>
+</style>
