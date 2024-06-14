@@ -32,7 +32,7 @@ const execute = async (code) => {
     })
 }
 const newWindow = () => {
-    window.open('/editor.html', '_blank', 'popup')
+    window.open('/editor', '_blank', 'popup')
     const channel = new BroadcastChannel('sonewEditor')
     channel.onmessage = function (event) {
         switch (event.data.action) {
@@ -58,7 +58,7 @@ const newWindow = () => {
 <template>
     <div style="margin: 0 5px 0 auto;">
         <el-tooltip content="清空" placement="bottom" effect="light">
-            <el-button @click="">
+            <el-button @click="messages.clear(to)">
                 <div class="iconFront">
                     <IconFront iconName="clear" size="small"></IconFront>
                 </div>
@@ -81,7 +81,7 @@ const newWindow = () => {
     </div>
     <el-scrollbar ref="scrollbar" always>
         <div class="message" ref="message">
-            <div v-for="(message, i) in messages.client" style="border: 1px;">
+            <div v-for="(message, i) in messages[to]" style="border: 1px;">
                 <template v-if="message.level == Message.TYPES.COMMANDER.LEVEL">
                     <Code :doc="message.text" :id="'codeContainer-' + i" />
                 </template>

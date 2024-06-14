@@ -12,6 +12,17 @@ import Force from './table/Force.vue'
 import Chart from './chart/Chart.vue'
 import { useStatusStore } from '../../stores/status'
 
+const props = defineProps({
+    w: {
+        type: Number,
+        required: true,
+    },
+    h: {
+        type: Number,
+        required: true,
+    }
+})
+
 const status = useStatusStore()
 const editableTabs = reactive([{
     title: '模型',
@@ -92,12 +103,12 @@ const removeTab = (tableName) => {
     status.ui.tab.main.list.splice(index, 1)
     status.ui.tab.main.active = status.ui.tab.main.list.at(-1)
 }
-
 </script>
 
 
 <template>
-    <el-tabs class="wrapper" v-model="status.ui.tab.main.active" type="border-card" closable @tab-remove="removeTab">
+    <el-tabs v-model="status.ui.tab.main.active" type="border-card" closable
+        :style="{ 'height': props.h + 'px', 'width': props.w + 'px' }" @tab-remove="removeTab">
         <el-tab-pane v-for="item in editableTabs" :key="item.name" :label="item.title" :name="item.name">
             <template #label>
                 <span>
@@ -106,8 +117,8 @@ const removeTab = (tableName) => {
                 </span>
             </template>
             <el-auto-resizer>
-                <template #default="{ height, width }">
-                    <component :is="item.component" :height="height" :width="width"></component>
+                <template #default="{ width, height }">
+                    <component :is="item.component" :width="width" :height="height"></component>
                 </template>
             </el-auto-resizer>
         </el-tab-pane>
@@ -116,10 +127,8 @@ const removeTab = (tableName) => {
 
 
 <style scope>
-.wrapper {
-    height: 100%;
+.el-tabs {
     display: grid;
     grid-template-rows: auto 1fr;
-    border-right: 0;
 }
 </style>

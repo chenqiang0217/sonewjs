@@ -7,6 +7,7 @@ const scrollbar = ref()
 const message = ref()
 const timers = ref([])
 const messages = useMessageStore()
+const to = 'server'
 onMounted(() => {
     const resizeObserver = new ResizeObserver(() => {
         scrollbar.value?.setScrollTop(message.value.clientHeight)
@@ -21,7 +22,7 @@ const timeOut = (event) => {
 <template>
     <div style="margin: 0 5px 0 auto;">
         <el-tooltip content="清空" placement="bottom" effect="light">
-            <el-button @click="">
+            <el-button @click="messages.clear(to)">
                 <div class="iconFront">
                     <IconFront iconName="clear" size="small"></IconFront>
                 </div>
@@ -37,7 +38,7 @@ const timeOut = (event) => {
     </div>
     <el-scrollbar ref="scrollbar" always>
         <div ref="message">
-            <div class="message" v-for="(message, index) in messages.server">
+            <div class="message" v-for="(message, index) in messages[to]">
                 <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME">
                     <IconFront :iconName="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
                         size="small">

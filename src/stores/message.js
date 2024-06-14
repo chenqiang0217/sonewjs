@@ -11,32 +11,12 @@ export class Message {
         this.text = text
         this.level = level
         this.delay = delay
-        // const now = new Date()
-        // this.time =
-        //     ('0' + now.getHours()).slice(-2) +
-        //     ':' +
-        //     ('0' + now.getMinutes()).slice(-2) +
-        //     ':' +
-        //     ('0' + now.getSeconds()).slice(-2)
     }
 }
 export const useMessageStore = defineStore('message', {
     state: () => {
         return {
-            client: [
-                // new Message({
-                //     text: "let s = 'hello world'\nreturn 'hello world'",
-                //     level: Message.TYPES.COMMANDER.LEVEL
-                // }),
-                // new Message({
-                //     text: "return 'hello world'",
-                //     level: Message.TYPES.COMMANDER.LEVEL
-                // }),
-                // new Message({
-                //     text: "const b = 'hello world'",
-                //     level: Message.TYPES.INFO.LEVEL
-                // })
-            ],
+            client: [],
             server: []
         }
     },
@@ -49,7 +29,7 @@ export const useMessageStore = defineStore('message', {
             }
         },
         clear(to = 'client') {
-            this.message[to] = []
+            this[to] = []
         }
     }
 })

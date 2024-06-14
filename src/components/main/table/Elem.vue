@@ -35,4 +35,5 @@ const columns = [
 </template>
 
 <style scoped>
+
 </style>

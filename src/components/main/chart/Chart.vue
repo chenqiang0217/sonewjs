@@ -229,7 +229,7 @@ onMounted(() => {
         CanvasRenderer,
     ])
     const canvas = document.getElementById('chart')
-    chart = echarts.init(canvas, null, { width: 0, height: 0 })
+    chart = echarts.init(canvas, null, { width: props.width, height: props.height })
     chart.setOption(option)
     model.result.forEach(result => {
         series[0].data.push([result.step, result.rsdl])

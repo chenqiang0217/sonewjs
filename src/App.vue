@@ -7,10 +7,13 @@ import Bottom from './components/bottom/Bottom.vue'
 import Divider from './components/Divider.vue'
 
 const minimalWidth = 300
-const minimalHeight = 50
+const minimalHeight = 100
 const refTop = ref(null)
 const refBottom = ref(null)
 const refRight = ref(null)
+
+const mainWidth = ref(0)
+const mainHeight = ref(0)
 const disableBottom = ref(false)
 const disableRight = ref(false)
 
@@ -23,6 +26,7 @@ onMounted(() => {
         else {
             disableRight.value = false
         }
+        mainWidth.value = document.documentElement.clientWidth - refRight.value?.clientWidth
     })
     const bottomObserver = new ResizeObserver(() => {
         if (refBottom.value
@@ -33,6 +37,7 @@ onMounted(() => {
         else {
             disableBottom.value = false
         }
+        mainHeight.value = document.documentElement.clientHeight - refTop.value?.clientHeight - refBottom.value?.clientHeight
     })
     rightObserver.observe(refRight.value)
     bottomObserver.observe(refBottom.value)
@@ -45,7 +50,7 @@ onMounted(() => {
             <Top />
         </div>
         <div class="main">
-            <Main />
+            <Main :w="mainWidth" :h="mainHeight" />
         </div>
         <div class="bottom" ref="refBottom">
             <Divider top :height="200" :disable="disableBottom">
@@ -87,6 +92,7 @@ onMounted(() => {
 
 .main {
     grid-area: main;
+    overflow: hidden;
 }
 
 .bottom {
