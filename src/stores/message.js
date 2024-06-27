@@ -7,7 +7,7 @@ export class Message {
         ERROR: {LEVEL: 4, NAME: 'danger'},
         COMMANDER: {LEVEL: 5, NAME: 'commander'}
     }
-    constructor({text, level, delay=0}) {
+    constructor({text, level, delay = 0}) {
         this.text = text
         this.level = level
         this.delay = delay
@@ -21,7 +21,12 @@ export const useMessageStore = defineStore('message', {
         }
     },
     actions: {
-        add({text, level = Message.TYPES.INFO.LEVEL, to = 'client', delay = 0}) {
+        add({
+            text,
+            level = Message.TYPES.INFO.LEVEL,
+            to = 'client',
+            delay = 0
+        }) {
             this[to].push(new Message({text, level, delay}))
             return {
                 to,

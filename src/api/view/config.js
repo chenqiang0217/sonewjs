@@ -1,6 +1,7 @@
 import { Color3 } from "@babylonjs/core"
 import { defineStore } from 'pinia'
 import { VIEWCONSTANT } from './constant'
+import { Elem } from '../model/elem'
 
 const useViewConfigStore = defineStore('viewConfig', {
     state: () => {
@@ -25,20 +26,20 @@ const useViewConfigStore = defineStore('viewConfig', {
                     color: {
                         selected: VIEWCONSTANT.COLOR.MESH.ELEM.SELECTED,
                         prep: {
-                            binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.TYPE,
-                            type: new Map([
-                                [1, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.LOCK],
-                                [0, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.FREE],
+                            binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.ETYPE,
+                            eType: new Map([
+                                [Elem.ETYPE.LOCK, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.LOCK],
+                                [Elem.ETYPE.FREE, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.FREE],
                             ]),
                             femType: new Map(),
                             mat: new Map(),
                             sec: new Map(),
                         },
                         rslt: {
-                            binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.TYPE,
-                            type: new Map([
-                                [1, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.LOCK],
-                                [0, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.FREE],
+                            binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.ETYPE,
+                            eType: new Map([
+                                [Elem.ETYPE.LOCK, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.LOCK],
+                                [Elem.ETYPE.FREE, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.FREE],
                             ]),
                             contour: {
                                 by: 'f',

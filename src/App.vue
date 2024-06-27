@@ -10,8 +10,8 @@ const minimalWidth = 300
 const minimalHeight = 100
 const refTop = ref(null)
 const refBottom = ref(null)
+const refMain = ref(null)
 const refRight = ref(null)
-
 const mainWidth = ref(0)
 const mainHeight = ref(0)
 const disableBottom = ref(false)
@@ -26,7 +26,6 @@ onMounted(() => {
         else {
             disableRight.value = false
         }
-        mainWidth.value = document.documentElement.clientWidth - refRight.value?.clientWidth
     })
     const bottomObserver = new ResizeObserver(() => {
         if (refBottom.value
@@ -37,10 +36,16 @@ onMounted(() => {
         else {
             disableBottom.value = false
         }
-        mainHeight.value = document.documentElement.clientHeight - refTop.value?.clientHeight - refBottom.value?.clientHeight
+    })
+    const mainObserver = new ResizeObserver(() => {
+        if(refMain.value){
+            mainWidth.value = refMain.value.clientWidth
+            mainHeight.value = refMain.value.clientHeight
+        }
     })
     rightObserver.observe(refRight.value)
     bottomObserver.observe(refBottom.value)
+    mainObserver.observe(refMain.value)
 })
 </script>
 
@@ -49,7 +54,7 @@ onMounted(() => {
         <div class="top" ref="refTop">
             <Top />
         </div>
-        <div class="main">
+        <div class="main" ref="refMain">
             <Main :w="mainWidth" :h="mainHeight" />
         </div>
         <div class="bottom" ref="refBottom">

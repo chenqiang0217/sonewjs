@@ -15,21 +15,33 @@ onMounted(() => {
         scrollbar.value?.setScrollTop(message.value.clientHeight)
     })
     resizeObserver.observe(message.value)
+    messages.add({
+        text: 'sonew 0.1.0',
+        level: Message.TYPES.INFO.LEVEL,
+        to,
+    })
 })
-
 const execute = async (code) => {
     messages.add({
         text: code,
         level: Message.TYPES.COMMANDER.LEVEL,
         to,
     })
-    const commander = new Commander(code)
-    const result = commander.execute()
-    messages.add({
-        text: result,
-        level: Message.TYPES.SUCCESS.LEVEL,
-        to,
-    })
+    try {
+        const commander = new Commander(code)
+        commander.execute()
+        messages.add({
+            text: '执行完成',
+            level: Message.TYPES.SUCCESS.LEVEL,
+            to
+        })
+    } catch (error) {
+        messages.add({
+            text: '执行错误\n' + error?.message,
+            level: Message.TYPES.ERROR.LEVEL,
+            to
+        })
+    }
 }
 const newWindow = () => {
     window.open('/editor', '_blank', 'popup')
@@ -85,15 +97,17 @@ const newWindow = () => {
                 <template v-if="message.level == Message.TYPES.COMMANDER.LEVEL">
                     <Code :doc="message.text" :id="'codeContainer-' + i" />
                 </template>
-                <template v-else>
-                    <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME">
-                        <IconFront
-                            :iconName="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
-                            size="small">
-                        </IconFront>
-                        {{ message.text }}
-                    </el-text>
-                </template>
+                <div v-else>
+                    <div v-for="line in message.text.split('\n')">
+                        <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME">
+                            <IconFront
+                                :iconName="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
+                                size="small">
+                            </IconFront>
+                            {{ line }}
+                        </el-text>
+                    </div>
+                </div>
             </div>
         </div>
     </el-scrollbar>

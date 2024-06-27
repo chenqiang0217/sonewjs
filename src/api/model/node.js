@@ -1,7 +1,7 @@
-import { Vector3 } from '@babylonjs/core'
+import {Vector3} from '@babylonjs/core'
 
 class Node {
-    static TYPE = {
+    static NTYPE = {
         FREE: 0b00000000,
         LOCK: 0b00000001
     }
@@ -14,7 +14,7 @@ class Node {
     get position() {
         return new Vector3(this.x, this.y, this.z)
     }
-    set position({ x, y, z }) {
+    set position({x, y, z}) {
         this.x = x
         this.y = y
         this.z = z
@@ -22,12 +22,11 @@ class Node {
     get positionInScene() {
         return new Vector3(this.y, this.z, this.x)
     }
-    toArray() {
+    asArray() {
         return [this.no, this.x, this.y, this.z]
     }
     clone() {
-        return new Node(this.toArray())
+        return new Node(this.asArray())
     }
 }
-
-export { Node }
+export {Node}

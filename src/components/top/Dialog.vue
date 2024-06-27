@@ -33,30 +33,21 @@ const position = computed(() => ({
 
 <template>
     <Teleport to="body">
-        <div
-            class="dialog"
-            :style="position"
-            v-drag
-            v-show="show"
-        >
+        <div class="dialog" :style="position" v-drag v-show="show">
             <div class="header">
-                <p>{{ title }}</p>
+                <el-text size="large" style="padding-left: 10px;">{{ title }}</el-text>
             </div>
-            <div class="modal"><slot></slot></div>
+            <div class="modal">
+                <slot></slot>
+            </div>
             <div class="dialog-submit-wrapper">
-                <el-button
-                    type="primary"
-                    plain
-                    @click="status.ui.dialog.apply = true"
-                >
-                    应用</el-button
-                >
-                <el-button
-                    type="primary"
-                    plain
-                    @click="status.ui.dialog.show = false"
-                    >关闭</el-button
-                >
+                <el-button type="primary" round @click="status.ui.dialog.show = false"><el-text>
+                        关闭
+                    </el-text></el-button>
+                <el-button type="primary" round @click="status.ui.dialog.apply = true">
+                    <el-text>
+                        应用
+                    </el-text></el-button>
             </div>
         </div>
     </Teleport>
@@ -66,26 +57,54 @@ const position = computed(() => ({
 .dialog {
     position: fixed;
     z-index: 10;
-    background: white;
+    background: var(--el-color-white);
     border: 1px solid var(--el-color-primary-light-7);
-    /* box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 0 2px rgba(0, 0, 0, .04); */
+    box-shadow: var(--el-box-shadow-light);
 }
-.header {
+
+.header,
+.el-button {
     background: var(--el-color-primary-light-7);
     height: 2em;
     display: inline-flex;
     align-items: center;
     width: 100%;
-    padding-left: 10px;
-}
-.header:hover {
-    background: var(--el-color-primary);
-    p {
-        color: white;
+
+    .el-text {
+        color: var(--el-color-primary);
     }
 }
-.dialog .modal {
+
+.el-button {
+    max-width: 160px;
+}
+
+.header:hover,
+.el-button:hover {
+    background: var(--el-color-primary);
+
+    .el-text {
+        color: var(--el-color-primary-light-7);
+    }
+}
+
+.dialog-submit-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    margin: 10px 10px;
+}
+
+.modal {
     padding: 10px;
     padding-bottom: 0;
+
+    .el-input-number {
+        width: 100%;
+    }
+
+    .el-select {
+        width: 100%;
+    }
 }
 </style>

@@ -164,7 +164,7 @@ const modelTreeView = computed(() => [
                 label: group.label,
                 icon: `node-shape`,
                 children: equality.map(eqlt => {
-                    const nodeShape = model.categorized.target.nodeShape.find(nodeShape => nodeShape.group === group.no
+                    const nodeShape = model.categorized.target.nodeShape.find(nodeShape => nodeShape.group === group
                         && nodeShape.equality === eqlt.no)
                     return {
                         nodeSize: nodeShape.node.length,
@@ -182,14 +182,14 @@ const modelTreeView = computed(() => [
                     }
                 }).filter(i => i.nodeSize > 0)
             })),
-        },{
+        }, {
             label: '单元几何',
             icon: `element-shape`,
             children: model.target.group.map(group => ({
                 label: group.label,
                 icon: `element-shape`,
                 children: equality.map(eqlt => {
-                    const elemShape = model.categorized.target.elemShape.find(elemShape => elemShape.group === group.no
+                    const elemShape = model.categorized.target.elemShape.find(elemShape => elemShape.group === group
                         && elemShape.equality === eqlt.no)
                     return {
                         elemSize: elemShape.elem.length,
@@ -207,14 +207,14 @@ const modelTreeView = computed(() => [
                     }
                 }).filter(i => i.elemSize > 0)
             })),
-        },{
+        }, {
             label: '单元预应力',
             icon: `element-force`,
             children: model.target.group.map(group => ({
                 label: group.label,
                 icon: `element-force`,
                 children: equality.map(eqlt => {
-                    const elemForce = model.categorized.target.elemForce.find(elemForce => elemForce.group === group.no
+                    const elemForce = model.categorized.target.elemForce.find(elemForce => elemForce.group === group
                         && elemForce.equality === eqlt.no)
                     return {
                         elemSize: elemForce.elem.length,
@@ -269,7 +269,7 @@ const onContextmenu = (event, object, node, element) => {
                     <span>树形菜单</span>
                 </span>
             </template>
-            <el-scrollbar always noresize wrap-class="scroll-wrap" view-class="view-wrap">
+            <el-scrollbar>
                 <el-tree :data="modelTreeView" highlight-current @node-contextmenu="onContextmenu">
                     <!-- <template #default="scope">
                         <DocumentAdd v-if="true" class="icon"></DocumentAdd>
@@ -293,27 +293,9 @@ const onContextmenu = (event, object, node, element) => {
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr;
-    border: 1px 0px 0px 0px;
 }
 
 .el-tab-pane {
     height: 100%;
-    display: grid;
-    grid-template-rows: 1fr auto;
-}
-
-.align-items-end {
-    max-height: 100%;
-    position: absolute;
-    bottom: 0;
-}
-
-.scroll-wrap {
-    height: 100%;
-}
-
-.view-wrap {
-    height: 100%;
-    position: relative;
 }
 </style>

@@ -16,7 +16,7 @@ const showDialogSolutionConfig = () => {
     status.ui.dialog.component.is = Config
     status.ui.dialog.show = true
     status.ui.dialog.title = '设置'
-    status.ui.dialog.width = 450
+    status.ui.dialog.width = 500
 }
 const solutionRun = () => {
     const model = useModelStore()
@@ -112,7 +112,9 @@ const resultViewInit = () => {
             )
             .forEach(line => line.hide())
         model.categorized.node.free.forEach(node => {
-            view.createPoint(node.clone(), 'rslt')
+            view.createPoint(node.clone(), 'rslt').updateMeshColor(
+                view.scene.metadata.materials.point.prep.free
+            )
         })
         const freeNode = view.points.rslt.map(point => point.mesh.metadata)
         model.categorized.elem.free.forEach(elem => {
@@ -121,7 +123,7 @@ const resultViewInit = () => {
             const el = elem.clone()
             el.iNode = iNode
             el.jNode = jNode
-            view.createLine(el, 'rslt')
+            view.createLine(el, 'rslt').updateMeshColor()
         })
     }
 }
@@ -137,29 +139,29 @@ const formData = () => {
     const node = new Float64Array(
         model.categorized.node.free
             .sort(byNoAsec)
-            .map(node => node.toArray())
+            .map(node => node.asArray())
             .flat()
     )
     const elem = new Float64Array(
         model.categorized.elem.free
             .sort(byNoAsec)
-            .map(elem => elem.toArrayShort())
+            .map(elem => elem.asArrayShort())
             .flat()
     )
     const cnst = new Float64Array(
         model.cnst
             .sort((a, b) => a.node.no - b.node.no)
-            .map(cnst => cnst.toArray())
+            .map(cnst => cnst.asArray())
             .flat()
     )
     const nodeShape = new Float64Array(
-        model.target.nodeShape.map(shape => shape.toArray()).flat()
+        model.target.nodeShape.map(shape => shape.asArray()).flat()
     )
     const elemShape = new Float64Array(
-        model.target.elemShape.map(shape => shape.toArray()).flat()
+        model.target.elemShape.map(shape => shape.asArray()).flat()
     )
     const elemForce = new Float64Array(
-        model.target.elemForce.map(force => force.toArray()).flat()
+        model.target.elemForce.map(force => force.asArray()).flat()
     )
     const elemForceInit = new Float64Array(
         model.categorized.elem.free
@@ -189,7 +191,7 @@ const queryResult = async opt => {
         text: '获取计算结果',
         level: Message.TYPES.INFO.LEVEL,
         to,
-        delay,
+        delay
     })
     await sleep(delay)
     const {
@@ -206,11 +208,10 @@ const queryResult = async opt => {
     let response
     try {
         status.task.query.retry += 1
-        if(status.task.run != CONSTANT.TASK.RUN.ABORT){
+        if (status.task.run != CONSTANT.TASK.RUN.ABORT) {
             status.task.query.retry += 1
             response = await task.result.query(formData)
-        }
-        else{
+        } else {
             return
         }
     } catch (error) {
@@ -218,7 +219,7 @@ const queryResult = async opt => {
         messages.add({
             text: '获取计算结果错误',
             level: Message.TYPES.ERROR.LEVEL,
-            to,
+            to
         })
         return
     }

@@ -4,21 +4,17 @@ import { useView } from '../../../api/view/index'
 import { useStatusStore } from '../../../stores/status'
 import { useModelStore } from '../../../stores/model'
 
-
-
 const status = useStatusStore()
 onMounted(() => {
     const view = useView()
-    const config = view.scene.metadata.useConfig()
-    config.canvas = `canvas`
-    view.model = useModelStore
+    view.useModel = useModelStore
+    view.watchModelChange()
 })
 </script>
 
 <template>
     <!-- 必须加div包裹canvas,并设置其宽度为100%，因为canvas是有高宽比例的 -->
     <div
-        id="canvasWrapper"
         v-loading="status.view.loading"
     >
         <canvas id="canvas"></canvas>

@@ -5,8 +5,8 @@ class Cnst {
         this.dim = dim
         this.cs = cs
     }
-    toArray() {
-        return [this.no, this.node.no, this.dim, this.cs]
+    asArray() {
+        return [this.no, this.node.no, this.dim, this.cs.no]
     }
 }
 export { Cnst }

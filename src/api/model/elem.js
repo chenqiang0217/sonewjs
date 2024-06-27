@@ -10,7 +10,7 @@ class BaseElem {
     get length() {
         return this.jNode.position.subtract(this.iNode.position).length()
     }
-    toArray() {
+    asArray() {
         return [
             this.no,
             this.femType,
@@ -21,24 +21,24 @@ class BaseElem {
         ]
     }
     clone() {
-        const arr = this.toArray()
+        const arr = this.asArray()
         arr.splice(-2, 2, this.iNode.clone(), this.jNode.clone())
         return new BaseElem(arr)
     }
 }
 class Elem extends BaseElem {
-    static TYPE = {
+    static ETYPE = {
         FREE: 0b00000000,
         LOCK: 0b00000001
     }
-    constructor([no, type, femType, mat, sec, iNode, jNode]) {
+    constructor([no, eType, femType, mat, sec, iNode, jNode]) {
         super([no, femType, mat, sec, iNode, jNode])
-        this.type = type
+        this.eType = eType
     }
-    toArray() {
+    asArray() {
         return [
             this.no,
-            this.type,
+            this.eType,
             this.femType,
             this.mat,
             this.sec,
@@ -46,7 +46,7 @@ class Elem extends BaseElem {
             this.jNode.no
         ]
     }
-    toArrayShort() {
+    asArrayShort() {
         return [
             this.no,
             this.iNode.no,
@@ -54,7 +54,7 @@ class Elem extends BaseElem {
         ]
     }
     clone() {
-        const arr = this.toArray()
+        const arr = this.asArray()
         arr.splice(-2, 2, this.iNode.clone(), this.jNode.clone())
         return new Elem(arr)
     }

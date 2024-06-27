@@ -1,22 +1,13 @@
-import { Vector3 } from '@babylonjs/core'
-import { MainScene } from './mainScene'
-import { Control } from './control'
-import { Material } from './material'
-import { useViewConfigStore } from './config'
-import { useViewStatusStore } from './status'
-import { VIEWCONSTANT } from './constant'
-import { Point } from './point'
-import { Line } from './line'
-
-//引用类型测试
-// a = [{a:1}, {a:3}, {a:2}]
-// b = new Set(a)
-// c = Array.from(b)
-// b.has(a[0]) //true
-// b.has(c[0]) //true
-// a[0] === c[0] //true
-// a === b //false
-// 结论：数组，集合操作，里面的对象元素是同一内存地址。
+import {watch} from 'vue'
+import {Vector3} from '@babylonjs/core'
+import {MainScene} from './mainScene'
+import {Control} from './control'
+import {Material} from './material'
+import {useViewConfigStore} from './config'
+import {useViewStatusStore} from './status'
+import {VIEWCONSTANT} from './constant'
+import {Point} from './point'
+import {Line} from './line'
 
 class View {
     constructor() {
@@ -40,10 +31,10 @@ class View {
         }
     }
     //在View.vue中进行配置
-    get model() {
-        return this.scene.metadata.useModel()
+    get useModel() {
+        return this.scene.metadata.useModel
     }
-    set model(useModel) {
+    set useModel(useModel) {
         this.scene.metadata.useModel = useModel
     }
     get bounding() {
@@ -60,7 +51,40 @@ class View {
                 max = Vector3.Maximize(max, boundingBox)
             })
         }
-        return { min, max }
+        return {min, max}
+    }
+    watchModelChange() {
+        const model = this.scene.metadata.useModel()
+        Array.from(['free', 'lock']).forEach(type => {
+            watch(
+                () => model.categorized.node[type],
+                (now, pre) => {
+                    now.filter(now => !pre.find(pre => pre === now)).forEach(
+                        node =>
+                            this.points.prep
+                                .find(point => point.mesh.metadata === node)
+                                .updateMeshColor(
+                                    this.scene.metadata.materials.point.prep[
+                                        type
+                                    ]
+                                )
+                    )
+                }
+            )
+        })
+        Array.from(['free', 'lock']).forEach(type => {
+            watch(
+                () => model.categorized.elem[type],
+                (now, pre) => {
+                    now.filter(now => !pre.find(pre => pre === now)).forEach(
+                        elem =>
+                            this.lines.prep
+                                .find(line => line.mesh.metadata === elem)
+                                .updateMeshColor()
+                    )
+                }
+            )
+        })
     }
     createPoint(node, type = 'prep') {
         const point = new Point(node, this.scene, Point[type.toUpperCase()])
@@ -83,12 +107,6 @@ class View {
     }
     createLine(elem, type = 'prep') {
         const line = new Line(elem, this.scene, Line[type.toUpperCase()])
-        const ijNode = new Set([elem.iNode, elem.jNode])
-        this.points[type]
-            .filter(point => ijNode.has(point.mesh.metadata))
-            .forEach(point => {
-                point.linkedLines.add(line)
-            })
         this.lines[type].push(line)
         return line
     }
@@ -118,4 +136,4 @@ const useView = (function () {
     }
 })()
 
-export { useView, useViewConfigStore, useViewStatusStore, VIEWCONSTANT}
+export {useView, useViewConfigStore, useViewStatusStore, VIEWCONSTANT}

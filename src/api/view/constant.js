@@ -80,7 +80,7 @@ const VIEWCONSTANT = {
                 DEFAULT: Color3.Black(),
                 SELECTED: Color3.Red(),
                 BINDING: {
-                    TYPE: 'type',
+                    ETYPE: 'eType',
                     FEMTYPE: 'femType',
                     MAT: 'mat',
                     SEC: 'sec',

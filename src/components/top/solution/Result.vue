@@ -29,18 +29,18 @@ const option = ref({
     },
     nodeTag: {
         show: false,
-        key: '',
+        key: 'x',
         digits: 0
     },
     elemTag: {
         show: false,
-        key: '',
+        key: 'l',
         magnification: 1,
         digits: 0
     }
 })
 watch(() => option.value.elemTag.show, show => {
-    if(show === false){
+    if (show === false) {
         option.value.contour.show = false
     }
 })
@@ -67,13 +67,13 @@ watch(
 watch(
     () => status.ui.dialog.apply,
     (apply) => {
-        if(apply){
+        if (apply) {
             status.ui.dialog.apply = false
-            viewResultSecne()
+            onApply()
         }
     }
 )
-const viewResultSecne = () => {
+const onApply = () => {
     // //表单验证
     // if ((option.nodeTag.show && !option.nodeTag.key)
     //     || (option.elemTag.show && !option.elemTag.key)
@@ -95,7 +95,7 @@ const viewResultSecne = () => {
     const view = useView()
     const result = model.result.find(res => res.step == step)
     const nodes = result.node
-    nodes.forEach(node => 
+    nodes.forEach(node =>
         view.points.rslt.find(point => point.mesh.metadata.no == node.no).position = node.position
     )
     view.lines.rslt.forEach(line => line.updatePosition())
@@ -106,7 +106,7 @@ const viewResultSecne = () => {
         const digits = option.value.nodeTag.digits
 
         view.points.rslt.forEach(point => {
-            point.text =  point.mesh.metadata[key].toFixed(digits)
+            point.text = point.mesh.metadata[key].toFixed(digits)
         })
         view.control.showText('node', 'rslt')
     } else {
@@ -121,7 +121,7 @@ const viewResultSecne = () => {
         config.mesh.elem.color.rslt.contour.by = key
         const nSec = config.mesh.elem.color.rslt.contour.nSec
         const elems = result.elem
-        const {min, max} = result.summarized.elem[key]
+        const { min, max } = result.summarized.elem[key]
         const colors = config.contour
         view.lines.rslt.forEach(line => {
             const v = elems.find(elem => elem.no == line.no)[key]
@@ -166,52 +166,30 @@ const viewResultTable = mesh => {
 </script>
 
 <template>
-    <el-form
-        ref="form"
-        :model="option"
-        label-position="top"
-    >
+    <el-form ref="form" :model="option" label-position="top">
         <el-form-item label="荷载步">
-            <div class="flex-Wrapper">
-                <el-select
-                    v-model="option.step.loadStep"
-                    placeholder="荷载步"
-                    class="select"
-                >
-                    <el-option
-                        v-for="loadStep in new Set(
+            <el-row>
+                <el-col :span="8">
+                    <el-select v-model="option.step.loadStep" placeholder="荷载步" class="select">
+                        <el-option v-for="loadStep in new Set(
                             model.result.map(res => res.loadStep)
-                        )"
-                        :label="loadStep"
-                        :value="loadStep"
-                        :key="loadStep"
-                    ></el-option>
-                </el-select>
-                <el-select
-                    v-model="option.step.subStep"
-                    placeholder="子步"
-                    class="select"
-                >
-                    <el-option
-                        v-for="subStep in new Set(
+                        )" :label="loadStep" :value="loadStep" :key="loadStep"></el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="8">
+                    <el-select v-model="option.step.subStep" placeholder="子步" class="select">
+                        <el-option v-for="subStep in new Set(
                             model.result
                                 .filter(
                                     res => res.loadStep == option.step.loadStep
                                 )
                                 .map(res => res.subStep)
-                        )"
-                        :label="subStep"
-                        :value="subStep"
-                        :key="subStep"
-                    ></el-option>
-                </el-select>
-                <el-select
-                    v-model="option.step.iterativeStep"
-                    placeholder="迭代步"
-                    class="select"
-                >
-                    <el-option
-                        v-for="iterativeStep in new Set(
+                        )" :label="subStep" :value="subStep" :key="subStep"></el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="8">
+                    <el-select v-model="option.step.iterativeStep" placeholder="迭代步" class="select">
+                        <el-option v-for="iterativeStep in new Set(
                             model.result
                                 .filter(
                                     res =>
@@ -219,156 +197,118 @@ const viewResultTable = mesh => {
                                         res.subStep == option.step.subStep
                                 )
                                 .map(res => res.iterativeStep)
-                        )"
-                        :label="iterativeStep"
-                        :value="iterativeStep"
-                        :key="iterativeStep"
-                    ></el-option>
-                </el-select>
-            </div>
+                        )" :label="iterativeStep" :value="iterativeStep" :key="iterativeStep"></el-option>
+                    </el-select>
+                </el-col>
+            </el-row>
         </el-form-item>
 
         <el-form-item>
-            <el-checkbox v-model="option.nodeTag.show">节点数值</el-checkbox
-            ><el-button @click="viewResultTable('node')">...</el-button>
-            <div
-                class="grid-Wrapper1"
-                v-show="option.nodeTag.show"
-            >
-                <div class="align-right">类别：</div>
-                <div>
-                    <el-select v-model="option.nodeTag.key">
-                        <el-option
-                            label="请选择："
-                            value=""
-                            disabled
-                        ></el-option>
-                        <el-option
-                            label="x坐标"
-                            value="x"
-                        ></el-option>
-                        <el-option
-                            label="y坐标"
-                            value="y"
-                        ></el-option>
-                        <el-option
-                            label="z坐标"
-                            value="z"
-                        ></el-option>
-                    </el-select>
-                </div>
-                <div class="align-right">精度：</div>
-                <div>
-                    <el-input-number
-                        style="width: 100%"
-                        v-model="option.nodeTag.digits"
-                        :min="0"
-                        :max="10"
-                        :step="1"
-                        step-strictly
-                    />
-                </div>
-            </div>
+            <el-checkbox v-model="option.nodeTag.show">节点数值</el-checkbox>
+            <el-button @click="viewResultTable('node')">...</el-button>
         </el-form-item>
+        <div v-show="option.nodeTag.show">
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>类别：</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="option.nodeTag.key">
+                            <el-option label="x坐标" value="x"></el-option>
+                            <el-option label="y坐标" value="y"></el-option>
+                            <el-option label="z坐标" value="z"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>精度：</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-input-number v-model="option.nodeTag.digits" :min="0" :max="10" :step="1" step-strictly />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </div>
         <el-form-item>
-            <el-checkbox v-model="option.elemTag.show">单元数值</el-checkbox
-            ><el-button @click="viewResultTable('elem')">...</el-button>
-            <div
-                class="grid-Wrapper1"
-                v-show="option.elemTag.show"
-            >   
-                <div class="align-right">类别：</div>
-                <div>
-                    <el-select v-model="option.elemTag.key">
-                        <!-- l,q,f为model.result.elem对应key -->
-                        <el-option
-                            label="请选择："
-                            value=""
-                            disabled
-                        ></el-option>
-                        <el-option
-                            label="单元长度"
-                            value="l"
-                        ></el-option>
-                        <el-option
-                            label="单元力密度"
-                            value="q"
-                        ></el-option>
-                        <el-option
-                            label="单元预应力"
-                            value="f"
-                        ></el-option>
-                    </el-select>
-                </div>
-                <div class="align-right">放大倍数：</div>
-                <div>
-                    <el-input-number
-                        style="width: 100%"
-                        v-model="option.elemTag.magnification"
-                        :min="1"
-                        :step="1"
-                        step-strictly
-                    />
-                </div>
-                <div class="align-right">精度：</div>
-                <div>
-                    <el-input-number
-                        style="width: 100%"
-                        v-model="option.elemTag.digits"
-                        :min="0"
-                        :max="10"
-                        :step="1"
-                        step-strictly
-                    />
-                </div>
-            </div>
+            <el-checkbox v-model="option.elemTag.show">单元数值</el-checkbox><el-button
+                @click="viewResultTable('elem')">...</el-button>
         </el-form-item>
+        <div v-show="option.elemTag.show">
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>类别：</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="option.elemTag.key">
+                            <!-- l,q,f为model.result.elem对应key -->
+                            <el-option label="单元长度" value="l"></el-option>
+                            <el-option label="单元力密度" value="q"></el-option>
+                            <el-option label="单元预应力" value="f"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>放大倍数：</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-input-number v-model="option.elemTag.magnification" :min="1" :step="1" step-strictly />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>精度：</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-input-number v-model="option.elemTag.digits" :min="0" :max="10" :step="1" step-strictly />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </div>
         <el-form-item label="显示控制">
-            <div class="grid-Wrapper2">
-                <div style="flex: 1">
-                    <el-checkbox v-model="option.contour.show" :disabled="!option.elemTag.show"
-                        >等值线</el-checkbox
-                    >
+            <el-row>
+                <el-col :span="12">
+                    <el-checkbox v-model="option.contour.show" :disabled="!option.elemTag.show">等值线</el-checkbox>
                     <el-button size="small">...</el-button>
-                </div>
-                <div style="flex: 1">
+                </el-col>
+                <el-col :span="12">
                     <el-checkbox v-model="option.legend.show">图例</el-checkbox>
                     <el-button size="small">...</el-button>
-                </div>
-                <div style="flex: 1">
-                    <el-checkbox v-model="option.shape.show"
-                        >变形幅值</el-checkbox
-                    >
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-checkbox v-model="option.shape.show">变形幅值</el-checkbox>
                     <el-button size="small">...</el-button>
-                </div>
-            </div>
+                </el-col>
+            </el-row>
         </el-form-item>
     </el-form>
 </template>
 
 <style scoped>
-.select {
-    flex: 1;
-    padding-inline-start: 5px;
-}
-.flex-Wrapper {
-    flex: 1;
-    display: flex;
-    justify-content: space-around;
-}
-.grid-Wrapper1 {
-    display: grid;
-    grid-template-columns: 70px 1fr;
-    grid-column-gap: 5px;
-}
-.grid-Wrapper2 {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-.align-right {
-    margin-left: auto;
-}
+.el-row {
+        width: 100%
+    }
 .el-button {
     padding: 0;
     border: 0;

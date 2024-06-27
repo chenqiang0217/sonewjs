@@ -39,11 +39,10 @@ const readLocalFile = (file, callback) => {
 }
 
 function readWorkbook(workbook) {
-    const view = useView()
     const model = useModelStore()
     const labels = ['node', 'elem', 'constraint', 'nodeShape', 'elemShape', 'elemForce']
-    const funcs = [model.insertNode, model.insertElem, model.insertCnst,
-    model.insertNodeShape, model.insertElemShape, model.insertElemForce]
+    const funcs = [model.createNode, model.createElem, model.createCnst,
+    model.createNodeShape, model.createElemShape, model.createElemForce]
     for (let label of labels) {
         let func = funcs.shift()
         let sheet = XLSX.utils.sheet_to_json(
@@ -56,8 +55,6 @@ function readWorkbook(workbook) {
             } else { break }
         }
     }
-    model.node.forEach(node => view.createPoint(node))
-    model.elem.forEach(elem => view.createLine(elem))
 }
 
 function callFunc(func, data) {

@@ -6,8 +6,14 @@ import {
     Cnst,
     NodeShape,
     ElemShape,
-    ElemForce
+    ElemForce,
+    LoadGroup,
+    TargetGroup,
+    LoadStep,
+    Substep,
+    Cs
 } from '../api/model/index'
+import {useView} from '../api/view/index'
 
 const useModelStore = defineStore('model', {
     state: () => {
@@ -17,43 +23,72 @@ const useModelStore = defineStore('model', {
             facet: [],
             cnst: [],
             target: {
-                group: [{no: 1, label: 'basis'}],
+                group: [
+                    new TargetGroup({no: 1, label: 'basis'}),
+                    new TargetGroup({no: 2, label: 'test'})
+                ],
                 nodeShape: [],
                 elemShape: [],
                 elemForce: []
             },
             load: {
-                group: [{no: 1, label: 'basis'}],
+                group: [new LoadGroup({no: 1, label: 'basis'})],
                 node: {},
                 elem: {}
             },
+            cs: [
+                new Cs({no: 0, label: '世界坐标系'}),
+                new Cs({no: 1, label: 'test'})
+            ],
+            loadStep: [
+                new LoadStep('basis1', [], [new Substep()])
+            ],
             result: []
         }
     },
     getters: {
+        maxNo: state => {
+            const nodeNos = state.node.map(node => node.no)
+            nodeNos.push(0)
+            const elemNos = state.elem.map(elem => elem.no)
+            elemNos.push(0)
+            const cnstNos = state.cnst.map(cnst => cnst.no)
+            cnstNos.push(0)
+            return {
+                node: Math.max(...nodeNos),
+                elem: Math.max(...elemNos),
+                cnst: Math.max(...cnstNos)
+            }
+        },
         categorized: state => {
-            const freeElem = state.elem.filter(elem => elem.type === Elem.TYPE.FREE)
-            const freeNode = Array.from(
-                new Set(freeElem.map(elem => [elem.iNode, elem.jNode]).flat())
+            const freeElem = state.elem.filter(
+                elem => elem.eType === Elem.ETYPE.FREE
             )
-
-            const femType = Array.from(
-                new Set(state.elem.map(elem => elem.femType))
-            )
+            const freeNode = freeElem
+                .map(elem => [elem.iNode, elem.jNode])
+                .flat()
+                .filter((item, index, arr) => arr.indexOf(item) === index)
+            const femType = state.elem
+                .map(elem => elem.femType)
+                .filter((item, index, arr) => arr.indexOf(item) === index)
                 .sort(byNumAsec)
                 .map(no => ({
                     no,
                     label: no,
                     elem: state.elem.filter(elem => elem.femType === no)
                 }))
-            const mat = Array.from(new Set(state.elem.map(elem => elem.mat)))
+            const mat = state.elem
+                .map(elem => elem.mat)
+                .filter((item, index, arr) => arr.indexOf(item) === index)
                 .sort(byNumAsec)
                 .map(no => ({
                     no,
                     label: no,
                     elem: state.elem.filter(elem => elem.mat === no)
                 }))
-            const sec = Array.from(new Set(state.elem.map(elem => elem.sec)))
+            const sec = state.elem
+                .map(elem => elem.sec)
+                .filter((item, index, arr) => arr.indexOf(item) === index)
                 .sort(byNumAsec)
                 .map(no => ({
                     no,
@@ -61,31 +96,37 @@ const useModelStore = defineStore('model', {
                     elem: state.elem.filter(elem => elem.sec === no)
                 }))
             //cnst
-            const cnst = Array.from(new Set(state.cnst.map(cnst => cnst.dim)))
+            const cnst = state.cnst
+                .map(cnst => cnst.dim)
+                .filter((item, index, arr) => arr.indexOf(item) === index)
                 .sort(byNumAsec)
                 .map(dim => {
                     return {
                         dim,
-                        node: state.cnst.filter(cnst => cnst.dim === dim).map(cnst => cnst.node)
+                        node: state.cnst
+                            .filter(cnst => cnst.dim === dim)
+                            .map(cnst => cnst.node)
                     }
                 })
             //nodeShape
             const nodeShape = state.target.group
                 .map(group =>
                     Object.values(NodeShape.EQUALITY).map(equality => {
-                        const node = new Set(
-                            state.target.nodeShape
-                                .filter(
-                                    shape =>
-                                        shape.equality === equality &&
-                                        shape.group === group.no
-                                )
-                                .map(shape => [shape.nodePrm, shape.nodeSlv])
-                                .flat()
-                        )
-                        node.delete(undefined)
+                        const node = state.target.nodeShape
+                            .filter(
+                                shape =>
+                                    shape.equality === equality &&
+                                    shape.group === group
+                            )
+                            .map(shape => [shape.nodePrm, shape.nodeSlv])
+                            .flat()
+                            .filter(item => item instanceof Node)
+                            .filter(
+                                (item, index, arr) =>
+                                    arr.indexOf(item) === index
+                            )
                         return {
-                            group: group.no,
+                            group,
                             equality,
                             node: Array.from(node)
                         }
@@ -95,19 +136,21 @@ const useModelStore = defineStore('model', {
             const elemShape = state.target.group
                 .map(group =>
                     Object.values(ElemShape.EQUALITY).map(equality => {
-                        const elem = new Set(
-                            state.target.elemShape
-                                .filter(
-                                    shape =>
-                                        shape.equality === equality &&
-                                        shape.group === group.no
-                                )
-                                .map(shape => [shape.elemPrm, shape.elemSlv])
-                                .flat()
-                        )
-                        elem.delete(undefined)
+                        const elem = state.target.elemShape
+                            .filter(
+                                shape =>
+                                    shape.equality === equality &&
+                                    shape.group === group
+                            )
+                            .map(shape => [shape.elemPrm, shape.elemSlv])
+                            .flat()
+                            .filter(item => item instanceof Elem)
+                            .filter(
+                                (item, index, arr) =>
+                                    arr.indexOf(item) === index
+                            )
                         return {
-                            group: group.no,
+                            group,
                             equality,
                             elem: Array.from(elem)
                         }
@@ -117,19 +160,21 @@ const useModelStore = defineStore('model', {
             const elemForce = state.target.group
                 .map(group =>
                     Object.values(ElemForce.EQUALITY).map(equality => {
-                        const elem = new Set(
-                            state.target.elemForce
-                                .filter(
-                                    force =>
-                                        force.equality === equality &&
-                                        force.group === group.no
-                                )
-                                .map(force => [force.elemPrm, force.elemSlv])
-                                .flat()
-                        )
-                        elem.delete(undefined)
+                        const elem = state.target.elemForce
+                            .filter(
+                                force =>
+                                    force.equality === equality &&
+                                    force.group === group
+                            )
+                            .map(force => [force.elemPrm, force.elemSlv])
+                            .flat()
+                            .filter(item => item instanceof Elem)
+                            .filter(
+                                (item, index, arr) =>
+                                    arr.indexOf(item) === index
+                            )
                         return {
-                            group: group.no,
+                            group,
                             equality,
                             elem: Array.from(elem)
                         }
@@ -165,25 +210,103 @@ const useModelStore = defineStore('model', {
         }
     },
     actions: {
-        insertNode([no, x, y, z]) {
-            this.node.push(new Node([no, x, y, z]))
+        createNode([no, x, y, z]) {
+            const node = new Proxy(new Node([no, x, y, z]), {
+                set: function (obj, prop, value, receiver) {
+                    Reflect.set(obj, prop, value)
+                    const view = useView()
+                    view.points.prep
+                        .find(point => point.mesh.metadata == receiver)
+                        .updatePosition()
+                        .updateLabel()
+                    view.lines.prep
+                        .filter(
+                            line =>
+                                line.mesh.metadata.iNode == receiver ||
+                                line.mesh.metadata.jNode == receiver
+                        )
+                        .forEach(line => line.updatePosition())
+                    return true
+                }
+            })
+            const view = useView()
+            const point = view.createPoint(node)
+            this.node.push(node)
+            // metadata必须采用model中的数据，因为model中的数据经过了proxy处理，直接采用node会导致view.points.prep[i].mesh.metadata与receiver不一致。
+            point.mesh.metadata = this.node.at(-1)
+            return this.node.at(-1)
         },
-        insertElem([no, type, femType, mat, sec, iNodeNo, jNodeNo]) {
+        removeNode(node) {
+            const index = this.node.findIndex(item => item === node)
+            const view = useView()
+            //必须保证两数组数据一致
+            if (index != -1) {
+                view.points.prep[index].remove()
+                view.points.prep.splice(index, 1)
+                this.node.splice(index, 1)
+            }
+        },
+        createElem([no, type, femType, mat, sec, iNodeNo, jNodeNo]) {
             const iNode = this.node.find(node => node.no === iNodeNo)
             const jNode = this.node.find(node => node.no === jNodeNo)
             if (iNode && jNode) {
-                this.elem.push(
-                    new Elem([no, type, femType, mat, sec, iNode, jNode])
+                const elem = new Proxy(
+                    new Elem([no, type, femType, mat, sec, iNode, jNode]),
+                    {
+                        set: function (obj, prop, value, receiver) {
+                            Reflect.set(obj, prop, value)
+                            const view = useView()
+                            view.lines.prep
+                                .find(l => l.mesh.metadata === receiver)
+                                .updatePosition()
+                                .updateLabel()
+                            // iNode, jNode不能放到[]里面采用forEach
+                            view.points.prep
+                                .find(
+                                    point =>
+                                        point.mesh.metadata === receiver.iNode
+                                )
+                                .updateMeshColor()
+                            view.points.prep
+                                .find(
+                                    point =>
+                                        point.mesh.metadata === receiver.jNode
+                                )
+                                .updateMeshColor()
+                            return true
+                        }
+                    }
                 )
+                const view = useView()
+                const line = view.createLine(elem)
+                this.elem.push(elem)
+                line.mesh.metadata = this.elem.at(-1)
             }
         },
-        insertCnst([no, nodeNo, dim, cs]) {
+        removeElem(elem) {
+            const index = this.elem.findIndex(item => item === elem)
+            const view = useView()
+            //必须保证两数组数据一致
+            if (index != -1) {
+                view.lines.prep[index].remove()
+                view.lines.prep.splice(index, 1)
+                this.elem.splice(index, 1)
+            }
+        },
+        createCnst([no, nodeNo, dim, csNo]) {
             const node = this.node.find(node => node.no === nodeNo)
+            const cs = this.cs.find(cs => cs.no === csNo)
             this.cnst.push(new Cnst([no, node, dim, cs]))
         },
-        insertNodeShape([
+        removeCnst(cnst) {
+            const index = this.cnst.findIndex(item => item === cnst)
+            if (index != -1) {
+                this.cnst.splice(index, 1)
+            }
+        },
+        createNodeShape([
             no,
-            group,
+            groupNo,
             equality,
             type,
             dim,
@@ -193,6 +316,7 @@ const useModelStore = defineStore('model', {
             y,
             z
         ]) {
+            const group = this.target.group.find(group => group.no === groupNo)
             const nodePrm = this.node.find(node => node.no === nodeNoPrm)
             const nodeSlv = this.node.find(node => node.no === nodeNoSlv)
             this.target.nodeShape.push(
@@ -210,18 +334,27 @@ const useModelStore = defineStore('model', {
                 ])
             )
         },
-        insertElemShape([
+        removeNodeShape(shape) {
+            const index = this.target.nodeShape.findIndex(
+                item => item === shape
+            )
+            if (index != -1) {
+                this.target.nodeShape.splice(index, 1)
+            }
+        },
+        createElemShape([
             no,
-            group,
+            groupNo,
             equality,
             type,
             dim,
             elemNoPrm,
             elemNoSlv,
-            val1,
-            val2,
-            val3
+            x,
+            y,
+            z
         ]) {
+            const group = this.target.group.find(group => group.no === groupNo)
             const elemPrm = this.elem.find(elem => elem.no === elemNoPrm)
             const elemSlv = this.elem.find(elem => elem.no === elemNoSlv)
             this.target.elemShape.push(
@@ -233,15 +366,23 @@ const useModelStore = defineStore('model', {
                     dim,
                     elemPrm,
                     elemSlv,
-                    val1,
-                    val2,
-                    val3
+                    x,
+                    y,
+                    z
                 ])
             )
         },
-        insertElemForce([
+        removeElemShape(shape) {
+            const index = this.target.elemShape.findIndex(
+                item => item === shape
+            )
+            if (index != -1) {
+                this.target.elemShape.splice(index, 1)
+            }
+        },
+        createElemForce([
             no,
-            group,
+            groupNo,
             equality,
             type,
             dim,
@@ -249,6 +390,7 @@ const useModelStore = defineStore('model', {
             elemNoSlv,
             val
         ]) {
+            const group = this.target.group.find(group => group.no === groupNo)
             const elemPrm = this.elem.find(elem => elem.no === elemNoPrm)
             const elemSlv = this.elem.find(elem => elem.no === elemNoSlv)
             this.target.elemForce.push(
@@ -264,7 +406,19 @@ const useModelStore = defineStore('model', {
                 ])
             )
         },
-
+        removeElemForce(force) {
+            const index = this.target.elemForce.findIndex(
+                item => item === force
+            )
+            if (index != -1) {
+                this.target.elemForce.splice(index, 1)
+            }
+        },
+        createLoadStep({label, targetGroup, subStep, description}) {
+            this.loadStep.push(
+                new LoadGroup({label, targetGroup, subStep, description})
+            )
+        },
         clearResult() {
             this.result = []
         }

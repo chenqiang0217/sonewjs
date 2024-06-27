@@ -204,7 +204,7 @@ function onPickProcessing() {
     pickBox.scaling = new Vector3(
         v3.x,
         v3.y,
-        view.scene.activeCamera.radius * 2.0
+        view.scene.activeCamera.radius * 1.8
     )
     status.mesh.selected.region[0] = v1
     status.mesh.selected.region[1] = v2

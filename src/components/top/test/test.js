@@ -5,6 +5,7 @@ export function test(){
     const view = useView()
     const model = view.scene.metadata.useModel()
     model.node[0].x += -10
-    view.points.prep.find(point => point.mesh.metadata === model.node[0]).updatePosition()
-    console.log(model.node[0])
+    model.elem[0].no =  1111
+    model.elem[0].jNode =   model.node[1]
+    // console.log(model.node[0])
 }

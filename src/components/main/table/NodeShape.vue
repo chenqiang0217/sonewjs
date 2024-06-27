@@ -14,7 +14,7 @@ const model = useModelStore()
 const cellWidth = 150
 const columns = [
     { key: '1', title: '序号', dataKey: 'no', width: cellWidth },
-    { key: '2', title: '组别', dataKey: 'group', width: cellWidth },
+    { key: '2', title: '组别', dataKey: 'group.no', width: cellWidth },
     { key: '3', title: '等式类型', dataKey: 'equality', width: cellWidth },
     { key: '4', title: '目标类型', dataKey: 'type', width: cellWidth },
     { key: '5', title: '方向', dataKey: 'dim', width: cellWidth },

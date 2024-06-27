@@ -12,8 +12,8 @@ import {
     showDialogElem,
     showDialogConstraint,
     showDialogLoad,
-    drawFacets,
-    drawPyramids
+    // drawFacets,
+    // drawPyramids
 } from './model/model'
 import {
     showDialogTargetCatalog,

@@ -16,7 +16,7 @@ const columns = [
     { key: '1', title: '序号', dataKey: 'no', width: cellWidth },
     { key: '2', title: '节点', dataKey: 'node.no', width: cellWidth },
     { key: '3', title: '方向', dataKey: 'dim', width: cellWidth },
-    { key: '4', title: '坐标系', dataKey: 'cs', width: cellWidth },
+    { key: '4', title: '坐标系', dataKey: 'cs.no', width: cellWidth },
 ]
 </script>
 

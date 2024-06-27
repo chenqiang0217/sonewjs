@@ -4,6 +4,7 @@ const byNumAsec = (a, b) => {
 const byNoAsec = (a, b) => {
     return a.no - b.no
 }
+const stringToNumberArray = (str, splitter = ',') => str.split(splitter).map(item => Number(item))
 const SetOperation = (aSet, bSet, type) => {
     let aArr = Array.from(aSet)
     let bArr = Array.from(bSet)
@@ -40,6 +41,31 @@ function base64ToFloat64Array(base64String) {
     }
     return new Float64Array(outputArray.buffer)
 }
+class Validator{
+    static  AllNumber() {
+        return !this.includes(Number.NaN)
+    }
+    static  AllInterger() {
+        return this.map(item => item % 1 === 0).reduce((a, b) => a && b, true)
+    }
+    constructor(data) {
+        this.data = data
+        this.conditions = []
+        return this
+    }
+    addCondition(condition){
+        this.conditions.push(condition)
+        return this
+    }
+    validate(){
+        for(const condition of this.conditions){
+            if(!condition.apply(this.data)){
+                return false
+            }
+        }
+        return true
+    }
+}
 
 
-export { byNumAsec, byNoAsec, SetOperation, debounce, sleep, base64ToFloat64Array }
+export { byNumAsec, byNoAsec, stringToNumberArray, SetOperation, debounce, sleep, base64ToFloat64Array, Validator }

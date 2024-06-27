@@ -12,6 +12,11 @@ class Target {
     }
 }
 class NodeShape extends Target {
+    static TYPE = {
+        SNODE: 0b00000000,
+        TNODEDIFF: 0b00000001,
+        TNODEDIVD: 0b00000010
+    }
     constructor([no, group, equality, type, dim, nodePrm, nodeSlv, x, y, z]) {
         super([no, group, equality, type, dim])
         this.nodePrm = nodePrm
@@ -20,10 +25,10 @@ class NodeShape extends Target {
         this.y = y
         this.z = z
     }
-    toArray() {
+    asArray() {
         return [
             this.no,
-            this.group,
+            this.group.no,
             this.equality,
             this.type,
             this.dim,
@@ -36,51 +41,50 @@ class NodeShape extends Target {
     }
 }
 class ElemShape extends Target {
-    constructor([
-        no,
-        group,
-        equality,
-        type,
-        dim,
-        elemPrm,
-        elemSlv,
-        val1,
-        val2,
-        val3
-    ]) {
+    static TYPE = {SELEM: 0b00000000, SELEML: 0b00000001, TELEMDIVD: 0b00000010}
+    constructor([no, group, equality, type, dim, elemPrm, elemSlv, x, y, z]) {
         super([no, group, equality, type, dim])
         this.elemPrm = elemPrm
         this.elemSlv = elemSlv
-        this.val1 = val1
-        this.val2 = val2
-        this.val3 = val3
+        this.x = x
+        this.y = y
+        this.z = z
     }
-    toArray() {
+    asArray() {
         return [
             this.no,
-            this.group,
+            this.group.no,
             this.equality,
             this.type,
             this.dim,
             this.elemPrm instanceof Elem ? this.elemPrm.no : 0,
             this.elemSlv instanceof Elem ? this.elemSlv.no : 0,
-            this.val1,
-            this.val2,
-            this.val3
+            this.x,
+            this.y,
+            this.z
         ]
     }
 }
 class ElemForce extends Target {
+    static TYPE = {
+        SDENSITY: 0b00000000,
+        TDENSITYDIFF: 0b00000001,
+        TDENSITYDIVD: 0b00000010,
+        SFORCE1: 0b00000011,
+        TFORCEDIVD1: 0b00000100,
+        SFORCE2: 0b00001011,
+        TFORCEDIVD2: 0b00001100
+    }
     constructor([no, group, equality, type, dim, elemPrm, elemSlv, val]) {
         super([no, group, equality, type, dim])
         this.elemPrm = elemPrm
         this.elemSlv = elemSlv
         this.val = val
     }
-    toArray() {
+    asArray() {
         return [
             this.no,
-            this.group,
+            this.group.no,
             this.equality,
             this.type,
             this.dim,

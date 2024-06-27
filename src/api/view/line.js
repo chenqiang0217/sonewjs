@@ -39,7 +39,7 @@ class Line {
         this.mesh.layerMask = TYPE.LAYER.MESH
         this.mesh.isVisible = true
         this.mesh.metadata = elem
-        this.updateMeshColor()
+        // this.updateMeshColor()
 
         const config = scene.metadata.useConfig()
         this.label = new TextBlock(
@@ -73,6 +73,10 @@ class Line {
         )
         this.mesh.refreshBoundingInfo()
         this.alignText()
+        return this
+    }
+    updateLabel(){
+        this.label.text = this.mesh.metadata.no
         return this
     }
     get no() {

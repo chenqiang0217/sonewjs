@@ -66,6 +66,27 @@ const useConfigStore = defineStore('config', {
                             },
                         ],
                     },
+                    {
+                        no: 2,
+                        name: 'test',
+                        categorization: 'test',
+                        nSubStep: 2,
+                        description: 'test',
+                        subStep: [
+                            {
+                                no: 1,
+                                nIterativeStep: 20,
+                                alpha: 1.0e2,
+                                rsdl: 1.0e-5,
+                            },
+                            {
+                                no: 2,
+                                nIterativeStep: 30,
+                                alpha: 1.0e1,
+                                rsdl: 1.0e-5,
+                            }
+                        ],
+                    },
                 ],
                 result: {
                     query: {

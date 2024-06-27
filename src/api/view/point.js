@@ -41,8 +41,6 @@ class Point {
         this.mesh.billboardMode = 7
         this.mesh.isVisible = true
         this.mesh.metadata = node
-        this.updateMeshColor()
-        this.linkedLines = new Set()
         const config = scene.metadata.useConfig()
         this.label = new TextBlock(
             TYPE.PREFIX.TEXT + TYPE.PREFIX.MESH + node.no
@@ -76,7 +74,7 @@ class Point {
         return this.mesh.metadata.no
     }
     set no(n) {
-        // this.mesh.metadata.no = n
+        this.mesh.metadata.no = n
         this.mesh.name = this.prefix + n
     }
     get text() {
@@ -84,6 +82,15 @@ class Point {
     }
     set text(t) {
         this.label.text = t
+    }
+    updatePosition() {
+        this.mesh.position = this.mesh.metadata.positionInScene
+        return this
+    }
+    updateLabel() {
+        //不更新name
+        this.label.text = String(this.mesh.metadata.no)
+        return this
     }
     updateMeshColor(material) {
         if (material) {
@@ -101,6 +108,7 @@ class Point {
         for (const [key, value] of Object.entries(style)) {
             this.label[key] = value
         }
+        return this
     }
     showMesh() {
         this.mesh.isVisible = true
@@ -123,9 +131,6 @@ class Point {
         this.label.isVisible = false
     }
     remove() {
-        // const scene = this.mesh.getScene()
-        // scene.removeMesh(this.mesh)
-        // scene.ui.removeControl(this.label)
         this.mesh.dispose()
         this.label.dispose()
     }

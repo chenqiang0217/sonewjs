@@ -27,7 +27,7 @@ const button = ref()
 let view
 onMounted(() => {
     const theme = EditorView.theme({
-        '*': {
+        '&': {
             fontFamily: 'JetBrains Mono, HarmonyOS Sans SC, Consolas, Courier New, monospace',
             fontSize: '14px',
             backgroundColor: props.editable ? '#F2F6FC' : '#FFFFFF'

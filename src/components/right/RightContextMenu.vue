@@ -126,44 +126,85 @@ const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
 
 <template>
     <ContextMenu v-model:show='show' :options='{ x, y, minWidth, theme }'>
-        <ContextMenuItem label='选择' @click='onClick(`select`, VIEWCONSTANT.SELECTING.S, tag)'>
+
+
+        <ContextMenuItem @click='onClick(`select`, VIEWCONSTANT.SELECTING.S, tag)'>
+            <template #label>
+                <el-text>选择</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='select-s' size='small' />
+                <el-text>
+                    <IconFront iconName='select-s' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem label='再选择' @click='onClick(`select`, VIEWCONSTANT.SELECTING.A, tag)'>
+        <ContextMenuItem @click='onClick(`select`, VIEWCONSTANT.SELECTING.A, tag)'>
+            <template #label>
+                <el-text>再选择</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='select-a' size='small' />
+                <el-text>
+                    <IconFront iconName='select-a' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem label='解除选择' @click='onClick(`select`, VIEWCONSTANT.SELECTING.U, tag)'>
+        <ContextMenuItem @click='onClick(`select`, VIEWCONSTANT.SELECTING.U, tag)'>
+            <template #label>
+                <el-text>解除选择</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='select-u' size='small' />
+                <el-text>
+                    <IconFront iconName='select-u' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem label='激活'>
+            <template #label>
+                <el-text>激活</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='active' size='small' />
+                <el-text>
+                    <IconFront iconName='active' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
         <ContextMenuItem label='再激活'>
+            <template #label>
+                <el-text>再激活</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='active' size='small' />
+                <el-text>
+                    <IconFront iconName='active' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
         <ContextMenuItem label='冻结'>
+            <template #label>
+                <el-text>冻结</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='frezone' size='small' />
+                <el-text>
+                    <IconFront iconName='frezone' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem label='表格' @click='onClick(`table`, 0, tag)'>
+        <ContextMenuItem @click='onClick(`table`, 0, tag)'>
+            <template #label>
+                <el-text>表格</el-text>
+            </template>
             <template #icon>
-                <IconFront iconName='import' size='small' />
+                <el-text>
+                    <IconFront iconName='import' size='small' class="iconFront"/>
+                </el-text>
             </template>
         </ContextMenuItem>
     </ContextMenu>
 </template>
 
-<style></style>
+<style scoped>
+.iconFront {
+    font-size: 14px;
+}
+</style>
