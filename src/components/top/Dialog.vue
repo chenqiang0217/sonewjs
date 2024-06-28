@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useStatusStore } from '../../stores/status'
 const status = useStatusStore()
 const props = defineProps({
@@ -19,21 +19,29 @@ const props = defineProps({
         type: Number,
         default: 100
     },
+    alginCenter: {
+        type: Boolean,
+        required: true
+    },
     width: {
         type: Number,
         required: true
     }
 })
-const position = computed(() => ({
-    left: props.left + 'px',
-    top: props.top + 'px',
-    width: props.width + 'px'
-}))
+const dialog = ref()
+const position = computed(() => {
+    const left = props.alginCenter ? (document.documentElement.clientWidth - props.width) / 2 + 'px' : props.left + 'px'
+    return {
+        left,
+        top: props.top + 'px',
+        width: props.width + 'px'
+    }
+})
 </script>
 
 <template>
     <Teleport to="body">
-        <div class="dialog" :style="position" v-drag v-show="show">
+        <div class="dialog" :style="position" v-drag v-show="show" ref="dialog">
             <div class="header">
                 <el-text size="large" style="padding-left: 10px;">{{ title }}</el-text>
             </div>

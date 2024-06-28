@@ -92,7 +92,7 @@ const newWindow = () => {
         </el-tooltip>
     </div>
     <el-scrollbar ref="scrollbar" always>
-        <div class="message" ref="message">
+        <div ref="message">
             <div v-for="(message, i) in messages[to]" style="border: 1px;">
                 <template v-if="message.level == Message.TYPES.COMMANDER.LEVEL">
                     <Code :doc="message.text" :id="'codeContainer-' + i" />
@@ -132,5 +132,8 @@ const newWindow = () => {
 
 .el-text {
     font-family: "JetBrains Mono";
+}
+.el-scrollbar{
+    padding-left: 8px;
 }
 </style>

@@ -1,3 +1,4 @@
+import {ref} from 'vue'
 import {v4 as uuidv4} from 'uuid'
 import {Node} from '../../../api/model/index'
 import {useModelStore} from '../../../stores/model'
@@ -9,14 +10,25 @@ import {task} from '../../../api/request'
 import {useView} from '../../../api/view/index'
 import {byNoAsec, sleep, base64ToFloat64Array} from '../../../api/utils'
 import Config from './Config.vue'
+import Run from './Run.vue'
 import Result from './Result.vue'
+
 
 const showDialogSolutionConfig = () => {
     const status = useStatusStore()
     status.ui.dialog.component.is = Config
     status.ui.dialog.show = true
-    status.ui.dialog.title = '设置'
+    status.ui.dialog.title = '求解设置'
     status.ui.dialog.width = 500
+    status.ui.dialog.alginCenter = false
+}
+const showDialogSolutionRun = () => {
+    const status = useStatusStore()
+    status.ui.dialog.component.is = Run
+    status.ui.dialog.show = true
+    status.ui.dialog.title = '求解'
+    status.ui.dialog.width = 600
+    status.ui.dialog.alginCenter = true
 }
 const solutionRun = () => {
     const model = useModelStore()
@@ -90,6 +102,7 @@ const showDialogSolutionResult = () => {
     status.ui.dialog.show = true
     status.ui.dialog.title = '结果查看'
     status.ui.dialog.width = 250
+    status.ui.dialog.alginCenter = false
     resultViewInit()
 }
 
@@ -130,11 +143,14 @@ const resultViewInit = () => {
 
 const formData = () => {
     const model = useModelStore()
-    const config = useConfigStore()
     const status = useStatusStore()
+    const loadStep = model.loadStep.filter(item => item.activated)
+    if(!loadStep){
+        throw Error('error')
+    }
     const taskConfig = {
         uuid: status.task.uuid,
-        loadStep: config.task.loadStep
+        loadStep
     }
     const node = new Float64Array(
         model.categorized.node.free
@@ -155,13 +171,19 @@ const formData = () => {
             .flat()
     )
     const nodeShape = new Float64Array(
-        model.target.nodeShape.map(shape => shape.asArray()).flat()
+        model.target.nodeShape
+        .filter(shape => loadStep[0].target.includes(shape.group))
+        .map(shape => shape.asArray()).flat()
     )
     const elemShape = new Float64Array(
-        model.target.elemShape.map(shape => shape.asArray()).flat()
+        model.target.elemShape
+        .filter(shape => loadStep[0].target.includes(shape.group))
+        .map(shape => shape.asArray()).flat()
     )
     const elemForce = new Float64Array(
-        model.target.elemForce.map(force => force.asArray()).flat()
+        model.target.elemForce
+        .filter(force => loadStep[0].target.includes(force.group))
+        .map(force => force.asArray()).flat()
     )
     const elemForceInit = new Float64Array(
         model.categorized.elem.free
@@ -373,6 +395,7 @@ const handleResult = result => {
 
 export {
     showDialogSolutionConfig,
+    showDialogSolutionRun,
     solutionRun,
     showSolutionProgress,
     showDialogSolutionResult

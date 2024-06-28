@@ -25,7 +25,7 @@ const operation = ref({
     nos,
     noPrm: null,
     start: 1,
-    group: model.target.group[0].no,
+    group: model.target.group[0]?.no,
     valuesFromModel: true,
     dim: {
         x: false,

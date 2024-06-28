@@ -38,7 +38,7 @@ const timeOut = (event) => {
     </div>
     <el-scrollbar ref="scrollbar" always>
         <div ref="message">
-            <div class="message" v-for="(message, index) in messages[to]">
+            <div v-for="(message, index) in messages[to]">
                 <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME">
                     <IconFront :iconName="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
                         size="small">
@@ -64,16 +64,14 @@ const timeOut = (event) => {
     height: 16px;
 }
 
-
 .iconFront {
     color: var(--el-color-primary-light-3);
 }
 
-.message {
-    display: flex;
-}
-
 .el-text {
     font-family: "JetBrains Mono";
+}
+.el-scrollbar{
+    padding-left: 8px;
 }
 </style>

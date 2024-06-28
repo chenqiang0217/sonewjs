@@ -10,7 +10,6 @@ import {
     LoadGroup,
     TargetGroup,
     LoadStep,
-    Substep,
     Cs
 } from '../api/model/index'
 import {useView} from '../api/view/index'
@@ -23,26 +22,20 @@ const useModelStore = defineStore('model', {
             facet: [],
             cnst: [],
             target: {
-                group: [
-                    new TargetGroup({no: 1, label: 'basis'}),
-                    new TargetGroup({no: 2, label: 'test'})
-                ],
+                group: [],
                 nodeShape: [],
                 elemShape: [],
                 elemForce: []
             },
             load: {
-                group: [new LoadGroup({no: 1, label: 'basis'})],
+                group: [],
                 node: {},
                 elem: {}
             },
             cs: [
-                new Cs({no: 0, label: '世界坐标系'}),
-                new Cs({no: 1, label: 'test'})
+                new Cs({no: 0, label: '世界坐标系'})
             ],
-            loadStep: [
-                new LoadStep('basis1', [], [new Substep()])
-            ],
+            loadStep: [],
             result: []
         }
     },
@@ -414,10 +407,37 @@ const useModelStore = defineStore('model', {
                 this.target.elemForce.splice(index, 1)
             }
         },
-        createLoadStep({label, targetGroup, subStep, description}) {
-            this.loadStep.push(
-                new LoadGroup({label, targetGroup, subStep, description})
+        createTargetGroup(no, label, description) {
+            this.target.group.push(new TargetGroup(no, label, description))
+        },
+        removeTargetGroup(group) {
+            const index = this.target.group.findIndex(
+                item => item === group
             )
+            if (index != -1) {
+                this.target.group.splice(index, 1)
+            }
+        },
+        createLoadStep(
+            label,
+            targetGroupNo = [],
+            subStep,
+            description
+        ) {
+            const targetGroup = targetGroupNo.map(
+                no => this.target.group.no == no
+            )
+            this.loadStep.push(
+                new LoadStep(label, targetGroup, subStep, description)
+            )
+        },
+        removeLoadStep(loadStep) {
+            const index = this.loadStep.findIndex(
+                item => item === loadStep
+            )
+            if (index != -1) {
+                this.loadStep.splice(index, 1)
+            }
         },
         clearResult() {
             this.result = []

@@ -39,7 +39,6 @@ const EDGES = {
     LEFT: 4
 }
 const edge = ref(EDGES.NONE)
-const container = ref()
 const dragable = ref()
 const sizeNow = ref({
     width: props.width,
@@ -91,13 +90,10 @@ function onMouseUp() {
     document.body.style.cursor = 'default'
     document.removeEventListener('mouseup', onMouseUp)
     document.removeEventListener('mousemove', onMouseMove)
-
-
 }
 </script>
 <template>
-    <div class="container1" ref="container"
-        >
+    <div class="container1">
         <el-divider v-if="top" @mousedown="(event) => onMouseDown(event, EDGES.TOP)" />
         <div class="container2">
             <el-divider class="vertical" direction="vertical" v-if="left"

@@ -4,9 +4,7 @@ class LoadStep {
         this.target = target
         this.subStep = subStep
         this.description = description
-    }
-    get nSubStep() {
-        return this.subStep.length
+        this.activated = false
     }
 }
 class Substep {

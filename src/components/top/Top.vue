@@ -16,14 +16,14 @@ import {
     // drawPyramids
 } from './model/model'
 import {
-    showDialogTargetCatalog,
+    showDialogTargetGroup,
     showDialogTargetNodeShape,
     showDialogTargetElemShape,
     showDialogTargetElemForce
 } from './target/target'
 import {
     showDialogSolutionConfig,
-    solutionRun,
+    showDialogSolutionRun,
     showSolutionProgress,
     showDialogSolutionResult
 } from './solution/solution'
@@ -127,7 +127,7 @@ const toolBars = ref([
         {
             label: '目标类别',
             icon: 'catalog',
-            action: showDialogTargetCatalog,
+            action: showDialogTargetGroup,
             clicked: false
         },
         {
@@ -159,7 +159,7 @@ const toolBars = ref([
         {
             label: '求解',
             icon: 'run',
-            action: solutionRun,
+            action: showDialogSolutionRun,
             clicked: false
         },
         {
@@ -332,9 +332,8 @@ const toolBars = ref([
             </div>
         </template>
     </div>
-
     <input type="file" id="xlsxFile" @change="projectImport" style="display: none" />
-    <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" :show="status.ui.dialog.show">
+    <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" :show="status.ui.dialog.show" :alginCenter="status.ui.dialog.alginCenter">
         <component :is="status.ui.dialog.component.is" />
     </Dialog>
 </template>

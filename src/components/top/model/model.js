@@ -11,6 +11,7 @@ const showDialogNode = () => {
     status.ui.dialog.show = true
     status.ui.dialog.title = '节点'
     status.ui.dialog.width = 250
+    status.ui.dialog.alginCenter = false
 }
 const showDialogElem = () => {
     const status = useStatusStore()
@@ -18,6 +19,7 @@ const showDialogElem = () => {
     status.ui.dialog.show = true
     status.ui.dialog.title = '单元'
     status.ui.dialog.width = 250
+    status.ui.dialog.alginCenter = false
 }
 const showDialogConstraint = () => {
     const status = useStatusStore()
@@ -25,6 +27,7 @@ const showDialogConstraint = () => {
     status.ui.dialog.show = true
     status.ui.dialog.title = '支座'
     status.ui.dialog.width = 250
+    status.ui.dialog.alginCenter = false
 }
 const showDialogLoad = () => {
     const status = useStatusStore()
@@ -32,6 +35,7 @@ const showDialogLoad = () => {
     status.ui.dialog.show = true
     status.ui.dialog.title = '荷载'
     status.ui.dialog.width = 250
+    status.ui.dialog.alginCenter = false
 }
 
 

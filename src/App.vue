@@ -6,7 +6,7 @@ import Right from './components/right/Right.vue'
 import Bottom from './components/bottom/Bottom.vue'
 import Divider from './components/Divider.vue'
 
-const minimalWidth = 300
+const minimalWidth = 250
 const minimalHeight = 100
 const refTop = ref(null)
 const refBottom = ref(null)

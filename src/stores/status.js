@@ -12,6 +12,7 @@ const useStatusStore = defineStore('status', {
                     apply: false,
                     title: '', 
                     width: 0,
+                    alginCenter: false,
                     component: markRaw({is: null}),
                 },
                 tab: {
