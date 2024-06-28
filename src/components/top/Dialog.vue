@@ -3,10 +3,6 @@ import { ref, computed } from 'vue'
 import { useStatusStore } from '../../stores/status'
 const status = useStatusStore()
 const props = defineProps({
-    show: {
-        type: Boolean,
-        required: true
-    },
     title: {
         type: String,
         required: true
@@ -41,7 +37,7 @@ const position = computed(() => {
 
 <template>
     <Teleport to="body">
-        <div class="dialog" :style="position" v-drag v-show="show" ref="dialog">
+        <div class="dialog" :style="position" v-drag ref="dialog">
             <div class="header">
                 <el-text size="large" style="padding-left: 10px;">{{ title }}</el-text>
             </div>

@@ -333,7 +333,7 @@ const toolBars = ref([
         </template>
     </div>
     <input type="file" id="xlsxFile" @change="projectImport" style="display: none" />
-    <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" :show="status.ui.dialog.show" :alginCenter="status.ui.dialog.alginCenter">
+    <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" v-if="status.ui.dialog.show" :alginCenter="status.ui.dialog.alginCenter">
         <component :is="status.ui.dialog.component.is" />
     </Dialog>
 </template>

@@ -2,10 +2,7 @@
 import { ref, watch } from 'vue'
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
-import { LoadStep } from '../../../api/model/loadStep'
-
 import { solutionRun } from './solution'
-
 
 const model = useModelStore()
 const status = useStatusStore()
