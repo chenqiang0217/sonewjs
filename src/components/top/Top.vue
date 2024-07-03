@@ -45,15 +45,15 @@ import {
     activeMesh,
     freezeMesh,
     switchMeshNodeVisibility,
-    switchLabelNodelVisibility,
-    switchLabelElemVisibility,
+    switchTextBlockNodeVisibility,
+    switchTextBlockElemVisibility,
+    switchTextBlockTargetisibility,
     meshViewConfig
 } from './visibility/visibility'
 import { account } from './account/account'
 import { about } from './about/about'
 import { test } from './test/test'
 
-import Dialog from './Dialog.vue'
 
 const status = useStatusStore()
 const toolBars = ref([
@@ -261,13 +261,19 @@ const toolBars = ref([
         {
             label: '节点号',
             icon: 'node-no',
-            action: switchLabelNodelVisibility,
+            action: switchTextBlockNodeVisibility,
             clicked: false
         },
         {
             label: '单元号',
             icon: 'element-no',
-            action: switchLabelElemVisibility,
+            action: switchTextBlockElemVisibility,
+            clicked: false
+        },
+        {
+            label: '目标类别',
+            icon: 't-circle',
+            action: switchTextBlockTargetisibility,
             clicked: false
         },
         {
@@ -333,9 +339,12 @@ const toolBars = ref([
         </template>
     </div>
     <input type="file" id="xlsxFile" @change="projectImport" style="display: none" />
-    <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" v-if="status.ui.dialog.show" :alginCenter="status.ui.dialog.alginCenter">
+    <!-- <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" v-if="status.ui.dialog.show" :alginCenter="status.ui.dialog.alginCenter">
         <component :is="status.ui.dialog.component.is" />
-    </Dialog>
+    </Dialog> -->
+    <Teleport to="body">
+        <component :is="status.ui.dialog.component" v-if="status.ui.dialog.show"/>
+    </Teleport>
 </template>
 
 <style scoped>

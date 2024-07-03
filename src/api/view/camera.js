@@ -1,7 +1,6 @@
 import {
     ArcRotateCamera, Vector2, Vector3
 } from "@babylonjs/core"
-
 import { useViewConfigStore } from './config'
 
 

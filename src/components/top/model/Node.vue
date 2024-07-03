@@ -5,6 +5,8 @@ import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { stringToNumberArray, Validator } from '../../../api/utils'
+import Dialog from '../Dialog.vue'
+
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -186,78 +188,79 @@ function onApply() {
 </script>
 
 <template>
-    <el-form :model="operation" label-position="top" status-icon :rules="rules">
-        <el-form-item>
-            <el-select v-model="operation.type" placeholder="选择类型">
-                <el-option v-for="{ value, label } in options" :label="label" :value="value"
-                    :key="value"></el-option>
-            </el-select>
-        </el-form-item>
-        <template v-if="operation.type == type.create">
-            <el-form-item prop="start">
-                <el-col :span="8"><el-text>起始编号：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.start" :min="1" /></el-col>
-            </el-form-item>
-            <el-form-item prop="position">
-                <el-col :span="8"><el-text>坐标：</el-text></el-col>
-                <el-col :span="16"><el-input v-model="operation.position" /></el-col>
-            </el-form-item>
+    <Dialog title="节点" :width="250">
+        <el-form :model="operation" label-position="top" status-icon :rules="rules">
             <el-form-item>
-                <el-col :span="8"><el-text>复制次数：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.create.times" :min="0" /></el-col>
+                <el-select v-model="operation.type" placeholder="选择类型">
+                    <el-option v-for="{ value, label } in options" :label="label" :value="value"
+                        :key="value"></el-option>
+                </el-select>
             </el-form-item>
-            <el-form-item prop="gap">
-                <el-col :span="8"><el-text>复制间距：</el-text></el-col>
-                <el-col :span="16"><el-input v-model="operation.gap" :disabled="operation.create.times == 0" /></el-col>
-            </el-form-item>
-        </template>
-        <template v-if="operation.type == type.copy">
-            <el-form-item>
-                <el-radio-group v-model="operation.copy.move">
-                    <el-radio :value="true">移动</el-radio>
-                    <el-radio :value="false">复制</el-radio>
-                </el-radio-group>
-            </el-form-item>
-            <el-form-item label="选择节点">
-                <el-input v-model="operation.nos" disabled />
-            </el-form-item>
-            <el-form-item prop="gap">
-                <el-col :span="8"><el-text>间距：</el-text></el-col>
-                <el-col :span="16"><el-input v-model="operation.gap" /></el-col>
-            </el-form-item>
-            <el-form-item prop="start">
-                <el-col :span="8"><el-text>起始编号：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.start" :min="1"
-                        :disabled="operation.copy.move" /></el-col>
-            </el-form-item>
-            <el-form-item>
-                <el-col :span="8"><el-text>复制次数：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.copy.times" :min="1"
-                        :disabled="operation.copy.move" /></el-col>
-            </el-form-item>
-        </template>
-        <template v-if="operation.type == type.remove">
-            <el-form-item label="选择节点">
-                <el-input v-model="operation.nos" disabled />
-            </el-form-item>
-            <el-form-item>
-                <el-checkbox v-model="operation.remove.onlyIsolated" label="仅孤立节点" disabled />
-            </el-form-item>
-        </template>
-        <template v-if="operation.type == type.rename">
-            <el-form-item label="选择单个节点" prop="singleNo">
-                <el-input v-model="operation.singleNo" disabled />
-            </el-form-item>
-            <el-form-item prop="noNew">
-                <el-col :span="8"><el-text>新编号：</el-text></el-col>
-                <el-col :span="16">
-                    <el-input-number v-model="operation.noNew" :min="1" />
-                </el-col>
-            </el-form-item>
-        </template>
-
-    </el-form>
+            <template v-if="operation.type == type.create">
+                <el-form-item prop="start">
+                    <el-col :span="8"><el-text>起始编号：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1" /></el-col>
+                </el-form-item>
+                <el-form-item prop="position">
+                    <el-col :span="8"><el-text>坐标：</el-text></el-col>
+                    <el-col :span="16"><el-input v-model="operation.position" /></el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="8"><el-text>复制次数：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.create.times" :min="0" /></el-col>
+                </el-form-item>
+                <el-form-item prop="gap">
+                    <el-col :span="8"><el-text>复制间距：</el-text></el-col>
+                    <el-col :span="16"><el-input v-model="operation.gap"
+                            :disabled="operation.create.times == 0" /></el-col>
+                </el-form-item>
+            </template>
+            <template v-if="operation.type == type.copy">
+                <el-form-item>
+                    <el-radio-group v-model="operation.copy.move">
+                        <el-radio :value="true">移动</el-radio>
+                        <el-radio :value="false">复制</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="选择节点">
+                    <el-input v-model="operation.nos" disabled />
+                </el-form-item>
+                <el-form-item prop="gap">
+                    <el-col :span="8"><el-text>间距：</el-text></el-col>
+                    <el-col :span="16"><el-input v-model="operation.gap" /></el-col>
+                </el-form-item>
+                <el-form-item prop="start">
+                    <el-col :span="8"><el-text>起始编号：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1"
+                            :disabled="operation.copy.move" /></el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="8"><el-text>复制次数：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.copy.times" :min="1"
+                            :disabled="operation.copy.move" /></el-col>
+                </el-form-item>
+            </template>
+            <template v-if="operation.type == type.remove">
+                <el-form-item label="选择节点">
+                    <el-input v-model="operation.nos" disabled />
+                </el-form-item>
+                <el-form-item>
+                    <el-checkbox v-model="operation.remove.onlyIsolated" label="仅孤立节点" disabled />
+                </el-form-item>
+            </template>
+            <template v-if="operation.type == type.rename">
+                <el-form-item label="选择单个节点" prop="singleNo">
+                    <el-input v-model="operation.singleNo" disabled />
+                </el-form-item>
+                <el-form-item prop="noNew">
+                    <el-col :span="8"><el-text>新编号：</el-text></el-col>
+                    <el-col :span="16">
+                        <el-input-number v-model="operation.noNew" :min="1" />
+                    </el-col>
+                </el-form-item>
+            </template>
+        </el-form>
+    </Dialog>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

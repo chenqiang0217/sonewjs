@@ -1,7 +1,7 @@
-import { Vector3, Vector2, MeshBuilder, VertexBuffer } from '@babylonjs/core'
-import { watch } from 'vue'
-import { useView } from './index'
-import { SetOperation } from '../utils'
+import {Vector3, Vector2, MeshBuilder, VertexBuffer} from '@babylonjs/core'
+import {watch} from 'vue'
+import {useView} from './index'
+import {SetOperation} from '../utils'
 
 class Control {
     constructor(scene) {
@@ -11,13 +11,12 @@ class Control {
         this.camera = scene.activeCamera
         this.pickBox = MeshBuilder.CreateBox(
             'pickBox',
-            { width: 1, height: 1, depth: 1 },
+            {width: 1, height: 1, depth: 1},
             scene
         )
         this.pickBox.layerMask = this.LAYER.PICKBOX
         this.pickBox.visibility = 0.5
         this.hidePickBox()
-
         // 视图旋转、mesh框选
         watch(
             () => status.mode,
@@ -28,7 +27,8 @@ class Control {
                     scene.onPointerDown = () => {
                         //旋转过程text全部隐藏
                         layerMask = this.camera.layerMask
-                        this.hideText()
+                        this.hideTextBlock('label')
+                        this.hideTextBlock('target')
                     }
                     scene.onPointerMove = null
                     scene.onPointerUp = evt => {
@@ -62,7 +62,7 @@ class Control {
                     }
                 }
             },
-            { immediate: true }
+            {immediate: true}
         )
         //是否显示节点
         watch(
@@ -70,23 +70,85 @@ class Control {
             visible => {
                 this.showMesh(`node`, `all`, visible)
             },
-            { immediate: true }
+            {immediate: true}
         )
         //是否显示节点text
         watch(
-            () => status.text.visible.node,
+            () => status.textBlock.visible.label.node,
             visible => {
-                this.showText(`node`, `all`, visible)
+                this.showTextBlock(`label`, `node`, `all`, visible)
             },
-            { immediate: true }
+            {immediate: true}
         )
         //是否显示单元text
         watch(
-            () => status.text.visible.elem,
+            () => status.textBlock.visible.label.elem,
             visible => {
-                this.showText(`elem`, `all`, visible)
+                this.showTextBlock(`label`, `elem`, `all`, visible)
             },
-            { immediate: true }
+            {immediate: true}
+        )
+        //是否显示nodeShape text
+        watch(
+            () => status.textBlock.visible.target.nodeShape.all,
+            visible => {
+                this.showTextBlock(`target`, `nodeShape`, `all`, visible)
+                Array.from(['eq', 'gt', 'lt']).forEach(key => {
+                    status.textBlock.visible.target.nodeShape[key] = visible
+                })
+            },
+            {immediate: true}
+        )
+        //是否显示target text
+        watch(
+            () => status.textBlock.visible.target.all,
+            visible => {
+                this.showTextBlock(`target`, `all`, `all`, visible)
+                Array.from(['nodeShape', 'elemShape', 'elemForce']).forEach(
+                    key =>
+                        (status.textBlock.visible.target[key]['all'] = visible)
+                )
+            },
+            {immediate: true}
+        )
+        //是否显示nodeShape text
+        watch(
+            () => status.textBlock.visible.target.nodeShape.all,
+            visible => {
+                this.showTextBlock(`target`, `nodeShape`, `all`, visible)
+                Array.from(['eq', 'gt', 'lt']).forEach(
+                    key =>
+                        (status.textBlock.visible.target.nodeShape[key] =
+                            visible)
+                )
+            },
+            {immediate: true}
+        )
+        //是否显示elemShape text
+        watch(
+            () => status.textBlock.visible.target.elemShape.all,
+            visible => {
+                this.showTextBlock(`target`, `elemShape`, `all`, visible)
+                Array.from(['eq', 'gt', 'lt']).forEach(
+                    key =>
+                        (status.textBlock.visible.target.elemShape[key] =
+                            visible)
+                )
+            },
+            {immediate: true}
+        )
+        //是否显示elemForce text
+        watch(
+            () => status.textBlock.visible.target.elemForce.all,
+            visible => {
+                this.showTextBlock(`target`, `elemForce`, `all`, visible)
+                Array.from(['eq', 'gt', 'lt']).forEach(
+                    key =>
+                        (status.textBlock.visible.target.elemForce[key] =
+                            visible)
+                )
+            },
+            {immediate: true}
         )
         //选中节点，单元显红
         watch(
@@ -94,46 +156,46 @@ class Control {
             (now, pre) => {
                 onNodeSelected(now, pre)
             },
-            { deep: true }
+            {deep: true}
         )
         watch(
             () => new Set(Array.from(status.mesh.selected.elem)),
             (now, pre) => {
                 onElemSelected(now, pre)
             },
-            { deep: true }
+            {deep: true}
         )
     }
     showMesh(entity = 'all', which = 'all', visible = true) {
         entity = entity.toUpperCase()
         which = which.toUpperCase()
         const layer = this.LAYER.MESH[entity][which]
-        this.show(layer, visible)
+        this.showLayer(layer, visible)
     }
     hideMesh(entity = 'all', which = 'all') {
         this.showMesh(entity, which, false)
     }
-    showText(entity = 'all', which = 'all', visible = true) {
+    showTextBlock(type, entity = 'all', which = 'all', visible = true) {
+        type = type.toUpperCase()
         entity = entity.toUpperCase()
         which = which.toUpperCase()
-        const layer = this.LAYER.TEXT[entity][which]
-        this.show(layer, visible)
+        let layer = this.LAYER.TEXTBLOCK[type][entity][which]
+        this.showLayer(layer, visible)
     }
-    hideText(entity = 'all', which = 'all') {
-        entity = entity.toUpperCase()
-        this.showText(entity, which, false)
+    hideTextBlock(type, entity = 'all', which = 'all') {
+        this.showTextBlock(type, entity, which, false)
     }
     showPickBox(visible = true) {
-        this.show(this.LAYER.PICKBOX, visible)
+        this.showLayer(this.LAYER.PICKBOX, visible)
     }
     hidePickBox() {
         this.showPickBox(false)
     }
-    show(layer, visible) {
+    showLayer(layer, visible) {
         if (visible) {
-            this.camera.layerMask = this.camera.layerMask | layer
+            this.camera.layerMask |= layer
         } else {
-            this.camera.layerMask = this.camera.layerMask & ~layer
+            this.camera.layerMask &= ~layer
         }
     }
 }
@@ -150,20 +212,34 @@ function alignTextWithLine() {
     let points = this.mesh.getVerticesData(VertexBuffer.PositionKind)
     let aPoint = Vector3.FromArray(points, 0)
     let bPoint = Vector3.FromArray(points, 3)
-    let { x, y } = Vector3.TransformNormal(
+    let {x, y} = Vector3.TransformNormal(
         bPoint.subtract(aPoint),
         view.scene.activeCamera.getViewMatrix()
     )
-    let v1 = new Vector2(x, y)
-    v1.normalize()
-    if (v1.x < 0) {
-        v1 = v1.negate()
+    let v1 = new Vector2(x, y),v2
+    if(v1.length() > Number.EPSILON){
+        v1 = v1.scale(1 / v1.length())
+        if (v1.x < 0) {
+            v1 = v1.negate()
+        }
+        v2 = new Vector2(-v1.y, v1.x)
     }
-    let v2 = new Vector2(-v1.y, v1.x)
-    let textBlock = this.label
-    textBlock.rotation = -Math.asin(v1.y)
-    textBlock.linkOffsetXInPixels = textBlock.fontSizeInPixels * v2.x * 0.5
-    textBlock.linkOffsetYInPixels = -textBlock.fontSizeInPixels * v2.y * 0.5
+    else{
+        v2 = new Vector2(0, 1)
+    }
+    const textBlocks = [
+        this.textBlock.label,
+        ...this.textBlock.target.elemShape,
+        ...this.textBlock.target.elemForce
+    ]
+    textBlocks.forEach((textBlock, index) => {
+        const alpha = index ? -1.0 : 1.0
+        textBlock.rotation = -Math.asin(v1.y)
+        textBlock.linkOffsetXInPixels =
+            alpha * textBlock.fontSizeInPixels * v2.x * 0.6
+        textBlock.linkOffsetYInPixels =
+            -alpha * textBlock.fontSizeInPixels * v2.y * 0.6
+    })
 }
 
 function onPickStart() {
@@ -175,7 +251,7 @@ function onPickStart() {
     const pickBox = view.control.pickBox
     pickBox.rotation.x = -Math.PI / 2 + view.scene.activeCamera.beta
     pickBox.rotation.y = Math.PI / 2 - view.scene.activeCamera.alpha
-    status.pointer[0] = { x: view.scene.pointerX, y: view.scene.pointerY }
+    status.pointer[0] = {x: view.scene.pointerX, y: view.scene.pointerY}
     const pickResult = view.scene.pick(view.scene.pointerX, view.scene.pointerY)
     pickBox.position = pickResult.ray.origin.add(
         pickResult.ray.direction.scale(view.scene.activeCamera.radius)
@@ -187,7 +263,7 @@ function onPickProcessing() {
     const view = useView()
     const status = view.scene.metadata.useStatus()
     const pickBox = view.control.pickBox
-    status.pointer[1] = { x: view.scene.pointerX, y: view.scene.pointerY }
+    status.pointer[1] = {x: view.scene.pointerX, y: view.scene.pointerY}
     let pick1 = view.scene.pick(status.pointer[0].x, status.pointer[0].y)
     let pick2 = view.scene.pick(status.pointer[1].x, status.pointer[1].y)
     let position1 = pick1.ray.origin.add(
@@ -268,7 +344,9 @@ function onNodeSelected(now, pre) {
     const points = [...view.points.prep, ...view.points.rslt]
     points
         .filter(point => node.has(point.no))
-        .forEach(point => point.updateMeshColor(view.scene.metadata.materials.point.selected))
+        .forEach(point =>
+            point.updateMeshColor(view.scene.metadata.materials.point.selected)
+        )
     node = SetOperation(pre, now, 'delete')
     points
         .filter(point => node.has(point.no))
@@ -288,4 +366,4 @@ function onElemSelected(now, pre) {
         .forEach(line => line.updateMeshColor())
 }
 
-export { Control, alignTextWithLines, alignTextWithLine }
+export {Control, alignTextWithLines, alignTextWithLine}

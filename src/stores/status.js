@@ -10,10 +10,7 @@ const useStatusStore = defineStore('status', {
                 dialog:{
                     show: false,
                     apply: false,
-                    title: '', 
-                    width: 0,
-                    alginCenter: false,
-                    component: markRaw({is: null}),
+                    component: void 0,
                 },
                 tab: {
                     main: {

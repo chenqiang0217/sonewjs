@@ -1,4 +1,3 @@
-import { useModelStore } from '../../../stores/model'
 import { useView } from '../../../api/view/index'
 import { alignTextWithLines } from '../../../api/view/control'
 

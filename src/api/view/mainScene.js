@@ -1,8 +1,8 @@
-import { Engine, Scene, Vector3 } from '@babylonjs/core'
-import { AdvancedDynamicTexture } from '@babylonjs/gui'
-import { OrthoCamera } from './camera'
-import { AxisScene } from './axisScene'
-import { VIEWCONSTANT } from './constant'
+import {Engine, Scene, Vector3} from '@babylonjs/core'
+import {AdvancedDynamicTexture} from '@babylonjs/gui'
+import {OrthoCamera} from './camera'
+import {AxisScene} from './axisScene'
+import {VIEWCONSTANT} from './constant'
 
 class MainScene extends Scene {
     constructor(canvas) {
@@ -22,35 +22,111 @@ class MainScene extends Scene {
         new OrthoCamera(this)
         this.activeCamera.attachControl(false)
         this.ui = {
-            node: {
-                prep: AdvancedDynamicTexture.CreateFullscreenUI(
-                    `textNodePrep`,
-                    true,
-                    this
-                ),
-                rslt: AdvancedDynamicTexture.CreateFullscreenUI(
-                    `textNodeRslt`,
-                    true,
-                    this
-                )
+            label: {
+                node: {
+                    prep: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `textNodePrep`,
+                        true,
+                        this
+                    ),
+                    rslt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `textNodeRslt`,
+                        true,
+                        this
+                    )
+                },
+                elem: {
+                    prep: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `textElemPrep`,
+                        true,
+                        this
+                    ),
+                    rslt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `textElemRslt`,
+                        true,
+                        this
+                    )
+                }
             },
-            elem: {
-                prep: AdvancedDynamicTexture.CreateFullscreenUI(
-                    `textElemPrep`,
-                    true,
-                    this
-                ),
-                rslt: AdvancedDynamicTexture.CreateFullscreenUI(
-                    `textElemRslt`,
-                    true,
-                    this
-                )
+            target: {
+                nodeShape: {
+                    eq: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetNodeShapeEq`,
+                        true,
+                        this
+                    ),
+                    gt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetNodeShapeGt`,
+                        true,
+                        this
+                    ),
+                    lt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetNodeShapeLt`,
+                        true,
+                        this
+                    )
+                },
+                elemShape: {
+                    eq: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetElemShapeEq`,
+                        true,
+                        this
+                    ),
+                    gt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetElemShapeGt`,
+                        true,
+                        this
+                    ),
+                    lt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetElemShapeLt`,
+                        true,
+                        this
+                    )
+                },
+                elemForce: {
+                    eq: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetElemForceEq`,
+                        true,
+                        this
+                    ),
+                    gt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetElemForceGt`,
+                        true,
+                        this
+                    ),
+                    lt: AdvancedDynamicTexture.CreateFullscreenUI(
+                        `symbolTargetElemForceLt`,
+                        true,
+                        this
+                    )
+                }
             }
         }
-        this.ui.node.prep.layer.layerMask = VIEWCONSTANT.LAYER.TEXT.NODE.PREP
-        this.ui.node.rslt.layer.layerMask = VIEWCONSTANT.LAYER.TEXT.NODE.RSLT
-        this.ui.elem.prep.layer.layerMask = VIEWCONSTANT.LAYER.TEXT.ELEM.PREP
-        this.ui.elem.rslt.layer.layerMask = VIEWCONSTANT.LAYER.TEXT.ELEM.RSLT
+        this.ui.label.node.prep.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.NODE.PREP
+        this.ui.label.node.rslt.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.NODE.RSLT
+        this.ui.label.elem.prep.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.PREP
+        this.ui.label.elem.rslt.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.RSLT
+
+        this.ui.target.nodeShape.eq.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.NODESHAPE.EQ
+        this.ui.target.nodeShape.gt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.NODESHAPE.GT
+        this.ui.target.nodeShape.lt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.NODESHAPE.LT
+
+        this.ui.target.elemShape.eq.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.ELEMSHAPE.EQ
+        this.ui.target.elemShape.gt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.ELEMSHAPE.GT
+        this.ui.target.elemShape.lt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.ELEMSHAPE.LT
+
+        this.ui.target.elemForce.eq.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.ELEMFORCE.EQ
+        this.ui.target.elemForce.gt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.ELEMFORCE.GT
+        this.ui.target.elemForce.lt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.ELEMFORCE.LT
 
         const resizeObserver = new ResizeObserver(() => {
             this.activeCamera.setView()
@@ -71,4 +147,4 @@ class MainScene extends Scene {
     }
 }
 
-export { MainScene }
+export {MainScene}

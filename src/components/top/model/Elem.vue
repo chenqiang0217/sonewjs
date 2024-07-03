@@ -6,6 +6,7 @@ import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { stringToNumberArray, Validator } from '../../../api/utils'
 import { Elem } from '../../../api/model/index'
+import Dialog from '../Dialog.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -214,135 +215,136 @@ function onApply() {
 </script>
 
 <template>
-    <el-form :model="operation" label-position="top" status-icon :rules="rules">
-        <el-form-item>
-            <el-select v-model="operation.type" placeholder="选择类型">
-                <el-option v-for="{ value, label } in options" :label="label" :value="value"
-                    :key="value"></el-option>
-            </el-select>
-        </el-form-item>
-        <template v-if="operation.type == type.create">
+    <Dialog title="单元" :width="250">
+        <el-form :model="operation" label-position="top" status-icon :rules="rules">
             <el-form-item>
-                <el-radio-group v-model="operation.eType">
-                    <el-radio :value="Elem.ETYPE.FREE">自由</el-radio>
-                    <el-radio :value="Elem.ETYPE.LOCK">锁定</el-radio>
-                </el-radio-group>
+                <el-select v-model="operation.type" placeholder="选择类型">
+                    <el-option v-for="{ value, label } in options" :label="label" :value="value"
+                        :key="value"></el-option>
+                </el-select>
             </el-form-item>
-            <el-form-item prop="start">
-                <el-col :span="8"><el-text>起始编号：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.start" :min="1" /></el-col>
-            </el-form-item>
-            <el-form-item prop="femType">
-                <el-col :span="8"><el-text>类型：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.femType" :min="1" /></el-col>
-            </el-form-item>
-            <el-form-item prop="mat">
-                <el-col :span="8"><el-text>材料：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.mat" :min="1" /></el-col>
-            </el-form-item>
-            <el-form-item prop="sec">
-                <el-col :span="8"><el-text>截面：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.sec" :min="1" /></el-col>
-            </el-form-item>
-            <el-form-item label="选择节点">
-                <el-input v-model="operation.ijNode" />
-            </el-form-item>
-        </template>
-        <template v-if="operation.type == type.copy">
-            <el-form-item label="选择单元">
-                <el-input v-model="operation.nos" disabled />
-            </el-form-item>
-            <el-form-item prop="gap">
-                <el-col :span="8"><el-text>间距：</el-text></el-col>
-                <el-col :span="16"><el-input v-model="operation.gap" /></el-col>
-            </el-form-item>
-            <el-form-item>
-                <el-col :span="8"><el-text>起始编号：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.start" :min="1"
-                        :disabled="operation.copy.move" /></el-col>
-            </el-form-item>
-            <el-form-item>
-                <el-col :span="8"><el-text>复制次数：</el-text></el-col>
-                <el-col :span="16"><el-input-number v-model="operation.copy.times" :min="1"
-                        :disabled="operation.copy.move" /></el-col>
-            </el-form-item>
-        </template>
-        <template v-if="operation.type == type.remove">
-            <el-form-item label="选择单元">
-                <el-input v-model="operation.nos" disabled />
-            </el-form-item>
-            <el-form-item>
-                <el-checkbox v-model="operation.remove.onlyIsolated" label="仅孤立单元" disabled />
-            </el-form-item>
-        </template>
-        <template v-if="operation.type == type.modify">
-            <el-form-item label="选择单元">
-                <el-input v-model="operation.nos" disabled />
-            </el-form-item>
-            <el-row>
-                <el-col :span="14">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.modify.eType" label="锁定、自由切换" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="10">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.modify.ijNode" label="节点反转" />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="8">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.modify.no" label="编号" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="16">
-                    <el-form-item prop="noNew">
-                        <el-input-number v-model="operation.noNew" :min="1" :disabled="!operation.modify.no" />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="8">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.modify.femType" label="类型" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="16">
-                    <el-form-item prop="femType">
-                        <el-input-number v-model="operation.femType" :min="1" :disabled="!operation.modify.femType" />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="8">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.modify.mat" label="材料" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="16">
-                    <el-form-item prop="mat">
-                        <el-input-number v-model="operation.mat" :min="1" :disabled="!operation.modify.mat" />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="8">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.modify.sec" label="截面" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="16">
-                    <el-form-item prop="sec">
-                        <el-input-number v-model="operation.sec" :min="1" :disabled="!operation.modify.sec" />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        </template>
-    </el-form>
+            <template v-if="operation.type == type.create">
+                <el-form-item>
+                    <el-radio-group v-model="operation.eType">
+                        <el-radio :value="Elem.ETYPE.FREE">自由</el-radio>
+                        <el-radio :value="Elem.ETYPE.LOCK">锁定</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item prop="start">
+                    <el-col :span="8"><el-text>起始编号：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1" /></el-col>
+                </el-form-item>
+                <el-form-item prop="femType">
+                    <el-col :span="8"><el-text>类型：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.femType" :min="1" /></el-col>
+                </el-form-item>
+                <el-form-item prop="mat">
+                    <el-col :span="8"><el-text>材料：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.mat" :min="1" /></el-col>
+                </el-form-item>
+                <el-form-item prop="sec">
+                    <el-col :span="8"><el-text>截面：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.sec" :min="1" /></el-col>
+                </el-form-item>
+                <el-form-item label="选择节点">
+                    <el-input v-model="operation.ijNode" />
+                </el-form-item>
+            </template>
+            <template v-if="operation.type == type.copy">
+                <el-form-item label="选择单元">
+                    <el-input v-model="operation.nos" disabled />
+                </el-form-item>
+                <el-form-item prop="gap">
+                    <el-col :span="8"><el-text>间距：</el-text></el-col>
+                    <el-col :span="16"><el-input v-model="operation.gap" /></el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="8"><el-text>起始编号：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1"
+                            :disabled="operation.copy.move" /></el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="8"><el-text>复制次数：</el-text></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.copy.times" :min="1"
+                            :disabled="operation.copy.move" /></el-col>
+                </el-form-item>
+            </template>
+            <template v-if="operation.type == type.remove">
+                <el-form-item label="选择单元">
+                    <el-input v-model="operation.nos" disabled />
+                </el-form-item>
+                <el-form-item>
+                    <el-checkbox v-model="operation.remove.onlyIsolated" label="仅孤立单元" disabled />
+                </el-form-item>
+            </template>
+            <template v-if="operation.type == type.modify">
+                <el-form-item label="选择单元">
+                    <el-input v-model="operation.nos" disabled />
+                </el-form-item>
+                <el-row>
+                    <el-col :span="14">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.modify.eType" label="锁定、自由切换" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.modify.ijNode" label="节点反转" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.modify.no" label="编号" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item prop="noNew">
+                            <el-input-number v-model="operation.noNew" :min="1" :disabled="!operation.modify.no" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.modify.femType" label="类型" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item prop="femType">
+                            <el-input-number v-model="operation.femType" :min="1"
+                                :disabled="!operation.modify.femType" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.modify.mat" label="材料" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item prop="mat">
+                            <el-input-number v-model="operation.mat" :min="1" :disabled="!operation.modify.mat" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.modify.sec" label="截面" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item prop="sec">
+                            <el-input-number v-model="operation.sec" :min="1" :disabled="!operation.modify.sec" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </template>
+        </el-form>
+    </Dialog>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

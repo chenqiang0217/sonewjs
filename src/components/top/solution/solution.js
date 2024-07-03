@@ -1,4 +1,4 @@
-import {ref} from 'vue'
+import { markRaw } from 'vue'
 import {v4 as uuidv4} from 'uuid'
 import {Node} from '../../../api/model/index'
 import {useModelStore} from '../../../stores/model'
@@ -16,19 +16,14 @@ import Result from './Result.vue'
 
 const showDialogSolutionConfig = () => {
     const status = useStatusStore()
-    status.ui.dialog.component.is = Config
+    status.ui.dialog.component = markRaw(Config)
     status.ui.dialog.show = true
-    status.ui.dialog.title = '求解设置'
-    status.ui.dialog.width = 500
-    status.ui.dialog.alginCenter = false
 }
 const showDialogSolutionRun = () => {
     const status = useStatusStore()
-    status.ui.dialog.component.is = Run
+    status.ui.dialog.component = markRaw(Run)
     status.ui.dialog.show = true
-    status.ui.dialog.title = '求解'
-    status.ui.dialog.width = 600
-    status.ui.dialog.alginCenter = true
+
 }
 const solutionRun = () => {
     const model = useModelStore()
@@ -98,17 +93,22 @@ const showSolutionProgress = () => {
 }
 const showDialogSolutionResult = () => {
     const status = useStatusStore()
-    status.ui.dialog.component.is = Result
+    status.ui.dialog.component = markRaw(Result)
     status.ui.dialog.show = true
-    status.ui.dialog.title = '结果查看'
-    status.ui.dialog.width = 250
-    status.ui.dialog.alginCenter = false
     resultViewInit()
 }
 
 const resultViewInit = () => {
     const model = useModelStore()
     const view = useView()
+    const status = view.scene.metadata.useStatus()
+    status.textBlock.visible.label.node = false
+    status.textBlock.visible.label.elem = false
+    status.textBlock.visible.target.all = false
+    status.textBlock.visible.target.nodeShape.all = false
+    status.textBlock.visible.target.elemShape.all = false
+    status.textBlock.visible.target.elemForce.all = false
+    view.control.hideTextBlock('target')
     if (view.points.rslt.length == 0 || view.lines.rslt.length == 0) {
         view.points.prep
             .filter(point =>

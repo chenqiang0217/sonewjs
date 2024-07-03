@@ -1,5 +1,7 @@
 <script setup>
 import { useModelStore } from '../../../stores/model'
+import Empty from './Empty.vue'
+
 defineProps({
     width: {
         type: Number,
@@ -24,16 +26,11 @@ const columns = [
 </script>
 
 <template>
-    <el-table-v2
-        :columns="columns"
-        :data="model.elem"
-        :width="width"
-        :height="height"
-        :row-height="30"
-        fixed
-    />
+    <el-table-v2 :columns="columns" :data="model.elem" :width="width" :height="height" :row-height="30" fixed>
+        <template #empty>
+            <Empty />
+        </template>
+    </el-table-v2>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

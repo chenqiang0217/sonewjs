@@ -31,6 +31,9 @@ onMounted(() => {
             fontFamily: 'JetBrains Mono, HarmonyOS Sans SC, Consolas, Courier New, monospace',
             fontSize: '14px',
             backgroundColor: props.editable ? '#F2F6FC' : '#FFFFFF'
+        },
+        '&.cm-focused': {
+            outline: 0
         }
     })
     const extensions = [

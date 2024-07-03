@@ -3,6 +3,8 @@ import { nextTick, ref, watch } from 'vue'
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { Substep } from '../../../api/model/index'
+import Dialog from '../Dialog.vue'
+import Empty from '../../main/table/Empty.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -22,7 +24,7 @@ const onRowClick = row => {
     rowIndex.value = model.loadStep.findIndex(loadStep => loadStep == row)
 }
 const createLoadStep = (useDefault = false) => {
-    if(useDefault){
+    if (useDefault) {
         const subStep = [
             new Substep(20, 1.0e2, 1.0e-5),
             new Substep(30, 1.0e1, 1.0e-5),
@@ -34,7 +36,7 @@ const createLoadStep = (useDefault = false) => {
         ]
         model.createLoadStep('basis', [], subStep, 'basis')
     }
-    else{
+    else {
         model.createLoadStep()
     }
 }
@@ -128,103 +130,57 @@ watch(
 </script>
 
 <template>
-    <!-- 求解工况表格 -->
-    <div style="display: flex;padding-bottom: 5px;">
-        <el-text tag="b" type="info" style="margin-right: auto;">求解工况</el-text>
-        <el-button v-if="model.loadStep.length == 0" round @click="createLoadStep(true)"><el-text type="info">
-                <IconFront iconName="node-plus"></IconFront> 添加默认
-            </el-text></el-button>
-        <el-button v-else round @click="createLoadStep()"><el-text type="info">
-                <IconFront iconName="node-plus"></IconFront> 添加
-            </el-text></el-button>
-        <el-button round @click="removeLoadStep"><el-text type="info">
-                <IconFront iconName="node-minus"></IconFront> 删除
-            </el-text> </el-button>
-    </div>
-    <el-table :data="model.loadStep" @row-click="onRowClick" style="width: 100%;  margin-bottom: 20px"
-        highlight-current-row max-height="400" border fit show-overflow-tooltip tooltip-effect="light"
-        :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ 'text-align': 'center' }">
-        <el-table-column type="index" label="编号" width="60" />
-        <el-table-column prop="label" label="名称">
-            <template #default="scope">
-                <el-input v-if="cellLoadStep.row === scope.$index && cellLoadStep.column === scope.cellIndex"
-                    v-model="cellLoadStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
-                    @blur="cellEditCompleted(scope, cellLoadStep)" />
-                <el-text v-else @dblclick="cellEdit(scope, cellLoadStep)" truncated>{{ scope.row.label.length
-                    != 0 ? scope.row.label : '无' }}</el-text>
-            </template>
-        </el-table-column>
-        <el-table-column prop="target" label="目标组别" width="160">
-            <template #default="scope">
-                <el-select v-if="cellLoadStep.row === scope.$index && cellLoadStep.column === scope.cellIndex"
-                    v-model="cellLoadStep.data" ref="cellRef" multiple @blur="cellSelectCompleted(cellLoadStep)"
-                    collapse-tags>
-                    <el-option v-for="{ no, label } in model.target.group" :label="label" :value="no"
-                        :key="no"></el-option>
-                </el-select>
-                <el-text v-else @dblclick="cellSelect(scope, cellLoadStep)" truncated>{{
-                    scope.row.target.length ? scope.row.target.map(group => group.no).join(',') : '无' }}</el-text>
-            </template>
-        </el-table-column>
-        <el-table-column prop="subStep" label="子步数">
-            <template #default="scope">
-                {{ scope.row.subStep.length }}
-            </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述">
-            <template #default="scope">
-                <el-input v-if="cellLoadStep.row === scope.$index && cellLoadStep.column === scope.cellIndex"
-                    v-model="cellLoadStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
-                    @blur="cellEditCompleted(scope, cellLoadStep)" />
-                <el-text v-else @dblclick="cellEdit(scope, cellLoadStep)" truncated>{{ scope.row.description.length
-                    != 0 ? scope.row.description : '无'
-                    }}</el-text>
-            </template>
-        </el-table-column>
-        <template #empty>
-            <el-empty :image-size="100" description="未定义">
-            </el-empty>
-        </template>
-    </el-table>
-    <!-- 求解子步表格 -->
-    <template v-if="rowIndex != void 0">
+    <Dialog title="求解设置" :width="600">
+        <!-- 求解工况表格 -->
         <div style="display: flex;padding-bottom: 5px;">
-            <el-text tag="b" type="info" style="margin-right: auto;">子步</el-text>
-            <el-button round @click="createSubStep"><el-text type="info">
+            <el-text tag="b" type="info" style="margin-right: auto;">求解工况</el-text>
+            <el-button v-if="model.loadStep.length == 0" round @click="createLoadStep(true)"><el-text type="info">
+                    <IconFront iconName="node-plus"></IconFront> 添加默认
+                </el-text></el-button>
+            <el-button v-else round @click="createLoadStep()"><el-text type="info">
                     <IconFront iconName="node-plus"></IconFront> 添加
                 </el-text></el-button>
-            <el-button round @click="removeSubStep"><el-text type="info">
+            <el-button round @click="removeLoadStep"><el-text type="info">
                     <IconFront iconName="node-minus"></IconFront> 删除
                 </el-text> </el-button>
         </div>
-        <el-table :data="model.loadStep[rowIndex].subStep" style="width: 100%; margin-bottom: 20px" max-height="500"
-            stripe border fit show-overflow-tooltip :header-cell-style="{ 'text-align': 'center' }"
-            :cell-style="{ 'text-align': 'center' }">
+        <el-table :data="model.loadStep" @row-click="onRowClick" style="width: 100%;  margin-bottom: 20px"
+            highlight-current-row max-height="400" border fit show-overflow-tooltip tooltip-effect="light"
+            :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ 'text-align': 'center' }">
             <el-table-column type="index" label="编号" width="60" />
-            <el-table-column prop="nIterativeStep" label="迭代步数">
+            <el-table-column prop="label" label="名称">
                 <template #default="scope">
-                    <el-input v-if="cellSubStep.row === scope.$index && cellSubStep.column === scope.cellIndex"
-                        v-model="cellSubStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
-                        @blur="cellEditCompleted(scope, cellSubStep, 'interger')" />
-                    <el-text v-else @dblclick="cellEdit(scope, cellSubStep)">{{ scope.row.nIterativeStep }}</el-text>
+                    <el-input v-if="cellLoadStep.row === scope.$index && cellLoadStep.column === scope.cellIndex"
+                        v-model="cellLoadStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
+                        @blur="cellEditCompleted(scope, cellLoadStep)" />
+                    <el-text v-else @dblclick="cellEdit(scope, cellLoadStep)" truncated>{{ scope.row.label.length
+                        != 0 ? scope.row.label : '无' }}</el-text>
                 </template>
             </el-table-column>
-            <el-table-column prop="alpha" label="不等式权重">
+            <el-table-column prop="target" label="目标组别" width="160">
                 <template #default="scope">
-                    <el-input v-if="cellSubStep.row === scope.$index && cellSubStep.column === scope.cellIndex"
-                        v-model="cellSubStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
-                        @blur="cellEditCompleted(scope, cellSubStep, 'interger')" />
-                    <el-text v-else @dblclick="cellEdit(scope, cellSubStep)"> {{
-                        Number(scope.row.alpha).toExponential(2)
-                        }}</el-text>
+                    <el-select v-if="cellLoadStep.row === scope.$index && cellLoadStep.column === scope.cellIndex"
+                        v-model="cellLoadStep.data" ref="cellRef" multiple @blur="cellSelectCompleted(cellLoadStep)"
+                        collapse-tags>
+                        <el-option v-for="{ no, label } in model.target.group" :label="label" :value="no"
+                            :key="no"></el-option>
+                    </el-select>
+                    <el-text v-else @dblclick="cellSelect(scope, cellLoadStep)" truncated>{{
+                        scope.row.target.length ? scope.row.target.map(group => group.no).join(',') : '无' }}</el-text>
                 </template>
             </el-table-column>
-            <el-table-column prop="rsdl" label="误差限值">
+            <el-table-column prop="subStep" label="子步数">
                 <template #default="scope">
-                    <el-input v-if="cellSubStep.row === scope.$index && cellSubStep.column === scope.cellIndex"
-                        v-model="cellSubStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
-                        @blur="cellEditCompleted(scope, cellSubStep, 'float')" />
-                    <el-text v-else @dblclick="cellEdit(scope, cellSubStep)"> {{ Number(scope.row.rsdl).toExponential(2)
+                    {{ scope.row.subStep.length }}
+                </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述">
+                <template #default="scope">
+                    <el-input v-if="cellLoadStep.row === scope.$index && cellLoadStep.column === scope.cellIndex"
+                        v-model="cellLoadStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
+                        @blur="cellEditCompleted(scope, cellLoadStep)" />
+                    <el-text v-else @dblclick="cellEdit(scope, cellLoadStep)" truncated>{{ scope.row.description.length
+                        != 0 ? scope.row.description : '无'
                         }}</el-text>
                 </template>
             </el-table-column>
@@ -233,7 +189,56 @@ watch(
                 </el-empty>
             </template>
         </el-table>
-    </template>
+        <!-- 求解子步表格 -->
+        <template v-if="rowIndex != void 0">
+            <div style="display: flex;padding-bottom: 5px;">
+                <el-text tag="b" type="info" style="margin-right: auto;">子步</el-text>
+                <el-button round @click="createSubStep"><el-text type="info">
+                        <IconFront iconName="node-plus"></IconFront> 添加
+                    </el-text></el-button>
+                <el-button round @click="removeSubStep"><el-text type="info">
+                        <IconFront iconName="node-minus"></IconFront> 删除
+                    </el-text> </el-button>
+            </div>
+            <el-table :data="model.loadStep[rowIndex].subStep" style="width: 100%; margin-bottom: 20px" max-height="500"
+                stripe border fit show-overflow-tooltip :header-cell-style="{ 'text-align': 'center' }"
+                :cell-style="{ 'text-align': 'center' }">
+                <el-table-column type="index" label="编号" width="60" />
+                <el-table-column prop="nIterativeStep" label="迭代步数">
+                    <template #default="scope">
+                        <el-input v-if="cellSubStep.row === scope.$index && cellSubStep.column === scope.cellIndex"
+                            v-model="cellSubStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
+                            @blur="cellEditCompleted(scope, cellSubStep, 'interger')" />
+                        <el-text v-else @dblclick="cellEdit(scope, cellSubStep)">{{ scope.row.nIterativeStep
+                            }}</el-text>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="alpha" label="不等式权重">
+                    <template #default="scope">
+                        <el-input v-if="cellSubStep.row === scope.$index && cellSubStep.column === scope.cellIndex"
+                            v-model="cellSubStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
+                            @blur="cellEditCompleted(scope, cellSubStep, 'interger')" />
+                        <el-text v-else @dblclick="cellEdit(scope, cellSubStep)"> {{
+                            Number(scope.row.alpha).toExponential(2)
+                            }}</el-text>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="rsdl" label="误差限值">
+                    <template #default="scope">
+                        <el-input v-if="cellSubStep.row === scope.$index && cellSubStep.column === scope.cellIndex"
+                            v-model="cellSubStep.data" ref="cellRef" @keyup.enter="event => event.target.blur()"
+                            @blur="cellEditCompleted(scope, cellSubStep, 'float')" />
+                        <el-text v-else @dblclick="cellEdit(scope, cellSubStep)"> {{
+                            Number(scope.row.rsdl).toExponential(2)
+                            }}</el-text>
+                    </template>
+                </el-table-column>
+                <template #empty>
+                    <Empty />
+                </template>
+            </el-table>
+        </template>
+    </Dialog>
 </template>
 
 <style scoped>

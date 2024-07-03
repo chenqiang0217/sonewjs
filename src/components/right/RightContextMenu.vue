@@ -1,12 +1,10 @@
 <script setup>
 import { ref } from 'vue'
-import { useViewStatusStore, VIEWCONSTANT } from '../../api/view/index'
+import { useView, VIEWCONSTANT } from '../../api/view/index'
 import { useModelStore } from '../../stores/model'
 import { useStatusStore } from '../../stores/status'
+import { Target } from '../../api/model/index'
 
-const model = useModelStore()
-const status = useStatusStore()
-const viewStatus = useViewStatusStore()
 const props = defineProps({
     x: {
         type: Number,
@@ -42,6 +40,7 @@ const props = defineProps({
 const show = ref(false)
 defineExpose({ show })
 const onClick = (action, mode, { view, table }) => {
+    const viewStatus = useView().scene.metadata.useStatus()
     let meshList, mesh
     switch (action) {
         case `select`:
@@ -69,12 +68,14 @@ const onClick = (action, mode, { view, table }) => {
         case `activate`:
             break
         case `table`:
+            const status = useStatusStore()
             status.addMainTab(table)
             break
     }
 }
 
 const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
+    const model = useModelStore()
     switch (mesh) {
         case 'node':
             switch (from) {
@@ -122,81 +123,133 @@ const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
             }
     }
 }
+
+const showTargetTextBlock = ({ from: target, group, type: equalityNo }, s) => {
+    const view = useView()
+    const control = view.control
+    const [equality, _] = Object.entries(Target.EQUALITY).find(([key, value]) => value == equalityNo)
+    let isVisible = true
+    switch (s) {
+        case 's':
+            control.hideTextBlock('target', 'all', 'all')
+            control.showTextBlock('target', target, equality)
+            break
+        case 'a':
+            control.showTextBlock('target', target, equality)
+            break
+        case 'u':
+            control.hideTextBlock('target', target, equality)
+            isVisible = false
+            break
+    }
+}
 </script>
 
 <template>
-    <ContextMenu v-model:show='show' :options='{ x, y, minWidth, theme }'>
-
-
-        <ContextMenuItem @click='onClick(`select`, VIEWCONSTANT.SELECTING.S, tag)'>
+    <ContextMenu v-model:show="show" :options="{ x, y, minWidth, theme }">
+        <ContextMenuItem @click="onClick(`select`, VIEWCONSTANT.SELECTING.S, tag)">
             <template #label>
                 <el-text>选择</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='select-s' size='small' class="iconFront"/>
+                    <IconFront iconName="select-s" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem @click='onClick(`select`, VIEWCONSTANT.SELECTING.A, tag)'>
+        <ContextMenuItem @click="onClick(`select`, VIEWCONSTANT.SELECTING.A, tag)">
             <template #label>
                 <el-text>再选择</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='select-a' size='small' class="iconFront"/>
+                    <IconFront iconName="select-a" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem @click='onClick(`select`, VIEWCONSTANT.SELECTING.U, tag)'>
+        <ContextMenuItem @click="onClick(`select`, VIEWCONSTANT.SELECTING.U, tag)">
             <template #label>
                 <el-text>解除选择</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='select-u' size='small' class="iconFront"/>
+                    <IconFront iconName="select-u" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem label='激活'>
+        <ContextMenuItem>
             <template #label>
                 <el-text>激活</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='active' size='small' class="iconFront"/>
+                    <IconFront iconName="active" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem label='再激活'>
+        <ContextMenuItem>
             <template #label>
                 <el-text>再激活</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='active' size='small' class="iconFront"/>
+                    <IconFront iconName="active" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem label='冻结'>
+        <ContextMenuItem>
             <template #label>
                 <el-text>冻结</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='frezone' size='small' class="iconFront"/>
+                    <IconFront iconName="frezone" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem @click='onClick(`table`, 0, tag)'>
+        <template v-if="Array.from(['nodeShape', 'elemShape', 'elemForce']).includes(tag.view.from)">
+            <ContextMenuItem @click="showTargetTextBlock(tag.view, 's')">
+                <template #label>
+                    <el-text>显示</el-text>
+                </template>
+                <template #icon>
+                    <el-text>
+                        <IconFront iconName="active" size="small" class="iconFront" />
+                    </el-text>
+                </template>
+            </ContextMenuItem>
+            <ContextMenuItem @click="showTargetTextBlock(tag.view, 'a')">
+                <template #label>
+                    <el-text>再显示</el-text>
+                </template>
+                <template #icon>
+                    <el-text>
+                        <IconFront iconName="active" size="small" class="iconFront" />
+                    </el-text>
+                </template>
+            </ContextMenuItem>
+            <ContextMenuItem @click="showTargetTextBlock(tag.view, 'u')">
+                <template #label>
+                    <el-text>隐藏</el-text>
+                </template>
+                <template #icon>
+                    <el-text>
+                        <IconFront iconName="frezone" size="small" class="iconFront" />
+                    </el-text>
+                </template>
+            </ContextMenuItem>
+        </template>
+        <ContextMenuSeparator />
+
+        <ContextMenuItem @click="onClick(`table`, 0, tag)">
             <template #label>
                 <el-text>表格</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName='import' size='small' class="iconFront"/>
+                    <IconFront iconName="import" size="small" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>

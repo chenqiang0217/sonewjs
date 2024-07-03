@@ -5,6 +5,7 @@ import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { Dim, ElemShape } from '../../../api/model/index'
 import { stringToNumberArray } from '../../../api/utils'
+import Dialog from '../Dialog.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -21,7 +22,7 @@ const nos = computed(() => Array.from(
 const operation = ref({
     type: type.add,
     equality: ElemShape.EQUALITY.EQ,
-    target: ElemShape.TYPE.SELEM,
+    target: ElemShape.TYPE.SELEM.is,
     nos,
     noPrm: null,
     start: 1,
@@ -71,7 +72,7 @@ function onApply() {
             operation.value.values[key] = 0
         }
     })
-    if (operation.value.target == ElemShape.TYPE.TELEMDIVD) {
+    if (operation.value.target == ElemShape.TYPE.TELEMDIVD.is) {
         operation.value.valuesFromModel = false
     }
     else {
@@ -82,8 +83,8 @@ function onApply() {
         lines.forEach(line => {
             const elem = line.mesh.metadata
             const vector = elem.jNode.position.subtract(elem.iNode.position)
-            let { x, y, z } = operation.value.target == ElemShape.TYPE.SELEM && operation.value.valuesFromModel ? vector : operation.value.values
-            if (operation.value.target == ElemShape.TYPE.SELEML || operation.value.target == ElemShape.TYPE.TELEMDIVD) {
+            let { x, y, z } = operation.value.target == ElemShape.TYPE.SELEM.is && operation.value.valuesFromModel ? vector : operation.value.values
+            if (operation.value.target == ElemShape.TYPE.SELEML.is || operation.value.target == ElemShape.TYPE.TELEMDIVD.is) {
                 x = operation.value.valuesFromModel ? Math.sqrt(
                     operation.value.dim.x ? vector.x ** 2 : 0
                         + operation.value.dim.y ? vector.y ** 2 : 0
@@ -95,10 +96,10 @@ function onApply() {
             const vals = { x, y, z }
             const elemShape = model.target.elemShape.find(shape => shape.group.no === operation.value.group
                 && shape.equality === operation.value.equality
-                && shape.type === operation.value.target
+                && shape.type.is === operation.value.target
                 && shape.elemSlv === elem)
             if (elemShape) {
-                if (operation.value.target == ElemShape.TYPE.SELEM) {
+                if (operation.value.target == ElemShape.TYPE.SELEM.is) {
                     elemShape.dim = operation.value.type == type.add ? (elemShape.dim | dim) : dim
                     Object.entries(operation.value.dim).forEach(([key, value]) => {
                         if (value) {
@@ -115,7 +116,7 @@ function onApply() {
                     elemShape.y = y
                     elemShape.z = z
                 }
-                if (operation.value.target == ElemShape.TYPE.TELEMDIVD) {
+                if (operation.value.target == ElemShape.TYPE.TELEMDIVD.is) {
                     elemShape.elemPrm = model.elem.find(elem => elem.no === operation.value.noPrm)
                 }
             }
@@ -135,8 +136,8 @@ function onApply() {
                             operation.value.equality,
                             operation.value.target,
                             dim,
-                            operation.value.noPrm,
                             elem.no,
+                            operation.value.noPrm,
                             x, y, z
                         ])
                         no += 1
@@ -151,7 +152,7 @@ function onApply() {
             model.target.elemShape.filter(shape =>
                 (operation.value.group != -1 ? operation.value.group === shape.group.no : true)
                 && (operation.value.equality != -1 ? operation.value.equality === shape.equality : true)
-                && (operation.value.target != -1 ? operation.value.target === shape.type : true)
+                && (operation.value.target != -1 ? operation.value.target === shape.type.is : true)
                 && (line.mesh.metadata === shape.elemSlv)
             ).forEach(shape => model.removeElemShape(shape))
         })
@@ -162,122 +163,123 @@ function onApply() {
 </script>
 
 <template>
-    <el-form :model="operation" label-position="top" status-icon>
-        <el-form-item>
-            <el-radio-group v-model="operation.type">
-                <el-radio v-for="{ value, label } in options" :value="value">{{ label }}</el-radio>
-            </el-radio-group>
-        </el-form-item>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>目标分组</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-select v-model="operation.group">
-                        <el-option
-                            v-for="{ no, label } of operation.type == type.remove ? model.target.group.concat([{ no: -1, label: '全部' }]) : model.target.group"
-                            :label="label" :value="no" :key="no"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>等式类型</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-select v-model="operation.equality">
-                        <el-option
-                            v-for="[key, value] of operation.type == type.remove ? Object.entries(ElemShape.EQUALITY).concat([['所有', -1]]) : Object.entries(ElemShape.EQUALITY)"
-                            :label="key == 'EQ' ? '等于' : key == 'GT' ? '大于' : key == 'LT' ? '小于' : '全部'" :value="value"
-                            :key="value"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>目标类型</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-select v-model="operation.target">
-                        <el-option
-                            v-for="[key, value] of operation.type == type.remove ? Object.entries(ElemShape.TYPE).concat([['ALL', -1]]) : Object.entries(ElemShape.TYPE)"
-                            :label="key == 'SELEM' ? '节点坐标差值' : key == 'SELEML' ? '投影长度' : key == 'TELEMDIVD' ? '投影长度比值' : '全部'"
-                            :value="value" :key="value"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>单元</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-input v-model="operation.nos" disabled />
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row v-if="operation.target == ElemShape.TYPE.TELEMDIVD && operation.type != type.remove">
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>参照单元</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-input-number v-model.number="operation.noPrm" :min="1" />
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <template v-if="operation.type != type.remove">
-            <el-form-item v-if="operation.target != ElemShape.TYPE.TELEMDIVD">
-                <el-checkbox v-model="operation.valuesFromModel" label="采用节点初始坐标" />
+    <Dialog title="单元几何目标" :width="250">
+        <el-form :model="operation" label-position="top" status-icon>
+            <el-form-item>
+                <el-radio-group v-model="operation.type">
+                    <el-radio v-for="{ value, label } in options" :value="value">{{ label }}</el-radio>
+                </el-radio-group>
             </el-form-item>
-            <template v-if="operation.target == ElemShape.TYPE.SELEM">
-                <el-row v-for="key in Object.keys(operation.dim)">
-                    <el-col :span="6">
-                        <el-form-item>
-                            <el-checkbox v-model="operation.dim[key]" :label="key" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="18">
-                        <el-form-item>
-                            <el-input v-model.number="operation.values[key]"
-                                :disabled="!operation.dim[key] || operation.valuesFromModel" />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>目标分组</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="operation.group">
+                            <el-option
+                                v-for="{ no, label } of operation.type == type.remove ? model.target.group.concat([{ no: -1, label: '全部' }]) : model.target.group"
+                                :label="label" :value="no" :key="no"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>等式类型</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="operation.equality">
+                            <el-option
+                                v-for="[key, value] of operation.type == type.remove ? Object.entries(ElemShape.EQUALITY).concat([['所有', -1]]) : Object.entries(ElemShape.EQUALITY)"
+                                :label="key == 'EQ' ? '等于' : key == 'GT' ? '大于' : key == 'LT' ? '小于' : '全部'"
+                                :value="value" :key="value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>目标类型</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="operation.target">
+                                <el-option
+                                v-for="type of operation.type == type.remove ? Object.values(ElemShape.TYPE).concat([{is: -1,label: '全部',alias: ''}]) : Object.values(ElemShape.TYPE)"
+                                :label="type.alias + ' ' + type.label"
+                                :value="type.is" :key="type.is"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>单元</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-input v-model="operation.nos" disabled />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-if="operation.target == ElemShape.TYPE.TELEMDIVD.is && operation.type != type.remove">
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>参照单元</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-input-number v-model.number="operation.noPrm" :min="1" />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <template v-if="operation.type != type.remove">
+                <el-form-item v-if="operation.target != ElemShape.TYPE.TELEMDIVD.is">
+                    <el-checkbox v-model="operation.valuesFromModel" label="采用节点初始坐标" />
+                </el-form-item>
+                <template v-if="operation.target == ElemShape.TYPE.SELEM.is">
+                    <el-row v-for="key in Object.keys(operation.dim)">
+                        <el-col :span="6">
+                            <el-form-item>
+                                <el-checkbox v-model="operation.dim[key]" :label="key" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="18">
+                            <el-form-item>
+                                <el-input v-model.number="operation.values[key]"
+                                    :disabled="!operation.dim[key] || operation.valuesFromModel" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </template>
+                <template v-else>
+                    <el-row>
+                        <el-col :span="4" v-for="key in Object.keys(operation.dim)">
+                            <el-form-item>
+                                <el-checkbox v-model="operation.dim[key]" :label="key" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item>
+                                <el-input v-model.number="operation.values.x" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </template>
             </template>
-            <template v-else>
-                <el-row>
-                    <el-col :span="4" v-for="key in Object.keys(operation.dim)">
-                        <el-form-item>
-                            <el-checkbox v-model="operation.dim[key]" :label="key" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item>
-                            <el-input v-model.number="operation.values.x" />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </template>
-        </template>
-    </el-form>
+        </el-form>
+    </Dialog>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -29,6 +29,13 @@ class View {
             prep: [],
             rslt: []
         }
+        this.symbols = {
+            target: {
+                nodeShape: [],
+                elemShape: [],
+                elemForce: []
+            }
+        }
     }
     //在View.vue中进行配置
     get useModel() {

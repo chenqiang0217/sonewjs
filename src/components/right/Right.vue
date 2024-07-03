@@ -37,10 +37,10 @@ const modelTreeView = computed(() => [
                         view: {
                             mesh: 'node',
                             from: 'type',
-                            label: 'free',
+                            label: 'free'
                         },
-                        table: 'node',
-                    },
+                        table: 'node'
+                    }
                 }, {
                     label: '锁定: ' + model.categorized.node.lock.length,
                     icon: `lock`,
@@ -50,9 +50,9 @@ const modelTreeView = computed(() => [
                             from: 'type',
                             label: 'lock',
                         },
-                        table: 'node',
-                    },
-                },],
+                        table: 'node'
+                    }
+                }]
             }, {
                 label: '单元',
                 icon: `element`,
@@ -63,10 +63,10 @@ const modelTreeView = computed(() => [
                         view: {
                             mesh: 'elem',
                             from: 'type',
-                            label: 'free',
+                            label: 'free'
                         },
-                        table: 'elem',
-                    },
+                        table: 'elem'
+                    }
                 }, {
                     label: '锁定: ' + model.categorized.elem.lock.length,
                     icon: `lock`,
@@ -74,11 +74,11 @@ const modelTreeView = computed(() => [
                         view: {
                             mesh: 'elem',
                             from: 'type',
-                            label: 'lock',
+                            label: 'lock'
                         },
-                        table: 'elem',
-                    },
-                },],
+                        table: 'elem'
+                    }
+                }]
             }]
     },
     {
@@ -95,12 +95,12 @@ const modelTreeView = computed(() => [
                         view: {
                             mesh: 'elem',
                             from: 'femType',
-                            label: femType.label,
+                            label: femType.label
                         },
-                        table: 'elem',
-                    },
+                        table: 'elem'
+                    }
                 }
-            }),
+            })
         }, {
             label: '材料: ' + model.categorized.elem.mat.length,
             icon: `mat`,
@@ -112,12 +112,12 @@ const modelTreeView = computed(() => [
                         view: {
                             mesh: 'elem',
                             from: 'mat',
-                            label: mat.label,
+                            label: mat.label
                         },
-                        table: 'elem',
-                    },
+                        table: 'elem'
+                    }
                 }
-            }),
+            })
         }, {
             label: '截面: ' + model.categorized.elem.sec.length,
             icon: `sec`,
@@ -129,12 +129,12 @@ const modelTreeView = computed(() => [
                         view: {
                             mesh: 'elem',
                             from: 'sec',
-                            label: sec.label,
+                            label: sec.label
                         },
-                        table: 'elem',
-                    },
+                        table: 'elem'
+                    }
                 }
-            }),
+            })
         }]
     }, {
         label: '支座',
@@ -147,14 +147,13 @@ const modelTreeView = computed(() => [
                     view: {
                         mesh: 'node',
                         from: 'cnst',
-                        type: cnst.dim,
+                        type: cnst.dim
                     },
-                    table: 'cnst',
-                },
+                    table: 'cnst'
+                }
             }
-        }),
-    },
-    {
+        })
+    }, {
         label: '功能目标',
         icon: `node-shape`,
         children: [{
@@ -177,15 +176,15 @@ const modelTreeView = computed(() => [
                                 group,
                                 type: eqlt.no,
                             },
-                            table: 'nodeShape',
-                        },
+                            table: 'nodeShape'
+                        }
                     }
                 }).filter(i => i.nodeSize > 0)
-            })),
+            })).filter(i => i.children.length > 0)
         }, {
             label: '单元几何',
             icon: `element-shape`,
-            children: model.target.group.map(group => ({
+            children:model.target.group.map(group => ({
                 label: group.label,
                 icon: `element-shape`,
                 children: equality.map(eqlt => {
@@ -200,13 +199,13 @@ const modelTreeView = computed(() => [
                                 mesh: 'elem',
                                 from: 'elemShape',
                                 group,
-                                type: eqlt.no,
+                                type: eqlt.no
                             },
-                            table: 'elemShape',
-                        },
+                            table: 'elemShape'
+                        }
                     }
                 }).filter(i => i.elemSize > 0)
-            })),
+            })).filter(i => i.children.length > 0)
         }, {
             label: '单元预应力',
             icon: `element-force`,
@@ -225,13 +224,13 @@ const modelTreeView = computed(() => [
                                 mesh: 'elem',
                                 from: 'elemForce',
                                 group,
-                                type: eqlt.no,
+                                type: eqlt.no
                             },
-                            table: 'elemForce',
-                        },
+                            table: 'elemForce'
+                        }
                     }
                 }).filter(i => i.elemSize > 0)
-            })),
+            })).filter(i => i.children.length > 0)
         }]
     }
 ])
@@ -249,9 +248,8 @@ const options = ref({
         table: '',
     },
 })
-
 const onContextmenu = (event, object, node, element) => {
-    if (node.isLeaf) {
+    if (object.tag) {
         contextMenuRef.value.show = true
         options.value.x = event.x
         options.value.y = event.y
@@ -283,7 +281,7 @@ const onContextmenu = (event, object, node, element) => {
                     </template>
                 </el-tree>
             </el-scrollbar>
-            <RightContextMenu ref="contextMenuRef" :x="options.x" :y="options.y" :tag="options.tag" />
+            <RightContextMenu ref="contextMenuRef" :x="options.x" :y="options.y" :tag="options.tag"/>
         </el-tab-pane>
     </el-tabs>
 </template>

@@ -1,7 +1,9 @@
-import { Color3 } from "@babylonjs/core"
-import { defineStore } from 'pinia'
-import { VIEWCONSTANT } from './constant'
-import { Elem } from '../model/elem'
+import {Color3} from '@babylonjs/core'
+import {defineStore} from 'pinia'
+import {VIEWCONSTANT} from './constant'
+import {Elem} from '../model/elem'
+import {TextBlock} from '@babylonjs/gui'
+import {NodeShape} from '../model'
 
 const useViewConfigStore = defineStore('viewConfig', {
     state: () => {
@@ -14,13 +16,13 @@ const useViewConfigStore = defineStore('viewConfig', {
                         selected: VIEWCONSTANT.COLOR.MESH.NODE.SELECTED,
                         prep: {
                             lock: VIEWCONSTANT.COLOR.MESH.NODE.PREP.LOCK,
-                            free: VIEWCONSTANT.COLOR.MESH.NODE.PREP.FREE,
+                            free: VIEWCONSTANT.COLOR.MESH.NODE.PREP.FREE
                         },
                         rslt: {
                             lock: VIEWCONSTANT.COLOR.MESH.NODE.RSLT.LOCK,
-                            free: VIEWCONSTANT.COLOR.MESH.NODE.RSLT.FREE,
-                        },
-                    },
+                            free: VIEWCONSTANT.COLOR.MESH.NODE.RSLT.FREE
+                        }
+                    }
                 },
                 elem: {
                     color: {
@@ -28,58 +30,81 @@ const useViewConfigStore = defineStore('viewConfig', {
                         prep: {
                             binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.ETYPE,
                             eType: new Map([
-                                [Elem.ETYPE.LOCK, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.LOCK],
-                                [Elem.ETYPE.FREE, VIEWCONSTANT.COLOR.MESH.ELEM.PREP.FREE],
+                                [
+                                    Elem.ETYPE.LOCK,
+                                    VIEWCONSTANT.COLOR.MESH.ELEM.PREP.LOCK
+                                ],
+                                [
+                                    Elem.ETYPE.FREE,
+                                    VIEWCONSTANT.COLOR.MESH.ELEM.PREP.FREE
+                                ]
                             ]),
                             femType: new Map(),
                             mat: new Map(),
-                            sec: new Map(),
+                            sec: new Map()
                         },
                         rslt: {
                             binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.ETYPE,
                             eType: new Map([
-                                [Elem.ETYPE.LOCK, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.LOCK],
-                                [Elem.ETYPE.FREE, VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.FREE],
+                                [
+                                    Elem.ETYPE.LOCK,
+                                    VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.LOCK
+                                ],
+                                [
+                                    Elem.ETYPE.FREE,
+                                    VIEWCONSTANT.COLOR.MESH.ELEM.RSLT.FREE
+                                ]
                             ]),
                             contour: {
                                 by: 'f',
                                 nSec: 11,
                                 lower: Color3.Blue(),
-                                higher: Color3.Red(),
+                                higher: Color3.Red()
                             }
-                        },
-                    },
+                        }
+                    }
                 },
                 membrane: {
                     color: {
                         selected: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT,
                         prep: {
                             lock: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT,
-                            free: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT,
+                            free: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT
                         },
                         rslt: {
                             lock: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT,
-                            free: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT,
-                        },
+                            free: VIEWCONSTANT.COLOR.MESH.MEMBRANE.DEFAULT
+                        }
+                    }
+                }
+            },
+            textBlock: {
+                fontFamily: 'JetBrains Mono',
+                sizePx: '14',
+                label: {
+                    node: {
+                        color: VIEWCONSTANT.COLOR.TEXTBLOCK.LABEL.NODE
                     },
+                    elem: {
+                        color: VIEWCONSTANT.COLOR.TEXTBLOCK.LABEL.ELEM
+                    }
                 },
-            },
-            text: {
-                node: {
-                    font: '',
-                    sizePx: '14',
-                    color: VIEWCONSTANT.COLOR.TEXT.NODE,
-                },
-                elem: {
-                    font: '',
-                    sizePx: '14',
-                    color: VIEWCONSTANT.COLOR.TEXT.ELEM,
-                },
-            },
+                target: {
+                    nodeShape: {
+                        color: VIEWCONSTANT.COLOR.TEXTBLOCK.TARGET.NODESHAPE
+                    },
+                    elemShape: {
+                        color: VIEWCONSTANT.COLOR.TEXTBLOCK.TARGET.ELEMSHAPE
+                    },
+                    elemForce: {
+                        color: VIEWCONSTANT.COLOR.TEXTBLOCK.TARGET.ELEMFORCE
+                    }
+                }
+            }
         }
     },
     getters: {
-        contour: (state) => {
+        contour: state => {
             const {nSec, lower, higher} = state.mesh.elem.color.rslt.contour
             let dColor = higher.subtract(lower)
             const colors = []
@@ -89,10 +114,7 @@ const useViewConfigStore = defineStore('viewConfig', {
             return colors
         }
     },
-    actions: {
-    },
+    actions: {}
 })
 
-
-
-export { useViewConfigStore }
+export {useViewConfigStore}

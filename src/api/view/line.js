@@ -5,6 +5,8 @@ import {
 import { TextBlock } from '@babylonjs/gui'
 import { VIEWCONSTANT } from './constant'
 import { alignTextWithLine } from './control'
+import {ElemShape, ElemForce} from '../model/index'
+
 
 class Line {
     static PREP = {
@@ -14,7 +16,7 @@ class Line {
         },
         LAYER: {
             MESH: VIEWCONSTANT.LAYER.MESH.ELEM.PREP,
-            TEXT: VIEWCONSTANT.LAYER.TEXT.ELEM.PREP
+            TEXT: VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.PREP
         }
     }
     static RSLT = {
@@ -24,7 +26,7 @@ class Line {
         },
         LAYER: {
             MESH: VIEWCONSTANT.LAYER.MESH.ELEM.RSLT,
-            TEXT: VIEWCONSTANT.LAYER.TEXT.ELEM.RSLT
+            TEXT: VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.RSLT
         }
     }
     constructor(elem, scene, TYPE = Line.PREP) {
@@ -39,24 +41,106 @@ class Line {
         this.mesh.layerMask = TYPE.LAYER.MESH
         this.mesh.isVisible = true
         this.mesh.metadata = elem
-        // this.updateMeshColor()
-
         const config = scene.metadata.useConfig()
-        this.label = new TextBlock(
+        const label = new TextBlock(
             TYPE.PREFIX.TEXT + TYPE.PREFIX.MESH + elem.no
         )
-        this.label.text = elem.no
-        this.updateLabelStyle({
-            fontSizeInPixels: config.text.elem.sizePx,
-            color: config.text.elem.color
+        label.text = elem.no
+        this.updateLabelStyle.call(label, {
+            fontFamily: config.textBlock.fontFamily,
+            fontSizeInPixels: config.textBlock.sizePx,
+            color: config.textBlock.label.elem.color,
         })
-        scene.ui.elem[TYPE === Line.PREP ? 'prep' : 'rslt'].addControl(
-            this.label
+        scene.ui.label.elem[TYPE === Line.PREP ? 'prep' : 'rslt'].addControl(
+            label
         )
-        this.label.linkWithMesh(this.mesh)
-
+        label.linkWithMesh(this.mesh)
+        this.textBlock = {
+            label,
+            target: {
+                elemShape: [],
+                elemForce: []
+            }
+        }
         this.alignText = alignTextWithLine
         this.alignText()
+    }
+    createTarget(target) {
+        let Target, which
+        if(target instanceof ElemShape){
+            Target = ElemShape
+            which= 'elemShape'
+        }
+        else if(target instanceof ElemForce){
+            Target = ElemForce
+            which= 'elemForce'
+        }
+        else{
+            return
+        }
+        const textBlocks = this.textBlock.target[which]
+        let textBlock
+        const [key, value] = Object.entries(Target.EQUALITY).find(
+            ([_, v]) => v === target.equality
+        )
+        textBlock = textBlocks.find(item =>
+            item?.metadata.map(item => item.equality).includes(value)
+        )
+        if (textBlock) {
+            textBlock.metadata.push(target)
+        } else {
+            textBlock = new TextBlock(
+                Line.PREP.PREFIX.TEXT + Line.PREP.PREFIX.MESH + this.no
+            )
+            textBlock.metadata = [target]
+            textBlocks.push(textBlock)
+        }
+        textBlock.text = textBlock.metadata
+            .sort((a, b) => a.type.is - b.type.is)
+            .map(item => item.type.alias)
+            .join('-')
+        const scene = this.mesh.getScene()
+        scene.ui.target[which][key.toLowerCase()].addControl(
+            textBlock
+        )
+        textBlock.linkWithMesh(this.mesh)
+        const config = scene.metadata.useConfig()
+        this.updateLabelStyle.call(textBlock, {
+            fontFamily: config.textBlock.fontFamily,
+            fontSizeInPixels: config.textBlock.sizePx,
+            color: config.textBlock.target[which].color
+        })
+        this.alignText()
+    }
+    removeTarget(target) {
+        let Target, which
+        if(target instanceof ElemShape){
+            Target = ElemShape
+            which= 'elemShape'
+        }
+        else if(target instanceof ElemForce){
+            Target = ElemForce
+            which= 'elemForce'
+        }
+        else{
+            return
+        }
+        const textBlocks = this.textBlock.target[which]
+        const index = textBlocks.findIndex(item =>
+            item.metadata.includes(target)
+        )
+        if (index != -1) {
+            const textBlock = textBlocks[index]
+            const targets = textBlock.metadata
+            const j = targets.findIndex(item => item === target)
+            targets.splice(j, 1)
+            if (targets) {
+                textBlock.text = targets.map(item => item.type.alias).join('-')
+            } else {
+                textBlocks.splice(index, 1)
+                textBlock.dispose()
+            }
+        }
     }
     get prefix() {
         let regex = /^[a-z]+/
@@ -76,7 +160,7 @@ class Line {
         return this
     }
     updateLabel(){
-        this.label.text = this.mesh.metadata.no
+        this.textBlock.label.text = this.mesh.metadata.no
         return this
     }
     get no() {
@@ -86,17 +170,17 @@ class Line {
         this.mesh.name = this.prefix + n
     }
     get text() {
-        return this.label.text
+        return this.textBlock.label.text
     }
     set text(t) {
-        this.label.text = t
+        this.textBlock.label.text = t
     }
     updateMeshName() {
         this.mesh.name = this.prefix + this.mesh.metadata.no
         return this
     }
     updateLabelText(text = this.mesh.metadata.no) {
-        this.label.text = text
+        this.textBlock.label.text = text
         return this
     }
     updateMeshColor(color) {
@@ -115,7 +199,7 @@ class Line {
     }
     updateLabelStyle(style) {
         for (const [key, value] of Object.entries(style)) {
-            this.label[key] = value
+            this[key] = value
         }
         return this
     }
@@ -126,25 +210,22 @@ class Line {
         this.mesh.isVisible = false
     }
     showText() {
-        this.label.isVisible = true
+        this.textBlock.label.isVisible = true
     }
     hideText() {
-        this.label.isVisible = false
+        this.textBlock.label.isVisible = false
     }
     show() {
         this.mesh.isVisible = true
-        this.label.isVisible = true
+        this.textBlock.label.isVisible = true
     }
     hide() {
         this.mesh.isVisible = false
-        this.label.isVisible = false
+        this.textBlock.label.isVisible = false
     }
     remove() {
-        // const scene = this.mesh.getScene()
-        // scene.removeMesh(this.mesh)
-        // scene.ui.removeControl(this.label)
         this.mesh.dispose()
-        this.label.dispose()
+        this.textBlock.label.dispose()
     }
 }
 

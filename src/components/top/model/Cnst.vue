@@ -4,8 +4,8 @@ import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { Dim } from '../../../api/model/index'
-
 import { stringToNumberArray } from '../../../api/utils'
+import Dialog from '../Dialog.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -105,32 +105,33 @@ function onApply() {
 </script>
 
 <template>
-    <el-form :model="operation" label-position="top" status-icon>
-        <el-form-item>
-            <el-radio-group v-model="operation.type">
-                <el-radio v-for="{ value, label } in options" :value="value">{{ label }}</el-radio>
-            </el-radio-group>
-        </el-form-item>
-        <el-form-item label="选择节点">
-            <el-input v-model="operation.nos" disabled />
-        </el-form-item>
-        <template v-if="operation.type != type.remove">
-            <el-text class="el-form-item__label">方向</el-text>
-            <el-row>
-                <el-col :span="8" v-for="key in Object.keys(operation.dim)">
-                    <el-form-item>
-                        <el-checkbox v-model="operation.dim[key]" :label="key" disabled />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-form-item label="坐标系">
-                <el-select v-model="operation.cs" disabled>
-                    <el-option v-for="cs in model.cs" :label="cs.label" :value="cs.no" :key="cs.no"></el-option>
-                </el-select>
+    <Dialog title="支座" :width="250">
+        <el-form :model="operation" label-position="top" status-icon>
+            <el-form-item>
+                <el-radio-group v-model="operation.type">
+                    <el-radio v-for="{ value, label } in options" :value="value">{{ label }}</el-radio>
+                </el-radio-group>
             </el-form-item>
-        </template>
-    </el-form>
+            <el-form-item label="选择节点">
+                <el-input v-model="operation.nos" disabled />
+            </el-form-item>
+            <template v-if="operation.type != type.remove">
+                <el-text class="el-form-item__label">方向</el-text>
+                <el-row>
+                    <el-col :span="8" v-for="key in Object.keys(operation.dim)">
+                        <el-form-item>
+                            <el-checkbox v-model="operation.dim[key]" :label="key" disabled />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-form-item label="坐标系">
+                    <el-select v-model="operation.cs" disabled>
+                        <el-option v-for="cs in model.cs" :label="cs.label" :value="cs.no" :key="cs.no"></el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+        </el-form>
+    </Dialog>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

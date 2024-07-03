@@ -32,9 +32,7 @@ const useModelStore = defineStore('model', {
                 node: {},
                 elem: {}
             },
-            cs: [
-                new Cs({no: 0, label: '世界坐标系'})
-            ],
+            cs: [new Cs({no: 0, label: '世界坐标系'})],
             loadStep: [],
             result: []
         }
@@ -209,14 +207,14 @@ const useModelStore = defineStore('model', {
                     Reflect.set(obj, prop, value)
                     const view = useView()
                     view.points.prep
-                        .find(point => point.mesh.metadata == receiver)
+                        .find(point => point.mesh.metadata === receiver)
                         .updatePosition()
                         .updateLabel()
                     view.lines.prep
                         .filter(
                             line =>
-                                line.mesh.metadata.iNode == receiver ||
-                                line.mesh.metadata.jNode == receiver
+                                line.mesh.metadata.iNode === receiver ||
+                                line.mesh.metadata.jNode === receiver
                         )
                         .forEach(line => line.updatePosition())
                     return true
@@ -301,37 +299,72 @@ const useModelStore = defineStore('model', {
             no,
             groupNo,
             equality,
-            type,
+            typeValue,
             dim,
-            nodeNoPrm,
             nodeNoSlv,
+            nodeNoPrm,
             x,
             y,
             z
         ]) {
             const group = this.target.group.find(group => group.no === groupNo)
-            const nodePrm = this.node.find(node => node.no === nodeNoPrm)
+            const type = Object.values(NodeShape.TYPE).find(
+                type => type.is === typeValue
+            )
             const nodeSlv = this.node.find(node => node.no === nodeNoSlv)
-            this.target.nodeShape.push(
+            const nodePrm = this.node.find(node => node.no === nodeNoPrm)
+            const nodeShape = new Proxy(
                 new NodeShape([
                     no,
                     group,
                     equality,
                     type,
                     dim,
-                    nodePrm,
                     nodeSlv,
+                    nodePrm,
                     x,
                     y,
                     z
-                ])
+                ]),
+                {
+                    set: function (obj, prop, value, receiver) {
+                        const view = useView()
+                        let point = view.points.prep.find(point =>
+                            point.textBlock.target.nodeShape
+                                .map(textBlock => textBlock.metadata)
+                                .flat()
+                                .includes(receiver)
+                        )
+                        point.removeNodeShape(receiver)
+                        Reflect.set(obj, prop, value)
+                        if (prop == 'nodeSlv') {
+                            point = view.points.prep.find(
+                                point => point.mesh.metadata === receiver[prop]
+                            )
+                        }
+                        point.createNodeShape(receiver)
+                        return true
+                    }
+                }
             )
+            const view = useView()
+            const point = view.points.prep.find(
+                point => point.mesh.metadata === nodeSlv
+            )
+            this.target.nodeShape.push(nodeShape)
+            point.createNodeShape(this.target.nodeShape.at(-1))
+            return this.target.nodeShape.at(-1)
         },
-        removeNodeShape(shape) {
+        removeNodeShape(target) {
             const index = this.target.nodeShape.findIndex(
-                item => item === shape
+                item => item === target
+            )
+            const view = useView()
+            const point = view.points.prep.find(
+                point => point.mesh.metadata === target.nodeSlv
             )
             if (index != -1) {
+                point.removeNodeShape(target)
                 this.target.nodeShape.splice(index, 1)
             }
         },
@@ -339,37 +372,73 @@ const useModelStore = defineStore('model', {
             no,
             groupNo,
             equality,
-            type,
+            typeValue,
             dim,
-            elemNoPrm,
             elemNoSlv,
+            elemNoPrm,
             x,
             y,
             z
         ]) {
             const group = this.target.group.find(group => group.no === groupNo)
-            const elemPrm = this.elem.find(elem => elem.no === elemNoPrm)
+            const type = Object.values(ElemShape.TYPE).find(
+                type => type.is === typeValue
+            )
             const elemSlv = this.elem.find(elem => elem.no === elemNoSlv)
-            this.target.elemShape.push(
+            const elemPrm = this.elem.find(elem => elem.no === elemNoPrm)
+            const elemShape = new Proxy(
                 new ElemShape([
                     no,
                     group,
                     equality,
                     type,
                     dim,
-                    elemPrm,
                     elemSlv,
+                    elemPrm,
                     x,
                     y,
                     z
-                ])
+                ]),
+                {
+                    set: function (obj, prop, value, receiver) {
+                        const view = useView()
+                        let line = view.lines.prep.find(line =>
+                            line.textBlock.target.elemShape
+                                .map(textBlock => textBlock.metadata)
+                                .flat()
+                                .includes(receiver)
+                        )
+                        line.removeTarget(receiver)
+                        Reflect.set(obj, prop, value)
+                        if (prop == 'elemSlv') {
+                            line = view.lines.prep.find(
+                                line => line.mesh.metadata === receiver[prop]
+                            )
+                        }
+                        line.createTarget(receiver)
+                        line.alignText()
+                        return true
+                    }
+                }
             )
+            const view = useView()
+            const line = view.lines.prep.find(
+                line => line.mesh.metadata === elemSlv
+            )
+            this.target.elemShape.push(elemShape)
+            line.createTarget(this.target.elemShape.at(-1))
+            return this.target.elemShape.at(-1)
         },
-        removeElemShape(shape) {
+        removeElemShape(target) {
             const index = this.target.elemShape.findIndex(
-                item => item === shape
+                item => item === target
+            )
+            const view = useView()
+            const line = view.lines.prep.find(
+                line => line.mesh.metadata === target.elemSlv
             )
             if (index != -1) {
+                line.removeTarget(target)
                 this.target.elemShape.splice(index, 1)
             }
         },
@@ -377,33 +446,68 @@ const useModelStore = defineStore('model', {
             no,
             groupNo,
             equality,
-            type,
+            typeValue,
             dim,
-            elemNoPrm,
             elemNoSlv,
+            elemNoPrm,
             val
         ]) {
             const group = this.target.group.find(group => group.no === groupNo)
-            const elemPrm = this.elem.find(elem => elem.no === elemNoPrm)
+            const type = Object.values(ElemForce.TYPE).find(
+                type => type.is === typeValue
+            )
             const elemSlv = this.elem.find(elem => elem.no === elemNoSlv)
-            this.target.elemForce.push(
+            const elemPrm = this.elem.find(elem => elem.no === elemNoPrm)
+            const elemForce = new Proxy(
                 new ElemForce([
                     no,
                     group,
                     equality,
                     type,
                     dim,
-                    elemPrm,
                     elemSlv,
+                    elemPrm,
                     val
-                ])
+                ]),
+                {
+                    set: function (obj, prop, value, receiver) {
+                        const view = useView()
+                        let line = view.lines.prep.find(line =>
+                            line.textBlock.target.elemForce
+                                .map(textBlock => textBlock.metadata)
+                                .flat()
+                                .includes(receiver)
+                        )
+                        line.removeTarget(receiver)
+                        Reflect.set(obj, prop, value)
+                        if (prop == 'elemSlv') {
+                            line = view.lines.prep.find(
+                                line => line.mesh.metadata === receiver[prop]
+                            )
+                        }
+                        line.createTarget(receiver)
+                        return true
+                    }
+                }
             )
+            const view = useView()
+            const line = view.lines.prep.find(
+                line => line.mesh.metadata === elemSlv
+            )
+            this.target.elemForce.push(elemForce)
+            line.createTarget(this.target.elemForce.at(-1))
+            return this.target.elemForce.at(-1)
         },
-        removeElemForce(force) {
+        removeElemForce(target) {
             const index = this.target.elemForce.findIndex(
-                item => item === force
+                item => item === target
+            )
+            const view = useView()
+            const line = view.lines.prep.find(
+                line => line.mesh.metadata === target.elemSlv
             )
             if (index != -1) {
+                line.removeTarget(target)
                 this.target.elemForce.splice(index, 1)
             }
         },
@@ -411,19 +515,12 @@ const useModelStore = defineStore('model', {
             this.target.group.push(new TargetGroup(no, label, description))
         },
         removeTargetGroup(group) {
-            const index = this.target.group.findIndex(
-                item => item === group
-            )
+            const index = this.target.group.findIndex(item => item === group)
             if (index != -1) {
                 this.target.group.splice(index, 1)
             }
         },
-        createLoadStep(
-            label,
-            targetGroupNo = [],
-            subStep,
-            description
-        ) {
+        createLoadStep(label, targetGroupNo = [], subStep, description) {
             const targetGroup = targetGroupNo.map(
                 no => this.target.group.no == no
             )
@@ -432,9 +529,7 @@ const useModelStore = defineStore('model', {
             )
         },
         removeLoadStep(loadStep) {
-            const index = this.loadStep.findIndex(
-                item => item === loadStep
-            )
+            const index = this.loadStep.findIndex(item => item === loadStep)
             if (index != -1) {
                 this.loadStep.splice(index, 1)
             }

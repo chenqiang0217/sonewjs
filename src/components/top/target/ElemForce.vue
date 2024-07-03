@@ -5,6 +5,7 @@ import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { Dim, ElemForce } from '../../../api/model/index'
 import { stringToNumberArray } from '../../../api/utils'
+import Dialog from '../Dialog.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -13,23 +14,13 @@ const type = {
     add: 1,
     remove: 3
 }
-const targetLabel = {
-    SDENSITY: '力密度',
-    TDENSITYDIFF: '力密度差值',
-    TDENSITYDIVD: '力密度比值',
-    SFORCE1: '单元力，以力密度为未知数',
-    TFORCEDIVD1: '单元力比值，以力密度为未知数',
-    SFORCE2: '单元力，以节点坐标为未知数',
-    TFORCEDIVD2: '单元力比值，以节点坐标为未知数',
-    ALL: '全部'
-}
 const nos = computed(() => Array.from(
     view.scene.metadata.useStatus().mesh.selected.elem
 ).join(','))
 const operation = ref({
     type: type.add,
     equality: ElemForce.EQUALITY.EQ,
-    target: ElemForce.TYPE.SDENSITY,
+    target: ElemForce.TYPE.SDENSITY.is,
     nos,
     noPrm: null,
     start: 1,
@@ -67,11 +58,11 @@ function onApply() {
     let dim = (operation.value.dim.x ? Dim.X : Dim.NONE)
         | (operation.value.dim.y ? Dim.Y : Dim.NONE)
         | (operation.value.dim.z ? Dim.Z : Dim.NONE)
-    if ([ElemForce.TYPE.SDENSITY, ElemForce.TYPE.TDENSITYDIFF, ElemForce.TYPE.TDENSITYDIVD]
+    if ([ElemForce.TYPE.SDENSITY.is, ElemForce.TYPE.TDENSITYDIFF.is, ElemForce.TYPE.TDENSITYDIVD.is]
         .includes(operation.value.target)) {
         dim = Dim.NONE
     }
-    if ([ElemForce.TYPE.SDENSITY, ElemForce.TYPE.SFORCE1, ElemForce.TYPE.SFORCE2]
+    if ([ElemForce.TYPE.SDENSITY.is, ElemForce.TYPE.SFORCE1.is, ElemForce.TYPE.SFORCE2.is]
         .includes(operation.value.target)) {
         operation.value.noPrm = 0
     }
@@ -81,12 +72,12 @@ function onApply() {
             const elem = line.mesh.metadata
             const elemForce = model.target.elemForce.find(force => force.group.no === operation.value.group
                 && force.equality === operation.value.equality
-                && force.type === operation.value.target
+                && force.type.is === operation.value.target
                 && force.elemSlv === elem)
             if (elemForce) {
                 elemForce.dim = dim
                 elemForce.val = operation.value.values.x
-                if ([ElemForce.TYPE.TDENSITYDIFF, ElemForce.TYPE.TDENSITYDIVD, ElemForce.TYPE.TFORCEDIVD1, ElemForce.TYPE.TFORCEDIVD2]
+                if ([ElemForce.TYPE.TDENSITYDIFF.is, ElemForce.TYPE.TDENSITYDIVD.is, ElemForce.TYPE.TFORCEDIVD1.is, ElemForce.TYPE.TFORCEDIVD2.is]
                     .includes(operation.value.target)) {
                     elemForce.elemPrm = model.elem.find(elem => elem.no === operation.value.noPrm)
                 }
@@ -107,8 +98,8 @@ function onApply() {
                             operation.value.equality,
                             operation.value.target,
                             dim,
-                            operation.value.noPrm,
                             elem.no,
+                            operation.value.noPrm,
                             operation.value.values.x
                         ])
                         no += 1
@@ -123,7 +114,7 @@ function onApply() {
             model.target.elemForce.filter(force =>
                 (operation.value.group != -1 ? operation.value.group === force.group.no : true)
                 && (operation.value.equality != -1 ? operation.value.equality === force.equality : true)
-                && (operation.value.target != -1 ? operation.value.target === force.type : true)
+                && (operation.value.target != -1 ? operation.value.target === force.type.is : true)
                 && (line.mesh.metadata === force.elemSlv)
             ).forEach(force => model.removeElemForce(force))
         })
@@ -134,121 +125,122 @@ function onApply() {
 </script>
 
 <template>
-    <el-form :model="operation" label-position="top" status-icon>
-        <el-form-item>
-            <el-radio-group v-model="operation.type">
-                <el-radio v-for="{ value, label } in options" :value="value">{{ label }}</el-radio>
-            </el-radio-group>
-        </el-form-item>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>目标分组</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-select v-model="operation.group">
-                        <el-option
-                            v-for="{ no, label } of operation.type == type.remove ? model.target.group.concat([{ no: -1, label: '全部' }]) : model.target.group"
-                            :label="label" :value="no" :key="no"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>等式类型</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-select v-model="operation.equality">
-                        <el-option
-                            v-for="[key, value] of operation.type == type.remove ? Object.entries(ElemForce.EQUALITY).concat([['所有', -1]]) : Object.entries(ElemForce.EQUALITY)"
-                            :label="key == 'EQ' ? '等于' : key == 'GT' ? '大于' : key == 'LT' ? '小于' : '全部'" :value="value"
-                            :key="value"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>目标类型</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-select v-model="operation.target">
-                        <el-option
-                            v-for="[key, value] of operation.type == type.remove ? Object.entries(ElemForce.TYPE).concat([['ALL', -1]]) : Object.entries(ElemForce.TYPE)"
-                            :label="targetLabel[key]" :value="value" :key="value"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8">
-                <el-form-item>
-                    <el-text>单元</el-text>
-                </el-form-item>
-            </el-col>
-            <el-col :span="16">
-                <el-form-item>
-                    <el-input v-model="operation.nos" disabled />
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <template v-if="operation.type != type.remove">
-            <el-row v-if="[ElemForce.TYPE.TDENSITYDIFF, ElemForce.TYPE.TDENSITYDIVD, ElemForce.TYPE.TFORCEDIVD1, ElemForce.TYPE.TFORCEDIVD2]
-                .includes(operation.target) && operation.type != type.remove">
+    <Dialog title="单元力目标" :width="250">
+        <el-form :model="operation" label-position="top" status-icon>
+            <el-form-item>
+                <el-radio-group v-model="operation.type">
+                    <el-radio v-for="{ value, label } in options" :value="value">{{ label }}</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-row>
                 <el-col :span="8">
                     <el-form-item>
-                        <el-text>参照单元</el-text>
+                        <el-text>目标分组</el-text>
                     </el-form-item>
                 </el-col>
                 <el-col :span="16">
                     <el-form-item>
-                        <el-input-number v-model.number="operation.noPrm" :min="1" />
+                        <el-select v-model="operation.group">
+                            <el-option
+                                v-for="{ no, label } of operation.type == type.remove ? model.target.group.concat([{ no: -1, label: '全部' }]) : model.target.group"
+                                :label="label" :value="no" :key="no"></el-option>
+                        </el-select>
                     </el-form-item>
                 </el-col>
             </el-row>
-            <template
-                v-if="[ElemForce.TYPE.SDENSITY, ElemForce.TYPE.TDENSITYDIFF, ElemForce.TYPE.TDENSITYDIVD].includes(operation.target)">
-                <el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>等式类型</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="operation.equality">
+                            <el-option
+                                v-for="[key, value] of operation.type == type.remove ? Object.entries(ElemForce.EQUALITY).concat([['所有', -1]]) : Object.entries(ElemForce.EQUALITY)"
+                                :label="key == 'EQ' ? '等于' : key == 'GT' ? '大于' : key == 'LT' ? '小于' : '全部'"
+                                :value="value" :key="value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>目标类型</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-select v-model="operation.target">
+                                <el-option
+                                v-for="type of operation.type == type.remove ? Object.values(ElemForce.TYPE).concat([{is: -1,label: '全部',alias: ''}]) : Object.values(ElemForce.TYPE)"
+                                :label="type.alias + ' ' + type.label"
+                                :value="type.is" :key="type.is"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-text>单元</el-text>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                    <el-form-item>
+                        <el-input v-model="operation.nos" disabled />
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <template v-if="operation.type != type.remove">
+                <el-row v-if="[ElemForce.TYPE.TDENSITYDIFF.is, ElemForce.TYPE.TDENSITYDIVD.is, ElemForce.TYPE.TFORCEDIVD1.is, ElemForce.TYPE.TFORCEDIVD2.is]
+                    .includes(operation.target) && operation.type != type.remove">
                     <el-col :span="8">
                         <el-form-item>
-                            <el-text>数值</el-text>
+                            <el-text>参照单元</el-text>
                         </el-form-item>
                     </el-col>
                     <el-col :span="16">
                         <el-form-item>
-                            <el-input v-model.number="operation.values.x" />
+                            <el-input-number v-model.number="operation.noPrm" :min="1" />
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <template
+                    v-if="[ElemForce.TYPE.SDENSITY.is, ElemForce.TYPE.TDENSITYDIFF.is, ElemForce.TYPE.TDENSITYDIVD.is].includes(operation.target)">
+                    <el-row>
+                        <el-col :span="8">
+                            <el-form-item>
+                                <el-text>数值</el-text>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="16">
+                            <el-form-item>
+                                <el-input v-model.number="operation.values.x" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </template>
+                <template v-else-if="[ElemForce.TYPE.SFORCE1.is, ElemForce.TYPE.TFORCEDIVD1.is, ElemForce.TYPE.SFORCE2.is, ElemForce.TYPE.TFORCEDIVD2.is]
+                    .includes(operation.target)">
+                    <el-row>
+                        <el-col :span="4" v-for="key in Object.keys(operation.dim)">
+                            <el-form-item>
+                                <el-checkbox v-model="operation.dim[key]" :label="key" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item>
+                                <el-input v-model.number="operation.values.x" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </template>
             </template>
-            <template v-else-if="[ElemForce.TYPE.SFORCE1, ElemForce.TYPE.TFORCEDIVD1, ElemForce.TYPE.SFORCE2, ElemForce.TYPE.TFORCEDIVD2]
-                .includes(operation.target)">
-                <el-row>
-                    <el-col :span="4" v-for="key in Object.keys(operation.dim)">
-                        <el-form-item>
-                            <el-checkbox v-model="operation.dim[key]" :label="key" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item>
-                            <el-input v-model.number="operation.values.x" />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </template>
-        </template>
-    </el-form>
+        </el-form>
+    </Dialog>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

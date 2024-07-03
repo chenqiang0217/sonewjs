@@ -2,6 +2,8 @@
 import { nextTick, ref, watch } from 'vue'
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
+import Dialog from '../Dialog.vue'
+import Empty from '../../main/table/Empty.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -91,42 +93,45 @@ watch(
 </script>
 
 <template>
-    <!-- 求解工况表格 -->
-    <div style="display: flex;padding-bottom: 5px;">
-        <el-text tag="b" type="info" style="margin-right: auto;">目标组别</el-text>
-        <el-button round @click="createTargetGroup"><el-text type="info">
-                <IconFront iconName="node-plus"></IconFront> 添加
-            </el-text></el-button>
-        <el-button round @click="removeTargetGroup"><el-text type="info">
-                <IconFront iconName="node-minus"></IconFront> 删除
-            </el-text> </el-button>
-    </div>
-    <el-table :data="model.target.group" @row-click="onRowClick" style="width: 100%;  margin-bottom: 20px"
-        highlight-current-row max-height="400" border fit show-overflow-tooltip tooltip-effect="light"
-        :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ 'text-align': 'center' }">
-        <el-table-column prop="no" label="编号" width="60" />
-        <el-table-column prop="label" label="名称">
-            <template #default="scope">
-                <el-input v-if="cell.row === scope.$index && cell.column === scope.cellIndex" v-model="cell.data"
-                    ref="cellRef" @keyup.enter="event => event.target.blur()" @blur="cellEditCompleted(scope, cell)" />
-                <el-text v-else @dblclick="cellEdit(scope, cell)" truncated>{{ scope.row.label.length
-                    != 0 ? scope.row.label : '无' }}</el-text>
+    <Dialog title="目标类别" :width="500">
+        <!-- 求解工况表格 -->
+        <div style="display: flex;padding-bottom: 5px;">
+            <el-text tag="b" type="info" style="margin-right: auto;">目标组别</el-text>
+            <el-button round @click="createTargetGroup"><el-text type="info">
+                    <IconFront iconName="node-plus"></IconFront> 添加
+                </el-text></el-button>
+            <el-button round @click="removeTargetGroup"><el-text type="info">
+                    <IconFront iconName="node-minus"></IconFront> 删除
+                </el-text> </el-button>
+        </div>
+        <el-table :data="model.target.group" @row-click="onRowClick" style="width: 100%;  margin-bottom: 20px"
+            highlight-current-row max-height="400" border fit show-overflow-tooltip tooltip-effect="light"
+            :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ 'text-align': 'center' }">
+            <el-table-column prop="no" label="编号" width="60" />
+            <el-table-column prop="label" label="名称">
+                <template #default="scope">
+                    <el-input v-if="cell.row === scope.$index && cell.column === scope.cellIndex" v-model="cell.data"
+                        ref="cellRef" @keyup.enter="event => event.target.blur()"
+                        @blur="cellEditCompleted(scope, cell)" />
+                    <el-text v-else @dblclick="cellEdit(scope, cell)" truncated>{{ scope.row.label.length
+                        != 0 ? scope.row.label : '无' }}</el-text>
+                </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述">
+                <template #default="scope">
+                    <el-input v-if="cell.row === scope.$index && cell.column === scope.cellIndex" v-model="cell.data"
+                        ref="cellRef" @keyup.enter="event => event.target.blur()"
+                        @blur="cellEditCompleted(scope, cell)" />
+                    <el-text v-else @dblclick="cellEdit(scope, cell)" truncated>{{ scope.row.description.length
+                        != 0 ? scope.row.description : '无'
+                        }}</el-text>
+                </template>
+            </el-table-column>
+            <template #empty>
+                <Empty />
             </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述">
-            <template #default="scope">
-                <el-input v-if="cell.row === scope.$index && cell.column === scope.cellIndex" v-model="cell.data"
-                    ref="cellRef" @keyup.enter="event => event.target.blur()" @blur="cellEditCompleted(scope, cell)" />
-                <el-text v-else @dblclick="cellEdit(scope, cell)" truncated>{{ scope.row.description.length
-                    != 0 ? scope.row.description : '无'
-                    }}</el-text>
-            </template>
-        </el-table-column>
-        <template #empty>
-            <el-empty :image-size="100" description="未定义">
-            </el-empty>
-        </template>
-    </el-table>
+        </el-table>
+    </Dialog>
 </template>
 
 <style scoped>
