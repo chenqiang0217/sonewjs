@@ -57,6 +57,7 @@ const solutionRun = () => {
                     })
                     break
                 case CONSTANT.TASK.RUN.FAIL:
+                    status.task.run = CONSTANT.TASK.RUN.FAIL
                     messages.add({
                         text: '计算未收敛',
                         level: Message.TYPES.WARNING.LEVEL,

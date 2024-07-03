@@ -32,7 +32,7 @@ const createLoadStep = (useDefault = false) => {
             new Substep(30, 1.0e-1, 1.0e-6),
             new Substep(60, 1.0e-3, 1.0e-6),
             new Substep(60, 1.0e-5, 1.0e-6),
-            new Substep(30, 0.0, 1.0e-6),
+            new Substep(60, 0.0, 1.0e-6),
         ]
         model.createLoadStep('basis', [], subStep, 'basis')
     }
