@@ -8,6 +8,7 @@ import {useViewStatusStore} from './status'
 import {VIEWCONSTANT} from './constant'
 import {Point} from './point'
 import {Line} from './line'
+import {Color3} from '@babylonjs/core'
 
 class View {
     constructor() {
@@ -60,7 +61,7 @@ class View {
         }
         return {min, max}
     }
-    watchModelChange() {
+    watchNodeTypeChange() {
         const model = this.scene.metadata.useModel()
         Array.from(['free', 'lock']).forEach(type => {
             watch(
@@ -71,23 +72,8 @@ class View {
                             this.points.prep
                                 .find(point => point.mesh.metadata === node)
                                 .updateMeshColor(
-                                    this.scene.metadata.materials.point.prep[
-                                        type
-                                    ]
+                                    this.scene.metadata.materials.point[type]
                                 )
-                    )
-                }
-            )
-        })
-        Array.from(['free', 'lock']).forEach(type => {
-            watch(
-                () => model.categorized.elem[type],
-                (now, pre) => {
-                    now.filter(now => !pre.find(pre => pre === now)).forEach(
-                        elem =>
-                            this.lines.prep
-                                .find(line => line.mesh.metadata === elem)
-                                .updateMeshColor()
                     )
                 }
             )
@@ -143,4 +129,4 @@ const useView = (function () {
     }
 })()
 
-export {useView, useViewConfigStore, useViewStatusStore, VIEWCONSTANT}
+export {useView, useViewConfigStore, useViewStatusStore, VIEWCONSTANT, Color3}

@@ -95,31 +95,20 @@ const VIEWCONSTANT = {
             NODE: {
                 DEFAULT: Color3.Black(),
                 SELECTED: Color3.Red(),
-                PREP: {
-                    FREE: Color3.Blue(),
-                    LOCK: Color3.Gray()
-                },
-                RSLT: {
-                    FREE: Color3.Black(),
-                    LOCK: Color3.Gray()
-                }
+                FREE: Color3.Blue(),
+                LOCK: Color3.Gray()
             },
             ELEM: {
                 DEFAULT: Color3.Black(),
                 SELECTED: Color3.Red(),
+                FREE: Color3.Black(),
+                LOCK: Color3.Gray(),
                 BINDING: {
+                    NO: 'no',
                     ETYPE: 'eType',
                     FEMTYPE: 'femType',
                     MAT: 'mat',
                     SEC: 'sec'
-                },
-                PREP: {
-                    FREE: Color3.Black(),
-                    LOCK: Color3.Gray()
-                },
-                RSLT: {
-                    FREE: Color3.Black(),
-                    LOCK: Color3.Gray()
                 }
             },
             MEMBRANE: {
@@ -127,15 +116,20 @@ const VIEWCONSTANT = {
             }
         },
         TEXTBLOCK: {
-            //注意text颜色和mesh颜色格式是不一致的
-            LABEL: {
-                NODE: '#F56C6C',
-                ELEM: '#67C23A'
+            NODE: {
+                DEFAULT: '#909399',
+                LABEL: '#F56C6C',
+                TARGET: {
+                    NODESHAPE: '#909399'
+                }
             },
-            TARGET:{
-                NODESHAPE: '#909399',
-                ELEMSHAPE: '#909399',
-                ELEMFORCE: '#909399'
+            ELEM: {
+                DEFAULT: '#909399',
+                LABEL: '#67C23A',
+                TARGET: {
+                    ELEMSHAPE: '#909399',
+                    ELEMFORCE: '#909399'
+                }
             }
         }
     }

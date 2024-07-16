@@ -131,7 +131,7 @@ const newWindow = () => {
 }
 
 .el-text {
-    font-family: "JetBrains Mono";
+    font-family: "JetBrains Mono Regular";
 }
 .el-scrollbar{
     padding-left: 8px;

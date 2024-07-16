@@ -1,5 +1,5 @@
-import { markRaw } from 'vue'
-import {v4 as uuidv4} from 'uuid'
+import {markRaw} from 'vue'
+// import {v4 as uuidv4} from 'uuid'
 import {Node} from '../../../api/model/index'
 import {useModelStore} from '../../../stores/model'
 import {useMessageStore, Message} from '../../../stores/message'
@@ -8,11 +8,14 @@ import {useStatusStore} from '../../../stores/status'
 import {CONSTANT} from '../../../stores/constant'
 import {task} from '../../../api/request'
 import {useView} from '../../../api/view/index'
-import {byNoAsec, sleep, base64ToFloat64Array} from '../../../api/utils'
+import {
+    byNoAsec,
+    base64ToFloat64Array,
+    float64ArrayToBase64
+} from '../../../api/utils'
 import Config from './Config.vue'
 import Run from './Run.vue'
 import Result from './Result.vue'
-
 
 const showDialogSolutionConfig = () => {
     const status = useStatusStore()
@@ -23,70 +26,29 @@ const showDialogSolutionRun = () => {
     const status = useStatusStore()
     status.ui.dialog.component = markRaw(Run)
     status.ui.dialog.show = true
-
 }
-const solutionRun = () => {
+const solutionRun = async () => {
     const model = useModelStore()
     const messages = useMessageStore()
     const status = useStatusStore()
-
     status.ui.tab.message.active = `server`
     const to = 'server'
-    model.result = []
-
-    // const uuid = status.task.uuid
-    const uuid = uuidv4()
-    status.task.uuid = uuid
-
+    model.disposeResult()
     messages.add({
-        // text: '开始计算，任务编码:' + uuid,
-        text: '开始计算，向服务器发送计算数据',
+        text: '连接服务器',
         level: Message.TYPES.INFO.LEVEL,
         to
     })
-
-    task.run(formData())
-        .then(function (response) {
-            //计算完成
-            switch (response.status) {
-                case CONSTANT.TASK.RUN.SUCCESS:
-                    messages.add({
-                        text: '计算完成',
-                        level: Message.TYPES.SUCCESS.LEVEL,
-                        to
-                    })
-                    break
-                case CONSTANT.TASK.RUN.FAIL:
-                    status.task.run = CONSTANT.TASK.RUN.FAIL
-                    messages.add({
-                        text: '计算未收敛',
-                        level: Message.TYPES.WARNING.LEVEL,
-                        to
-                    })
-                    break
-                case CONSTANT.TASK.RUN.ABORT:
-                    status.task.run = CONSTANT.TASK.RUN.ABORT
-                    messages.add({
-                        text: '模型存在致命错误，计算中止',
-                        level: Message.TYPES.ERROR.LEVEL,
-                        to
-                    })
-                    break
-            }
-        })
-        .catch(function () {
-            status.task.run = CONSTANT.TASK.RUN.ABORT
-            messages.add({
-                text: '服务器响应超时',
-                level: Message.TYPES.ERROR.LEVEL,
-                to
-            })
-        })
-        .finally(function () {})
+    task.run(await modelJson(), handleResult)
     showSolutionProgress()
     status.task.run = CONSTANT.TASK.RUN.PROGRESS
-    status.task.query.retry = 0
-    queryResult({uuid})
+    status.resetTaskResponse()
+    messages.add({
+        text: '获取计算结果',
+        level: Message.TYPES.INFO.LEVEL,
+        to,
+        animation: true
+    })
 }
 const showSolutionProgress = () => {
     const status = useStatusStore()
@@ -127,7 +89,7 @@ const resultViewInit = () => {
             .forEach(line => line.hide())
         model.categorized.node.free.forEach(node => {
             view.createPoint(node.clone(), 'rslt').updateMeshColor(
-                view.scene.metadata.materials.point.prep.free
+                view.scene.metadata.materials.point.free
             )
         })
         const freeNode = view.points.rslt.map(point => point.mesh.metadata)
@@ -137,21 +99,31 @@ const resultViewInit = () => {
             const el = elem.clone()
             el.iNode = iNode
             el.jNode = jNode
-            view.createLine(el, 'rslt').updateMeshColor()
+            view.createLine(el, 'rslt')
         })
     }
 }
 
-const formData = () => {
+const modelJson = async () => {
     const model = useModelStore()
-    const status = useStatusStore()
-    const loadStep = model.loadStep.filter(item => item.activated)
-    if(!loadStep){
+    const config = useConfigStore()
+    const loadStep = model.loadStep.find((item, index) => {
+        if (item.run) {
+            item.no = index + 1
+            return true
+        } else {
+            return false
+        }
+    })
+    if (!loadStep) {
+        const messages = useMessageStore()
+        const to = 'server'
+        messages.add({
+            text: '未添加荷载步',
+            level: Message.TYPES.ERROR.LEVEL,
+            to
+        })
         throw Error('error')
-    }
-    const taskConfig = {
-        uuid: status.task.uuid,
-        loadStep
     }
     const node = new Float64Array(
         model.categorized.node.free
@@ -173,134 +145,47 @@ const formData = () => {
     )
     const nodeShape = new Float64Array(
         model.target.nodeShape
-        .filter(shape => loadStep[0].target.includes(shape.group))
-        .map(shape => shape.asArray()).flat()
+            .filter(shape => loadStep.target.includes(shape.group))
+            .map(shape => shape.asArray())
+            .flat()
     )
     const elemShape = new Float64Array(
         model.target.elemShape
-        .filter(shape => loadStep[0].target.includes(shape.group))
-        .map(shape => shape.asArray()).flat()
+            .filter(shape => loadStep.target.includes(shape.group))
+            .map(shape => shape.asArray())
+            .flat()
     )
     const elemForce = new Float64Array(
         model.target.elemForce
-        .filter(force => loadStep[0].target.includes(force.group))
-        .map(force => force.asArray()).flat()
+            .filter(force => loadStep.target.includes(force.group))
+            .map(force => force.asArray())
+            .flat()
     )
     const elemForceInit = new Float64Array(
         model.categorized.elem.free
             .sort(byNoAsec)
             .map(elem => (elem.femType == 1 ? 1.0 : -1))
     )
-    const formData = new FormData()
-    formData.append('config', JSON.stringify(taskConfig))
-    formData.append('node', new Blob([node.buffer]))
-    formData.append('elem', new Blob([elem.buffer]))
-    formData.append('cnst', new Blob([cnst.buffer]))
-    formData.append('nodeShape', new Blob([nodeShape.buffer]))
-    formData.append('elemShape', new Blob([elemShape.buffer]))
-    formData.append('elemForce', new Blob([elemForce.buffer]))
-    formData.append('elemForceInit', new Blob([elemForceInit.buffer]))
-
-    return formData
-}
-
-const queryResult = async opt => {
-    const status = useStatusStore()
-    const config = useConfigStore()
-    const messages = useMessageStore()
-    const delay = config.task.result.query.delaySecond
-    const to = 'server'
-    messages.add({
-        text: '获取计算结果',
-        level: Message.TYPES.INFO.LEVEL,
-        to,
-        delay
-    })
-    await sleep(delay)
-    const {
-        uuid,
-        step = 0,
-        loadStep = 0,
-        subStep = 0,
-        iterativeStep = 0,
-        count = config.task.result.query.count
-    } = opt
-    const options = {uuid, step, loadStep, subStep, iterativeStep, count}
-    const formData = new FormData()
-    formData.append('options', JSON.stringify(options))
-    let response
-    try {
-        status.task.query.retry += 1
-        if (status.task.run != CONSTANT.TASK.RUN.ABORT) {
-            status.task.query.retry += 1
-            response = await task.result.query(formData)
-        } else {
-            return
+    return JSON.stringify({
+        node: await float64ArrayToBase64(node).then(s => s),
+        elem: await float64ArrayToBase64(elem).then(s => s),
+        cnst: await float64ArrayToBase64(cnst).then(s => s),
+        nodeShape: await float64ArrayToBase64(nodeShape).then(s => s),
+        elemShape: await float64ArrayToBase64(elemShape).then(s => s),
+        elemForce: await float64ArrayToBase64(elemForce).then(s => s),
+        elemForceInit: await float64ArrayToBase64(elemForceInit).then(s => s),
+        config: {
+            response: config.task.response,
+            loadStep
         }
-    } catch (error) {
-        status.task.run = CONSTANT.TASK.RUN.ABORT
-        messages.add({
-            text: '获取计算结果错误',
-            level: Message.TYPES.ERROR.LEVEL,
-            to
-        })
-        return
-    }
-    const {statusRes, steps} = handleResult(response.data)
-    if (statusRes != CONSTANT.TASK.RUN.PROGRESS) {
-        status.task.run = statusRes
-    }
-    let start, end
-    if (steps.length != 0) {
-        start = ': (' + steps.at(0) + ')'
-        end = ' ~ (' + steps.at(-1) + ')'
-    }
-    messages.add({
-        text:
-            '获取计算结果共' +
-            steps.length +
-            '步' +
-            (steps.length != 0 ? start : '') +
-            (steps.length >= 2 ? end : ''),
-        level: Message.TYPES.INFO.LEVEL,
-        to
     })
-    switch (statusRes) {
-        case CONSTANT.TASK.RUN.PROGRESS:
-            options.step = status.task.query.step
-            options.loadStep = status.task.query.loadStep
-            options.subStep = status.task.query.subStep
-            options.iterativeStep = status.task.query.iterativeStep
-            queryResult(options)
-            break
-        case CONSTANT.TASK.RUN.SUCCESS:
-            messages.add({
-                text: '获取计算结果完成',
-                level: Message.TYPES.SUCCESS.LEVEL,
-                to
-            })
-            // await task.result.delete({ uuid: options.uuid })
-            break
-        case CONSTANT.TASK.RUN.FAIL:
-            messages.add({
-                text: '计算结果不收敛',
-                level: Message.TYPES.WARNING.LEVEL,
-                to
-            })
-            break
-        case CONSTANT.TASK.RUN.ABORT:
-            messages.add({
-                text: '计算错误',
-                level: Message.TYPES.ERROR.LEVEL,
-                to
-            })
-            break
-    }
 }
 
 const handleResult = result => {
     const model = useModelStore()
     const status = useStatusStore()
+    const messages = useMessageStore()
+    const to = 'server'
     const fixedNode = Array.from(
         new Set(model.categorized.cnst.map(cnst => cnst.node).flat())
     ).sort(byNoAsec)
@@ -308,14 +193,26 @@ const handleResult = result => {
         .filter(node => !fixedNode.find(fixedNode => fixedNode === node))
         .sort(byNoAsec)
     const freeElem = model.categorized.elem.free.sort(byNoAsec)
-    let statusRes = CONSTANT.TASK.RUN.PROGRESS
-    let step, loadStep, subStep, iterativeStep, rsdl, rou, mu, nu
+    let step, loadStep, subStep, iterativeStep, rsdl, rou, mu, nu, statusRes
     const steps = []
     const n = deformedNode.length
-    result.forEach(res => {
+    let done = false
+    for (const res of result) {
+        statusRes = res.status
+        status.task.run = statusRes
+        if (statusRes == CONSTANT.TASK.RUN.ABORT) {
+            messages.add({
+                text: '计算中断',
+                level: Message.TYPES.ERROR.LEVEL,
+                to
+            })
+            return
+        } else if (statusRes == CONSTANT.TASK.RUN.END) {
+            done = true
+            break
+        }
         let p = [].slice.call(base64ToFloat64Array(res.x))
         let d = [].slice.call(base64ToFloat64Array(res.q))
-        statusRes = res.status
         step = res.step
         loadStep = res.loadStep
         subStep = res.subStep
@@ -384,14 +281,49 @@ const handleResult = result => {
             nu
         })
         steps.push([loadStep, subStep, iterativeStep])
-    })
-    if (result.length != 0) {
-        status.task.query.step = step
-        status.task.query.loadStep = loadStep
-        status.task.query.subStep = subStep
-        status.task.query.iterativeStep = iterativeStep
     }
-    return {statusRes, steps}
+    let [start, end] = [0, 0]
+    if (result.length != 0) {
+        status.task.response.step = step
+        status.task.response.loadStep = loadStep
+        status.task.response.subStep = subStep
+        status.task.response.iterativeStep = iterativeStep
+        status.task.run = statusRes
+        start = ': (' + steps.at(0) + ')'
+        end = ' ~ (' + steps.at(-1) + ')'
+    }
+    if (done) {
+        if (model.result.at(-1)?.status == CONSTANT.TASK.RUN.SUCCESS) {
+            messages.add({
+                text: '计算成功',
+                level: Message.TYPES.SUCCESS.LEVEL,
+                to
+            })
+        } else {
+            messages.add({
+                text: '计算不收敛',
+                level: Message.TYPES.WARNING.LEVEL,
+                to
+            })
+        }
+        return
+    }
+    messages.add({
+        text:
+            '获取计算结果共' +
+            steps.length +
+            '步' +
+            (steps.length != 0 ? start : '') +
+            (steps.length >= 2 ? end : ''),
+        level: Message.TYPES.INFO.LEVEL,
+        to
+    })
+    messages.add({
+        text: '获取计算结果',
+        level: Message.TYPES.INFO.LEVEL,
+        to,
+        animation: true
+    })
 }
 
 export {

@@ -16,10 +16,10 @@ const model = useModelStore()
 const cellWidth = 150
 const columns = [
     { key: 'no', title: '单元号', dataKey: 'no', width: cellWidth },
-    { key: 'eType', title: '锁定', dataKey: 'eType', width: cellWidth },
-    { key: 'femType', title: '类型', dataKey: 'femType', width: cellWidth },
-    { key: 'mat', title: '材料', dataKey: 'mat', width: cellWidth },
-    { key: 'sec', title: '截面', dataKey: 'sec', width: cellWidth },
+    { key: 'eType', title: '锁定', dataKey: 'eType.no', width: cellWidth },
+    { key: 'femType', title: '类型', dataKey: 'femType.no', width: cellWidth },
+    { key: 'mat', title: '材料', dataKey: 'mat.no', width: cellWidth },
+    { key: 'sec', title: '截面', dataKey: 'sec.no', width: cellWidth },
     { key: 'iNode', title: 'i节点', dataKey: 'iNode.no', width: cellWidth },
     { key: 'jNode', title: 'j节点', dataKey: 'jNode.no', width: cellWidth }
 ]

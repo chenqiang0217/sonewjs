@@ -37,7 +37,7 @@ globalThis.useConfig = useConfigStore
 // 初始化git
 // git init
 // git add .
-// git commit -m '...'
+// git commit -m 'version-0.1.0'
 // git remote add sonewjs https://github.com/chenqiang0217/sonewjs.git
 // git pull --rebase sonewjs master
 // git push -u sonewjs master

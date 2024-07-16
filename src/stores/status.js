@@ -1,4 +1,3 @@
-import { markRaw } from 'vue'
 import { defineStore } from 'pinia'
 import { CONSTANT } from './constant'
 
@@ -27,20 +26,16 @@ const useStatusStore = defineStore('status', {
                 loading: false
             },
             task: {
-                uuid: '2ff4fda4-c8f8-4e7e-b11d-bf8da910d5c8',
                 run: CONSTANT.TASK.RUN.NONE,
-                query: {
+                response: {
                     step: 0,
                     loadStep: 0,
                     subStep: 0,
                     iterativeStep: 0,
-                    retry: 0,
                 },
-            },
-            result: {
-                option: {
-                    step: 0,
-                },
+                view:{
+                    step: 0
+                }
             },
             user: {
                 name: ``,
@@ -64,6 +59,12 @@ const useStatusStore = defineStore('status', {
             this.ui.tab.main.list.push(tableName)
             this.ui.tab.main.active = tableName
         },
+        resetTaskResponse() {
+            this.task.response.step = 0
+            this.task.response.loadStep = 0
+            this.task.response.subStep = 0
+            this.task.response.iterativeStep = 0
+        }
     }
 })
 

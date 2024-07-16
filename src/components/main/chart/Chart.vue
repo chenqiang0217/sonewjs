@@ -229,13 +229,13 @@ onMounted(() => {
         CanvasRenderer,
     ])
     const canvas = document.getElementById('chart')
+    const loadStep = model.loadStep.find(ls => ls.run)
     chart = echarts.init(canvas, null, { width: props.width, height: props.height })
     chart.setOption(option)
     model.result.forEach(result => {
         series[0].data.push([result.step, result.rsdl])
         series[1].data.push([result.step, result.mu])
-        series[2].data.push([result.step, config.task.loadStep
-            .find(ls => ls.no == result.loadStep).subStep
+        series[2].data.push([result.step, loadStep.subStep
             .find(ss => ss.no == result.subStep).rsdl
         ])
     })
@@ -245,18 +245,22 @@ onMounted(() => {
     start = model.result.length - 1
 })
 const progress = computed(() => {
-    let totalStep = 0
-    config.task.loadStep.forEach((loadStep) => {
-        loadStep.subStep.forEach(subStep => totalStep += subStep.nIterativeStep)
-    })
     switch (status.task.run) {
         case CONSTANT.TASK.RUN.NONE:
             return 0.0
         case CONSTANT.TASK.RUN.ABORT:
             return 0.0
         case CONSTANT.TASK.RUN.PROGRESS:
-            return totalStep ? (status.task.query.step / totalStep) : 0.0
-        case CONSTANT.TASK.RUN.SUCCESS:
+            const loadStep = model.loadStep.find(ls => ls.run)
+            if(!loadStep){
+                return 0.0
+            }
+            let totalStep = status.task.response.step - status.task.response.iterativeStep
+            for (let i = status.task.response.subStep ? status.task.response.subStep - 1 : 0; i < loadStep.subStep.length; i++) {
+                totalStep += loadStep.subStep[i].nIterativeStep
+            }
+            return totalStep ? (status.task.response.step / totalStep) : 0.0
+        case CONSTANT.TASK.RUN.END:
             return 1.0
         default:
             return 0.0
@@ -276,9 +280,9 @@ watch(
                 let result = model.result[i]
                 series[0].data.push([result.step, result.rsdl])
                 series[1].data.push([result.step, result.mu])
-                series[2].data.push([result.step, config.task.loadStep
-                    .find(ls => ls.no == result.loadStep).subStep
-                    .find(ss => ss.no == result.subStep).rsdl])
+                series[2].data.push([result.step, model.loadStep.find(ls => ls.run).subStep
+                    .at(result.subStep - 1).rsdl
+                ])
             }
             start = now
             const subSteps = model.result.filter((item, index, self) =>

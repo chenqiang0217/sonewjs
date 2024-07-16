@@ -17,8 +17,7 @@ const useViewStatusStore = defineStore('viewStatus', {
                 visible: {
                     node: true,
                     elem: true,
-                    cnst: false,
-                    nodeShape: false
+                    cnst: false
                 },
                 selected: {
                     info: {},
@@ -32,7 +31,6 @@ const useViewStatusStore = defineStore('viewStatus', {
                 }
             },
             textBlock: {
-                prefix: 't',
                 visible: {
                     label: {
                         node: false,

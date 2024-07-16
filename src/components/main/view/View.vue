@@ -8,7 +8,7 @@ const status = useStatusStore()
 onMounted(() => {
     const view = useView()
     view.useModel = useModelStore
-    view.watchModelChange()
+    view.watchNodeTypeChange()
 })
 </script>
 

@@ -178,8 +178,8 @@ function onApply() {
             break
         case type.rename:
             const point = points.shift()
-            point.no = operation.value.noNew
-            point.updateLabel()
+            point.mesh.metadata.no = operation.value.noNew
+            point.updateLabelText()
             break
     }
     view.scene.metadata.useStatus().mesh.selected.node.clear()

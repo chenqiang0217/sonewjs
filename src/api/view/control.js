@@ -302,7 +302,7 @@ function onPickEnd() {
             mesh.isPickable &&
             pickBox.intersectsMesh(mesh, true)
         ) {
-            intersectedPoints.add(point.no)
+            intersectedPoints.add(point.mesh.metadata.no)
         }
     })
     const lines = [...view.lines.prep, ...view.lines.rslt]
@@ -313,7 +313,7 @@ function onPickEnd() {
             mesh.isPickable &&
             pickBox.intersectsMesh(mesh, true)
         ) {
-            intersectedLines.add(line.no)
+            intersectedLines.add(line.mesh.metadata.no)
         }
     })
     if (
@@ -343,13 +343,13 @@ function onNodeSelected(now, pre) {
     let node = SetOperation(now, pre, 'delete')
     const points = [...view.points.prep, ...view.points.rslt]
     points
-        .filter(point => node.has(point.no))
+        .filter(point => node.has(point.mesh.metadata.no))
         .forEach(point =>
             point.updateMeshColor(view.scene.metadata.materials.point.selected)
         )
     node = SetOperation(pre, now, 'delete')
     points
-        .filter(point => node.has(point.no))
+        .filter(point => node.has(point.mesh.metadata.no))
         .forEach(point => point.updateMeshColor())
 }
 function onElemSelected(now, pre) {
@@ -358,11 +358,11 @@ function onElemSelected(now, pre) {
     const config = view.scene.metadata.useConfig()
     const lines = [...view.lines.prep, ...view.lines.rslt]
     lines
-        .filter(line => elem.has(line.no))
+        .filter(line => elem.has(line.mesh.metadata.no))
         .forEach(line => line.updateMeshColor(config.mesh.elem.color.selected))
     elem = SetOperation(pre, now, 'delete')
     lines
-        .filter(line => elem.has(line.no))
+        .filter(line => elem.has(line.mesh.metadata.no))
         .forEach(line => line.updateMeshColor())
 }
 

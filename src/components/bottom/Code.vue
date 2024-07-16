@@ -1,12 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { minimalSetup, basicSetup } from 'codemirror'
+import { minimalSetup } from 'codemirror'
 import { EditorState } from '@codemirror/state'
-import { EditorView, lineNumbers, highlightActiveLineGutter, keymap } from '@codemirror/view'
+import { EditorView, lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
 import { javascript } from '@codemirror/lang-javascript'
-import { oneDark } from '@codemirror/theme-one-dark'
-// import { espresso } from 'thememirror'
-
 
 const props = defineProps({
     doc: {
@@ -28,7 +25,7 @@ let view
 onMounted(() => {
     const theme = EditorView.theme({
         '&': {
-            fontFamily: 'JetBrains Mono, HarmonyOS Sans SC, Consolas, Courier New, monospace',
+            fontFamily: 'JetBrains Mono Regular, HarmonyOS Sans SC, Consolas, Courier New, monospace',
             fontSize: '14px',
             backgroundColor: props.editable ? '#F2F6FC' : '#FFFFFF'
         },
@@ -40,11 +37,6 @@ onMounted(() => {
         minimalSetup, lineNumbers(), highlightActiveLineGutter(), javascript(), theme,
         EditorView.editable.of(props.editable),
     ]
-    // if (props.editable) {
-    //     extensions.push(
-    //         keymap.of([{ key: 'Ctrl-C-Enter', mac: 'Cmd-Enter', run: button.value.click, preventDefault: true, stopPropagation: true }])
-    //     )
-    // }
     const state = EditorState.create({
         doc: props.doc,
         extensions

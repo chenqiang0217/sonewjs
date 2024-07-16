@@ -15,7 +15,7 @@ defineProps({
 })
 const model = useModelStore()
 const status = useStatusStore()
-const node = model.result.find(res => res.step == status.result.option.step).node
+const node = model.result.find(res => res.step == status.task.view.step).node
 const cellWidth = 150
 const digits = 3
 const columns = [

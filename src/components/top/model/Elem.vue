@@ -5,7 +5,7 @@ import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { stringToNumberArray, Validator } from '../../../api/utils'
-import { Elem } from '../../../api/model/index'
+import { ElemType } from '../../../api/model/index'
 import Dialog from '../Dialog.vue'
 
 const model = useModelStore()
@@ -35,7 +35,7 @@ const operation = ref({
     nos,
     start: model.maxNo.elem + 1,
     noNew: model.maxNo.elem + 1,
-    eType: Elem.ETYPE.FREE,
+    eType: ElemType.FREE.no,
     femType: 1,
     mat: 1,
     sec: 1,
@@ -189,7 +189,7 @@ function onApply() {
             lines.forEach((line, index) => {
                 const elem = line.mesh.metadata
                 if (operation.value.modify.eType) {
-                    elem.eType = elem.eType === Elem.ETYPE.FREE ? Elem.ETYPE.LOCK : Elem.ETYPE.FREE
+                    elem.eType = elem.eType === ElemType.FREE ? ElemType.LOCK : ElemType.FREE
                 }
                 if (operation.value.modify.ijNode) {
                     [elem.iNode, elem.jNode] = [elem.jNode, elem.iNode]
@@ -226,8 +226,8 @@ function onApply() {
             <template v-if="operation.type == type.create">
                 <el-form-item>
                     <el-radio-group v-model="operation.eType">
-                        <el-radio :value="Elem.ETYPE.FREE">自由</el-radio>
-                        <el-radio :value="Elem.ETYPE.LOCK">锁定</el-radio>
+                        <el-radio :value="ElemType.FREE.no">自由</el-radio>
+                        <el-radio :value="ElemType.LOCK.no">锁定</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item prop="start">

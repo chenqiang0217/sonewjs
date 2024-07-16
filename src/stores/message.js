@@ -7,10 +7,10 @@ export class Message {
         ERROR: {LEVEL: 4, NAME: 'danger'},
         COMMANDER: {LEVEL: 5, NAME: 'commander'}
     }
-    constructor({text, level, delay = 0}) {
+    constructor({text, level, animation = false}) {
         this.text = text
         this.level = level
-        this.delay = delay
+        this.animation = animation
     }
 }
 export const useMessageStore = defineStore('message', {
@@ -25,9 +25,9 @@ export const useMessageStore = defineStore('message', {
             text,
             level = Message.TYPES.INFO.LEVEL,
             to = 'client',
-            delay = 0
+            animation = false
         }) {
-            this[to].push(new Message({text, level, delay}))
+            this[to].push(new Message({text, level, animation}))
             return {
                 to,
                 index: this[to].length - 1

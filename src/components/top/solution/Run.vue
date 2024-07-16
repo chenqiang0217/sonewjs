@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { solutionRun } from './solution'
@@ -8,23 +8,26 @@ import Empty from '../../main/table/Empty.vue'
 
 const model = useModelStore()
 const status = useStatusStore()
-const left = ref(0)
 const tableRef = ref()
 const onSelectionChange = (rows) => {
-    model.loadStep.forEach(item => item.activated = false)
+    model.loadStep.forEach(item => item.run = false)
     model.loadStep
         .filter(item => item === rows?.at(-1))
-        .forEach(item => item.activated = true)
-    rows.forEach((row, index, arr) => {
-        if (index < arr.length - 1) {
+        .forEach(item => {
+            if(item === rows?.at(-1)){
+                item.run = true
+            }
+            else{
+                item.run = false
+            }
+        })
+    rows.forEach(row => {
+        if (!row.run) {
             tableRef.value?.toggleRowSelection(row, false)
         }
     })
 }
 const width = 600
-onMounted(() => {
-    left.value = (document.body.clientWidth - width) / 2
-})
 watch(
     () => status.ui.dialog.apply,
     (apply) => {

@@ -33,8 +33,8 @@ const position = computed(() => ({
         <div class="dialog" :style="position" v-drag>
             <div class="header">
                 <slot name="header">
-                    <el-text tag="b" style="padding-left: 10px;margin-right: auto;">{{ title }}</el-text>
-                    <el-text class="close" style="padding-right: 10px;">
+                    <el-text tag="b" style="margin-right: auto;">{{ title }}</el-text>
+                    <el-text class="close">
                         <IconFront iconName="close" @click="status.ui.dialog.show = false" />
                     </el-text>
                 </slot>
@@ -73,15 +73,19 @@ const position = computed(() => ({
     height: 2em;
     display: flex;
     align-items: center;
-    width: 100%;
 
-    .el-text {
+    &.el-text {
         color: var(--el-color-primary);
     }
 }
 
+.header {
+    padding: 0 10px;
+}
+
 .el-button {
     max-width: 160px;
+    width: 100%;
 }
 
 .header:hover,
@@ -90,6 +94,10 @@ const position = computed(() => ({
 
     .el-text {
         color: var(--el-color-primary-light-7);
+    }
+
+    .el-text.close:hover {
+        color:  var(--el-color-primary-light-5);
     }
 }
 
@@ -104,11 +112,11 @@ const position = computed(() => ({
     padding: 10px;
     padding-bottom: 0;
 
-    .el-input-number {
+    &.el-input-number {
         width: 100%;
     }
 
-    .el-select {
+    &.el-select {
         width: 100%;
     }
 }

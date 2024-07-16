@@ -41,6 +41,20 @@ function base64ToFloat64Array(base64String) {
     }
     return new Float64Array(outputArray.buffer)
 }
+function float64ArrayToBase64(float64Array) {
+    const blob = new Blob([float64Array.buffer])
+    var reader = new FileReader()
+    reader.readAsDataURL(blob)
+    return new Promise((resolve, reject) => {
+        reader.onload = function () {
+            resolve(reader.result.split(',')[1])
+        }
+        reader.onerror = function (error) {
+            reject(error)
+        }
+    })
+}
+
 class Validator{
     static  AllNumber() {
         return !this.includes(Number.NaN)
@@ -68,4 +82,4 @@ class Validator{
 }
 
 
-export { byNumAsec, byNoAsec, stringToNumberArray, SetOperation, debounce, sleep, base64ToFloat64Array, Validator }
+export { byNumAsec, byNoAsec, stringToNumberArray, SetOperation, debounce, sleep, base64ToFloat64Array, float64ArrayToBase64, Validator }

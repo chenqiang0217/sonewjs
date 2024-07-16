@@ -2,8 +2,11 @@
 import { ref, computed } from 'vue'
 import { Target } from '../../api/model/index'
 import { useModelStore } from '../../stores/model'
+import { useViewConfigStore, Color3 } from '../../api/view/index'
 import RightContextMenu from './RightContextMenu.vue'
+import Color from './Color.vue'
 
+const config = useViewConfigStore()
 const equality = [
     {
         no: Target.EQUALITY.EQ,
@@ -40,7 +43,8 @@ const modelTreeView = computed(() => [
                             label: 'free'
                         },
                         table: 'node'
-                    }
+                    },
+                    color: config.mesh.node.color.free
                 }, {
                     label: '锁定: ' + model.categorized.node.lock.length,
                     icon: `lock`,
@@ -51,7 +55,8 @@ const modelTreeView = computed(() => [
                             label: 'lock',
                         },
                         table: 'node'
-                    }
+                    },
+                    color: config.mesh.node.color.lock
                 }]
             }, {
                 label: '单元',
@@ -62,22 +67,24 @@ const modelTreeView = computed(() => [
                     tag: {
                         view: {
                             mesh: 'elem',
-                            from: 'type',
+                            from: 'eType',
                             label: 'free'
                         },
                         table: 'elem'
-                    }
+                    },
+                    color: model.elemType[0].color
                 }, {
                     label: '锁定: ' + model.categorized.elem.lock.length,
                     icon: `lock`,
                     tag: {
                         view: {
                             mesh: 'elem',
-                            from: 'type',
+                            from: 'eType',
                             label: 'lock'
                         },
                         table: 'elem'
-                    }
+                    },
+                    color: model.elemType[1].color
                 }]
             }]
     },
@@ -89,16 +96,17 @@ const modelTreeView = computed(() => [
             icon: `femType`,
             children: model.categorized.elem.femType.map((femType) => {
                 return {
-                    label: femType.label + ': ' + femType.elem.length,
+                    label: femType.key.label + ': ' + femType.elem.length,
                     icon: `tag`,
                     tag: {
                         view: {
                             mesh: 'elem',
                             from: 'femType',
-                            label: femType.label
+                            label: femType.key
                         },
                         table: 'elem'
-                    }
+                    },
+                    color: femType.key.color
                 }
             })
         }, {
@@ -106,16 +114,17 @@ const modelTreeView = computed(() => [
             icon: `mat`,
             children: model.categorized.elem.mat.map(mat => {
                 return {
-                    label: mat.label + ': ' + mat.elem.length,
+                    label: mat.key.label + ': ' + mat.elem.length,
                     icon: `tag`,
                     tag: {
                         view: {
                             mesh: 'elem',
                             from: 'mat',
-                            label: mat.label
+                            label: mat.key
                         },
                         table: 'elem'
-                    }
+                    },
+                    color: mat.key.color
                 }
             })
         }, {
@@ -123,16 +132,17 @@ const modelTreeView = computed(() => [
             icon: `sec`,
             children: model.categorized.elem.sec.map(sec => {
                 return {
-                    label: sec.label + ': ' + sec.elem.length,
+                    label: sec.key.label + ': ' + sec.elem.length,
                     icon: `tag`,
                     tag: {
                         view: {
                             mesh: 'elem',
                             from: 'sec',
-                            label: sec.label
+                            label: sec.key
                         },
                         table: 'elem'
-                    }
+                    },
+                    color: sec.key.color
                 }
             })
         }]
@@ -184,7 +194,7 @@ const modelTreeView = computed(() => [
         }, {
             label: '单元几何',
             icon: `element-shape`,
-            children:model.target.group.map(group => ({
+            children: model.target.group.map(group => ({
                 label: group.label,
                 icon: `element-shape`,
                 children: equality.map(eqlt => {
@@ -256,32 +266,46 @@ const onContextmenu = (event, object, node, element) => {
         options.value.tag = object.tag
     }
 }
+const colorChange = (data, colorHexString) => {
+    if (colorHexString) {
+        const color = Color3.FromHexString(colorHexString)
+        if (data.color.equals(color)) {
+            return
+        }
+        data.color.r = color.r
+        data.color.g = color.g
+        data.color.b = color.b
+    }
+}
 </script>
 
 <template>
     <el-tabs type="border-card" class="right-tabs">
         <el-tab-pane>
             <template #label>
-                <span>
+                <el-text>
                     <IconFront iconName="tree"></IconFront>
-                    <span>树形菜单</span>
-                </span>
+                    树形菜单
+                </el-text>
             </template>
             <el-scrollbar>
-                <el-tree :data="modelTreeView" highlight-current @node-contextmenu="onContextmenu">
-                    <!-- <template #default="scope">
-                        <DocumentAdd v-if="true" class="icon"></DocumentAdd>
-                        <span>{{ scope.node.label }}</span>
-                    </template> -->
+                <el-tree :data="modelTreeView" highlight-current default-expand-all @node-contextmenu="onContextmenu">
                     <template #default="{ node, data }">
-                        <span>
-                            <IconFront :iconName="data.icon" color="gray" size="small"></IconFront>
-                            <span>{{ node.label }}</span>
-                        </span>
+                        <div style="display: flex; width:100%">
+                            <div>
+                                <el-text>
+                                    <IconFront :iconName="data.icon" size="small"></IconFront>{{ node.label }}
+                                </el-text>
+                            </div>
+                            <Color v-if="data.color" :color="data.color.toHexString()"
+                                :disabled="data.tag.view.mesh !== 'node' && data.tag.view.from !== config.mesh.elem.color.binding"
+                                @change="(color) => colorChange(data, color)"
+                                style="margin-left: auto;margin-right: 20px;" />
+                        </div>
                     </template>
                 </el-tree>
             </el-scrollbar>
-            <RightContextMenu ref="contextMenuRef" :x="options.x" :y="options.y" :tag="options.tag"/>
+            <RightContextMenu ref="contextMenuRef" :x="options.x" :y="options.y" :tag="options.tag" />
         </el-tab-pane>
     </el-tabs>
 </template>

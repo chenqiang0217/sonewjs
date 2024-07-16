@@ -44,12 +44,4 @@ const status = useStatusStore()
     display: grid;
     grid-template-rows: auto 1fr auto;
 }
-
-
-::v-deep(.el-tabs__header, .is-bottom) {
-    margin: 0;
-}
-::v-deep(input) {
-    padding: 0 10px;
-}
 </style>

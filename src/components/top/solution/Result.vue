@@ -105,7 +105,7 @@ const onApply = () => {
         const key = option.value.nodeTag.key
         const digits = option.value.nodeTag.digits
         view.points.rslt.forEach(point => {
-            point.text = point.mesh.metadata[key].toFixed(digits)
+            point.updateLabelText(point.mesh.metadata[key].toFixed(digits))
         })
         view.control.showTextBlock('label', 'node', 'rslt')
     }
@@ -117,14 +117,14 @@ const onApply = () => {
         const key = option.value.elemTag.key
         const magnification = option.value.elemTag.magnification
         const digits = option.value.elemTag.digits
-        config.mesh.elem.color.rslt.contour.by = key
-        const nSec = config.mesh.elem.color.rslt.contour.nSec
+        config.mesh.elem.color.contour.by = key
+        const nSec = config.mesh.elem.color.contour.nSec
         const elems = result.elem
         const { min, max } = result.summarized.elem[key]
         const colors = config.contour
         view.lines.rslt.forEach(line => {
-            const v = elems.find(elem => elem.no == line.no)[key]
-            line.text = (v * magnification).toFixed(digits)
+            const v = elems.find(elem => elem.no == line.mesh.metadata.no)[key]
+            line.updateLabelText((v * magnification).toFixed(digits))
             if (option.value.contour.show) {
                 let i = Math.round(
                     (v - min) / (max - min) * (nSec - 1)
@@ -150,7 +150,7 @@ const viewResultTable = mesh => {
             res.subStep === option.value.step.subStep &&
             res.iterativeStep === option.value.step.iterativeStep
     ).step
-    status.result.option.step = step
+    status.task.view.step = step
     switch (mesh) {
         case 'node': {
             status.addMainTab('deformation')

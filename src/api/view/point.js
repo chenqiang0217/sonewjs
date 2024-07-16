@@ -1,5 +1,6 @@
 import {MeshBuilder, Mesh, Vector3} from '@babylonjs/core'
 import {TextBlock} from '@babylonjs/gui'
+import {useViewConfigStore} from './config'
 import {VIEWCONSTANT} from './constant'
 import {NodeShape} from '../model/index'
 
@@ -42,17 +43,10 @@ class Point {
         this.mesh.billboardMode = 7
         this.mesh.isVisible = true
         this.mesh.metadata = node
-        const config = scene.metadata.useConfig()
         const label = new TextBlock(
             TYPE.PREFIX.TEXT + TYPE.PREFIX.MESH + node.no
         )
         label.text = node.no
-        this.updateLabelStyle.call(label, {
-            fontFamily: config.textBlock.fontFamily,
-            fontSizeInPixels: config.textBlock.sizePx,
-            color: config.textBlock.label.node.color,
-            linkOffsetYInPixels: -config.textBlock.sizePx * 0.6
-        })
         scene.ui.label.node[TYPE === Point.PREP ? 'prep' : 'rslt'].addControl(
             label
         )
@@ -63,6 +57,7 @@ class Point {
                 nodeShape: []
             }
         }
+        this.updateLabelStyle(this.textBlock.label)
     }
     createNodeShape(nodeShape) {
         const textBlocks = this.textBlock.target.nodeShape
@@ -77,7 +72,7 @@ class Point {
             textBlock.metadata.push(nodeShape)
         } else {
             textBlock = new TextBlock(
-                Point.PREP.PREFIX.TEXT + Point.PREP.PREFIX.MESH + this.no
+                Point.PREP.PREFIX.TEXT + Point.PREP.PREFIX.MESH + this.mesh.metadata.no
             )
             textBlock.metadata = [nodeShape]
             textBlocks.push(textBlock)
@@ -87,17 +82,9 @@ class Point {
             .map(item => item.type.alias)
             .join('-')
         const scene = this.mesh.getScene()
-        scene.ui.target.nodeShape[key.toLowerCase()].addControl(
-            textBlock
-        )
+        scene.ui.target.nodeShape[key.toLowerCase()].addControl(textBlock)
         textBlock.linkWithMesh(this.mesh)
-        const config = scene.metadata.useConfig()
-        this.updateLabelStyle.call(textBlock, {
-            fontFamily: config.textBlock.fontFamily,
-            fontSizeInPixels: config.textBlock.sizePx,
-            color: config.textBlock.target.nodeShape.color,
-            linkOffsetYInPixels: config.textBlock.sizePx * 0.6
-        })
+        this.updateLabelStyle(textBlocks)
     }
     removeNodeShape(nodeShape) {
         const textBlocks = this.textBlock.target.nodeShape
@@ -117,10 +104,6 @@ class Point {
             }
         }
     }
-    get prefix() {
-        let regex = /^[a-z]+/
-        return this.mesh.name.match(regex).shift()
-    }
     get position() {
         return this.mesh.metadata.position
     }
@@ -128,50 +111,57 @@ class Point {
         this.mesh.metadata.position = p
         this.mesh.position = this.mesh.metadata.positionInScene
     }
-    get positionInScene() {
-        return this.mesh.metadata.positionInScene
-    }
-    get no() {
-        return this.mesh.metadata.no
-    }
-    set no(n) {
-        this.mesh.metadata.no = n
-        this.mesh.name = this.prefix + n
-    }
-    get text() {
-        return this.textBlock.label.text
-    }
-    set text(t) {
-        this.textBlock.label.text = t
-    }
-    updatePosition() {
-        this.mesh.position = this.mesh.metadata.positionInScene
-        return this
-    }
-    updateLabel() {
-        //不更新name
-        this.textBlock.label.text = String(this.mesh.metadata.no)
-        return this
-    }
     updateMeshColor(material) {
         if (material) {
             this.mesh.material = material
         } else {
             const model = this.mesh.getScene().metadata.useModel()
             const materials = this.mesh.getScene().metadata.materials
-            const key1 = this.type === Point.PREP ? 'prep' : 'rslt'
-            const key2 = model.categorized.node.free.find(
+            const key1 = model.categorized.node.free.find(
                 node => node === this.mesh.metadata
             )
                 ? 'free'
                 : 'lock'
-            this.mesh.material = materials.point[key1][key2]
+            this.mesh.material = materials.point[key1]
         }
         return this
     }
-    updateLabelStyle(style) {
-        for (const [key, value] of Object.entries(style)) {
-            this[key] = value
+    updateLabelText(text = void 0) {
+        if (text) {
+            this.textBlock.label.text = text
+        }
+        else{
+            this.textBlock.label.text = String(this.mesh.metadata.no)
+        }
+        return this
+    }
+    updateLabelStyle(textBlock = void 0) {
+        const config = useViewConfigStore()
+        let style
+        if (!textBlock || textBlock === this.textBlock.label) {
+            style = {
+                fontFamily: config.textBlock.node.label.family,
+                fontSizeInPixels: config.textBlock.node.label.size,
+                color: config.textBlock.node.label.color,
+                linkOffsetYInPixels: -config.textBlock.node.label.size * 0.6
+            }
+            for (const [key, value] of Object.entries(style)) {
+                this.textBlock.label[key] = value
+            }
+        }
+        if (!textBlock || textBlock === this.textBlock.target.nodeShape) {
+            style = {
+                fontFamily: config.textBlock.node.target.nodeShape.family,
+                fontSizeInPixels: config.textBlock.node.target.nodeShape.size,
+                color: config.textBlock.node.target.nodeShape.color,
+                linkOffsetYInPixels:
+                    -config.textBlock.node.target.nodeShape.size * 0.6
+            }
+            this.textBlock.target.nodeShape.forEach(textBlock => {
+                for (const [key, value] of Object.entries(style)) {
+                    textBlock[key] = value
+                }
+            })
         }
         return this
     }

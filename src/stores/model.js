@@ -1,8 +1,14 @@
+import { markRaw } from 'vue'
 import {defineStore} from 'pinia'
-import {byNumAsec} from '../api/utils'
+import {Color3} from '@babylonjs/core'
+import {byNumAsec, byNoAsec} from '../api/utils'
 import {
     Node,
     Elem,
+    ElemType,
+    ElemFemType,
+    ElemMat,
+    ElemSec,
     Cnst,
     NodeShape,
     ElemShape,
@@ -20,6 +26,10 @@ const useModelStore = defineStore('model', {
             node: [],
             elem: [],
             facet: [],
+            elemType: [ElemType.FREE, ElemType.LOCK],
+            elemFemType: [],
+            elemMat: [],
+            elemSec: [],
             cnst: [],
             target: {
                 group: [],
@@ -32,7 +42,7 @@ const useModelStore = defineStore('model', {
                 node: {},
                 elem: {}
             },
-            cs: [new Cs({no: 0, label: '世界坐标系'})],
+            cs: markRaw([new Cs({no: 0, label: '世界坐标系'})]),
             loadStep: [],
             result: []
         }
@@ -53,7 +63,7 @@ const useModelStore = defineStore('model', {
         },
         categorized: state => {
             const freeElem = state.elem.filter(
-                elem => elem.eType === Elem.ETYPE.FREE
+                elem => elem.eType === state.elemType[0]
             )
             const freeNode = freeElem
                 .map(elem => [elem.iNode, elem.jNode])
@@ -62,29 +72,26 @@ const useModelStore = defineStore('model', {
             const femType = state.elem
                 .map(elem => elem.femType)
                 .filter((item, index, arr) => arr.indexOf(item) === index)
-                .sort(byNumAsec)
-                .map(no => ({
-                    no,
-                    label: no,
-                    elem: state.elem.filter(elem => elem.femType === no)
+                .sort(byNoAsec)
+                .map(item => ({
+                    key: item,
+                    elem: state.elem.filter(elem => elem.femType === item)
                 }))
             const mat = state.elem
                 .map(elem => elem.mat)
                 .filter((item, index, arr) => arr.indexOf(item) === index)
-                .sort(byNumAsec)
-                .map(no => ({
-                    no,
-                    label: no,
-                    elem: state.elem.filter(elem => elem.mat === no)
+                .sort(byNoAsec)
+                .map(item => ({
+                    key: item,
+                    elem: state.elem.filter(elem => elem.mat === item)
                 }))
             const sec = state.elem
                 .map(elem => elem.sec)
                 .filter((item, index, arr) => arr.indexOf(item) === index)
-                .sort(byNumAsec)
-                .map(no => ({
-                    no,
-                    label: no,
-                    elem: state.elem.filter(elem => elem.sec === no)
+                .sort(byNoAsec)
+                .map(item => ({
+                    key: item,
+                    elem: state.elem.filter(elem => elem.sec === item)
                 }))
             //cnst
             const cnst = state.cnst
@@ -237,10 +244,29 @@ const useModelStore = defineStore('model', {
                 this.node.splice(index, 1)
             }
         },
-        createElem([no, type, femType, mat, sec, iNodeNo, jNodeNo]) {
+        createElemFemType(no, label, color = Color3.Black) {
+            const elemFemType = new ElemFemType(no, label, color)
+            this.elemFemType.push(elemFemType)
+            return elemFemType
+        },
+        createElemMat(no, label, color = Color3.Black) {
+            const elemMat = new ElemMat(no, label, color)
+            this.elemMat.push(elemMat)
+            return elemMat
+        },
+        createElemSec(no, label, color = Color3.Black) {
+            const elemSec = new ElemSec(no, label, color)
+            this.elemSec.push(elemSec)
+            return elemSec
+        },
+        createElem([no, typeNo, femTypeNo, matNo, secNo, iNodeNo, jNodeNo]) {
             const iNode = this.node.find(node => node.no === iNodeNo)
             const jNode = this.node.find(node => node.no === jNodeNo)
-            if (iNode && jNode) {
+            const type = this.elemType.find(item => item.no === typeNo)
+            const femType = this.elemFemType.find(item => item.no === femTypeNo)
+            const mat = this.elemMat.find(item => item.no === matNo)
+            const sec = this.elemSec.find(item => item.no === secNo)
+            if (iNode && jNode && type && femType && mat && sec) {
                 const elem = new Proxy(
                     new Elem([no, type, femType, mat, sec, iNode, jNode]),
                     {
@@ -522,8 +548,8 @@ const useModelStore = defineStore('model', {
         },
         createLoadStep(label, targetGroupNo = [], subStep, description) {
             const targetGroup = targetGroupNo.map(
-                no => this.target.group.no == no
-            )
+                no => this.target.group.find(group => group.no == no)
+            ).filter(group => group)
             this.loadStep.push(
                 new LoadStep(label, targetGroup, subStep, description)
             )
@@ -534,7 +560,7 @@ const useModelStore = defineStore('model', {
                 this.loadStep.splice(index, 1)
             }
         },
-        clearResult() {
+        disposeResult() {
             this.result = []
         }
     }

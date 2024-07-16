@@ -99,7 +99,7 @@ const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
             }
         case 'elem':
             switch (from) {
-                case 'type':
+                case 'eType':
                     switch (label) {
                         case 'free':
                             return model.categorized.elem.free
@@ -107,11 +107,11 @@ const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
                             return model.categorized.elem.lock
                     }
                 case 'femType':
-                    return model.categorized.elem[from].find(i => i.no === label).node
+                    return model.categorized.elem[from].find(i => i.key === label).node
                 case 'mat':
-                    return model.categorized.elem[from].find(i => i.no === label).elem
+                    return model.categorized.elem[from].find(i => i.key === label).elem
                 case 'sec':
-                    return model.categorized.elem[from].find(i => i.no === label).elem
+                    return model.categorized.elem[from].find(i => i.key === label).elem
                 case 'elemShape':
                     return model.categorized.target.elemShape
                         .find(shape => shape.group === group.no && shape.equality === type)

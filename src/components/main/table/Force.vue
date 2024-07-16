@@ -15,7 +15,7 @@ defineProps({
 })
 const model = useModelStore()
 const status = useStatusStore()
-const elem = model.result.find(res => res.step == status.result.option.step).elem
+const elem = model.result.find(res => res.step == status.task.view.step).elem
 const cellWidth = 150
 const columns = [
     { key: '1', title: '单元号', dataKey: 'no', width: cellWidth },

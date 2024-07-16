@@ -1,11 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useMessageStore, Message } from '../../stores/message'
-import Timer from './Timer.vue'
 
 const scrollbar = ref()
 const message = ref()
-const timers = ref([])
 const messages = useMessageStore()
 const to = 'server'
 onMounted(() => {
@@ -14,9 +12,6 @@ onMounted(() => {
     })
     resizeObserver.observe(message.value)
 })
-const timeOut = (event) => {
-    event.target.style.visibility = "hidden";
-}
 </script>
 
 <template>
@@ -38,21 +33,22 @@ const timeOut = (event) => {
     </div>
     <el-scrollbar ref="scrollbar" always>
         <div ref="message">
-            <div v-for="(message, index) in messages[to]">
-                <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME">
-                    <IconFront :iconName="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
-                        size="small">
-                    </IconFront>
+            <div v-for="message in messages[to]">
+                <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
+                    class="animation" v-if="message.animation && message === messages[to].at(-1)">
                     {{ message.text }}
                 </el-text>
-                <Timer style="margin-left: 5px;" v-if="message.delay" :delay="message.delay" ref="timers"
-                    @timeOut="timeOut(index)" />
+                <el-text :type="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME" v-if="!message.animation">
+                    <IconFront :iconName="Object.values(Message.TYPES).find(item => item.LEVEL == message.level).NAME"
+                        size="small" />
+                    {{ message.text }}
+                </el-text>
             </div>
         </div>
     </el-scrollbar>
 </template>
 
-<style scoped>
+<style lang='scss' scoped>
 .el-tooltip {
     height: 16px;
 }
@@ -69,9 +65,50 @@ const timeOut = (event) => {
 }
 
 .el-text {
-    font-family: "JetBrains Mono";
+    font-family: "JetBrains Mono Regular";
 }
-.el-scrollbar{
+
+.el-scrollbar {
     padding-left: 8px;
+}
+
+
+.animation {
+    overflow: hidden;
+    white-space: nowrap;
+    display: block;
+    width: max-content;
+    position: relative;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        left: 0%;
+        height: 100%;
+        width: 100%;
+        background-color: var(--el-bg-color);
+        animation: typing 3s steps(6, start) 0.5s infinite normal forwards;
+    }
+
+    &::after {
+        width: 2px;
+        border-radius: 2em;
+        background-color: var(--el-color-primary);
+        animation: typing 3s steps(6, start) 0.5s infinite normal forwards, flashing 0.5s ease-out forwards infinite;
+    }
+}
+
+@keyframes typing {
+    to {
+        left: 100%;
+    }
+}
+
+@keyframes flashing {
+
+    to {
+        opacity: 0;
+    }
 }
 </style>

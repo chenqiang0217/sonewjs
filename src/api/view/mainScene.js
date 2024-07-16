@@ -102,10 +102,14 @@ class MainScene extends Scene {
                 }
             }
         }
-        this.ui.label.node.prep.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.NODE.PREP
-        this.ui.label.node.rslt.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.NODE.RSLT
-        this.ui.label.elem.prep.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.PREP
-        this.ui.label.elem.rslt.layer.layerMask = VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.RSLT
+        this.ui.label.node.prep.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.NODE.PREP
+        this.ui.label.node.rslt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.NODE.RSLT
+        this.ui.label.elem.prep.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.PREP
+        this.ui.label.elem.rslt.layer.layerMask =
+            VIEWCONSTANT.LAYER.TEXTBLOCK.LABEL.ELEM.RSLT
 
         this.ui.target.nodeShape.eq.layer.layerMask =
             VIEWCONSTANT.LAYER.TEXTBLOCK.TARGET.NODESHAPE.EQ

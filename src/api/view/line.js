@@ -3,11 +3,9 @@ import {
     VertexBuffer,
 } from '@babylonjs/core'
 import { TextBlock } from '@babylonjs/gui'
-import { VIEWCONSTANT } from './constant'
+import { VIEWCONSTANT } from './index'
 import { alignTextWithLine } from './control'
 import {ElemShape, ElemForce} from '../model/index'
-
-
 class Line {
     static PREP = {
         PREFIX: {
@@ -41,16 +39,10 @@ class Line {
         this.mesh.layerMask = TYPE.LAYER.MESH
         this.mesh.isVisible = true
         this.mesh.metadata = elem
-        const config = scene.metadata.useConfig()
+        this.updateMeshColor()
         const label = new TextBlock(
             TYPE.PREFIX.TEXT + TYPE.PREFIX.MESH + elem.no
         )
-        label.text = elem.no
-        this.updateLabelStyle.call(label, {
-            fontFamily: config.textBlock.fontFamily,
-            fontSizeInPixels: config.textBlock.sizePx,
-            color: config.textBlock.label.elem.color,
-        })
         scene.ui.label.elem[TYPE === Line.PREP ? 'prep' : 'rslt'].addControl(
             label
         )
@@ -62,6 +54,8 @@ class Line {
                 elemForce: []
             }
         }
+        this.updateLabelText()
+        this.updateLabelStyle(this.textBlock.label)
         this.alignText = alignTextWithLine
         this.alignText()
     }
@@ -90,7 +84,7 @@ class Line {
             textBlock.metadata.push(target)
         } else {
             textBlock = new TextBlock(
-                Line.PREP.PREFIX.TEXT + Line.PREP.PREFIX.MESH + this.no
+                Line.PREP.PREFIX.TEXT + Line.PREP.PREFIX.MESH + this.mesh.metadata.no
             )
             textBlock.metadata = [target]
             textBlocks.push(textBlock)
@@ -104,22 +98,15 @@ class Line {
             textBlock
         )
         textBlock.linkWithMesh(this.mesh)
-        const config = scene.metadata.useConfig()
-        this.updateLabelStyle.call(textBlock, {
-            fontFamily: config.textBlock.fontFamily,
-            fontSizeInPixels: config.textBlock.sizePx,
-            color: config.textBlock.target[which].color
-        })
+        this.updateLabelStyle(textBlocks)
         this.alignText()
     }
     removeTarget(target) {
-        let Target, which
+        let which
         if(target instanceof ElemShape){
-            Target = ElemShape
             which= 'elemShape'
         }
         else if(target instanceof ElemForce){
-            Target = ElemForce
             which= 'elemForce'
         }
         else{
@@ -142,10 +129,10 @@ class Line {
             }
         }
     }
-    get prefix() {
-        let regex = /^[a-z]+/
-        return this.mesh.name.match(regex).shift()
-    }
+    // get prefix() {
+    //     let regex = /^[a-z]+/
+    //     return this.mesh.name.match(regex).shift()
+    // }
     updatePosition() {
         const positions = [
             ...this.mesh.metadata.iNode.positionInScene.asArray(),
@@ -159,47 +146,62 @@ class Line {
         this.alignText()
         return this
     }
-    updateLabel(){
-        this.textBlock.label.text = this.mesh.metadata.no
-        return this
-    }
-    get no() {
-        return this.mesh.metadata.no
-    }
-    set no(n) {
-        this.mesh.name = this.prefix + n
-    }
-    get text() {
-        return this.textBlock.label.text
-    }
-    set text(t) {
-        this.textBlock.label.text = t
-    }
-    updateMeshName() {
-        this.mesh.name = this.prefix + this.mesh.metadata.no
-        return this
-    }
-    updateLabelText(text = this.mesh.metadata.no) {
-        this.textBlock.label.text = text
-        return this
-    }
     updateMeshColor(color) {
         if (color) {
             this.mesh.color = color
         } else {
             const config = this.mesh.getScene().metadata.useConfig()
-            const type = this.type === Line.PREP ? 'prep' : 'rslt'
-            const binding = config.mesh.elem.color[type].binding
-            const elem = this.mesh.metadata
-            this.mesh.color = config.mesh.elem.color[type][binding].get(
-                elem[binding]
-            )
+            const binding = config.mesh.elem.color.binding
+            this.mesh.color = this.mesh.metadata[binding].color
         }
         return this
     }
-    updateLabelStyle(style) {
-        for (const [key, value] of Object.entries(style)) {
-            this[key] = value
+    updateLabelText(text) {
+        if (text) {
+            this.textBlock.label.text = text
+        } else {
+            const config = this.mesh.getScene().metadata.useConfig()
+            const binding = config.textBlock.elem.label.binding
+            this.textBlock.label.text = this.mesh.metadata[binding].no || this.mesh.metadata[binding]
+        }
+        return this
+    }
+    updateLabelStyle(textBlock) {
+        const config = this.mesh.getScene().metadata.useConfig()
+        let style
+        if (!textBlock || textBlock === this.textBlock.label) {
+            style = {
+                fontFamily: config.textBlock.elem.label.family,
+                fontSizeInPixels: config.textBlock.elem.label.size,
+                color: config.textBlock.elem.label.color
+            }
+            for (const [key, value] of Object.entries(style)) {
+                this.textBlock.label[key] = value
+            }
+        }
+        if (!textBlock || textBlock === this.textBlock.target.elemShape) {
+            style = {
+                fontFamily: config.textBlock.elem.target.elemShape.family,
+                fontSizeInPixels: config.textBlock.elem.target.elemShape.size,
+                color: config.textBlock.elem.target.elemShape.color
+            }
+            this.textBlock.target.elemShape.forEach(textBlock => {
+                for (const [key, value] of Object.entries(style)) {
+                    textBlock[key] = value
+                }
+            })
+        }
+        if (!textBlock || textBlock === this.textBlock.target.elemForce) {
+            style = {
+                fontFamily: config.textBlock.elem.target.elemForce.family,
+                fontSizeInPixels: config.textBlock.elem.target.elemForce.size,
+                color: config.textBlock.elem.target.elemForce.color
+            }
+            this.textBlock.target.elemForce.forEach(textBlock => {
+                for (const [key, value] of Object.entries(style)) {
+                    textBlock[key] = value
+                }
+            })
         }
         return this
     }

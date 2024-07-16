@@ -1,3 +1,31 @@
+import {Color3} from '@babylonjs/core'
+
+class ElemAttr {
+    constructor(no, label, color) {
+        this.no = no
+        this.label = label
+        this.color = color
+    }
+}
+class ElemType{
+    static FREE = new ElemAttr(0b00000000, 'free', Color3.Black())
+    static LOCK = new ElemAttr(0b00000001, 'lock', Color3.Gray())
+}
+class ElemFemType extends ElemAttr{
+    constructor(no, label, color) {
+        super(no, label, color)
+    }
+}
+class ElemMat extends ElemAttr{
+    constructor(no, label, color) {
+        super(no, label, color)
+    }
+}
+class ElemSec extends ElemAttr{
+    constructor(no, label, color) {
+        super(no, label, color)
+    }
+}
 class BaseElem {
     constructor([no, femType, mat, sec, iNode, jNode]) {
         this.no = no
@@ -13,24 +41,25 @@ class BaseElem {
     asArray() {
         return [
             this.no,
-            this.femType,
-            this.mat,
-            this.sec,
+            this.femType.no,
+            this.mat.no,
+            this.sec.no,
             this.iNode.no,
             this.jNode.no
         ]
     }
     clone() {
-        const arr = this.asArray()
-        arr.splice(-2, 2, this.iNode.clone(), this.jNode.clone())
-        return new BaseElem(arr)
+        return new Elem([
+            this.no,
+            this.femType,
+            this.mat,
+            this.sec,
+            this.iNode.clone(),
+            this.jNode.clone()
+        ])
     }
 }
 class Elem extends BaseElem {
-    static ETYPE = {
-        FREE: 0b00000000,
-        LOCK: 0b00000001
-    }
     constructor([no, eType, femType, mat, sec, iNode, jNode]) {
         super([no, femType, mat, sec, iNode, jNode])
         this.eType = eType
@@ -38,10 +67,10 @@ class Elem extends BaseElem {
     asArray() {
         return [
             this.no,
-            this.eType,
-            this.femType,
-            this.mat,
-            this.sec,
+            this.eType.no,
+            this.femType.no,
+            this.mat.no,
+            this.sec.no,
             this.iNode.no,
             this.jNode.no
         ]
@@ -54,10 +83,19 @@ class Elem extends BaseElem {
         ]
     }
     clone() {
-        const arr = this.asArray()
-        arr.splice(-2, 2, this.iNode.clone(), this.jNode.clone())
-        return new Elem(arr)
+        return new Elem([
+            this.no,
+            this.eType,
+            this.femType,
+            this.mat,
+            this.sec,
+            this.iNode.clone(),
+            this.jNode.clone()
+        ])
     }
 }
 
-export { BaseElem, Elem }
+
+
+
+export { BaseElem, Elem, ElemType, ElemFemType, ElemMat, ElemSec }

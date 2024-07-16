@@ -51,12 +51,44 @@ function readWorkbook(workbook) {
         model.createElemShape,
         model.createElemForce
     ]
-    for (let label of labels) {
-        let func = funcs.shift()
-        let sheet = XLSX.utils.sheet_to_json(workbook.Sheets[label], {
+    for (const label of labels) {
+        const func = funcs.shift()
+        const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[label], {
             header: 1
         })
         sheet.shift()
+        if (label == 'elem') {
+            const view = useView()
+            const color = view.scene.metadata.constant.COLOR.MESH.ELEM.DEFAULT
+            let index
+            index = 2
+            sheet
+                .map(line => Number.parseInt(Number(line[index])))
+                .filter((item, i, arr) => arr.indexOf(item) === i)
+                .forEach(no => {
+                    if (!model.elemFemType.some(item => item.no == no)) {
+                        model.createElemFemType(no, String(no), color.clone())
+                    }
+                })
+            index = 3
+            sheet
+                .map(line => Number.parseInt(Number(line[index])))
+                .filter((item, i, arr) => arr.indexOf(item) === i)
+                .forEach(no => {
+                    if (!model.elemMat.some(item => item.no == no)) {
+                        model.createElemMat(no, String(no), color.clone())
+                    }
+                })
+            index = 4
+            sheet
+                .map(line => Number.parseInt(Number(line[index])))
+                .filter((item, i, arr) => arr.indexOf(item) === i)
+                .forEach(no => {
+                    if (!model.elemSec.some(item => item.no == no)) {
+                        model.createElemSec(no, String(no), color.clone())
+                    }
+                })
+        }
         if (['nodeShape', 'elemShape', 'elemForce'].includes(label)) {
             const index = 1
             sheet
