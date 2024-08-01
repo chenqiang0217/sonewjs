@@ -1,22 +1,23 @@
 import axios from 'axios'
+import Cookies from 'js-cookie'
 import {fetchEventSource} from '@microsoft/fetch-event-source'
 import {useMessageStore, Message} from '../stores/message'
 
 const service = axios.create({
     baseURL: '/api',
     withCredentials: false, // send cookies when cross-domain requests
-    timeout: 1000000
-    //multipart/form-data | application/json
-    // headers: {'Content-Type': 'application/json'},
+    timeout: 5000
 })
 
 service.interceptors.request.use(
     config => {
-        // config.headers['Authorization'] = localStorage.getItem("token")
+        const csrftoken = Cookies.get('csrftoken')
+        if (csrftoken !== void 0) {
+            config.headers['X-CSRFToken'] = Cookies.get('csrftoken')
+        }
         return config
     },
     error => {
-        // console.log(error)
         return Promise.reject(error)
     }
 )
@@ -76,21 +77,42 @@ service.interceptors.response.use(
                     break
             }
         }
-        return Promise.reject(message)
+        // return Promise.reject(error)
     }
 )
 
-const user = {
+const auth = {
     register: data => {
         return service({
-            url: '/user/register/',
+            url: '/auth/register/',
+            method: 'post',
+            data
+        })
+    },
+    userExist: data => {
+        return service({
+            url: '/auth/userExist/',
             method: 'post',
             data
         })
     },
     login: data => {
         return service({
-            url: '/user/login/',
+            url: '/auth/login/',
+            method: 'post',
+            data
+        })
+    },
+    sendVerificationCode: data => {
+        return service({
+            url: '/auth/sendVerificationCode/',
+            method: 'post',
+            data
+        })
+    },
+    resetPassword: data => {
+        return service({
+            url: '/auth/resetPassword/',
             method: 'post',
             data
         })
@@ -102,11 +124,17 @@ const task = {
         const controller = new AbortController()
         const messages = useMessageStore()
         const to = 'server'
+        const headers = {
+            'Content-Type': 'text/event-stream'
+        }
+        const csrftoken = Cookies.get('csrftoken')
+        if (csrftoken !== void 0) {
+            headers['X-CSRFToken'] = csrftoken
+        }
         await fetchEventSource('/api/task/run/', {
             method: 'post',
-            headers: {
-                'Content-Type': 'text/event-stream',
-            },
+            headers: headers,
+            openWhenHidden: true,
             body: data,
             signal: controller.signal,
             async onopen(response) {
@@ -116,31 +144,67 @@ const task = {
                         level: Message.TYPES.SUCCESS.LEVEL,
                         to
                     })
-                    return
                 } else if (
                     response.status >= 400 &&
                     response.status < 500 &&
                     response.status !== 429
                 ) {
                     messages.add({
-                        text: '服务器连接错误',
+                        text: '服务器连接错误：' + response.status,
                         level: Message.TYPES.ERROR.LEVEL,
                         to
                     })
                     controller.abort()
                 } else {
                     messages.add({
-                        text: '服务器内部错误',
+                        text: '服务器连接错误：' + response.status,
                         level: Message.TYPES.ERROR.LEVEL,
                         to
                     })
                     controller.abort()
                 }
             },
-            onmessage(msg) {
-                handleData(JSON.parse(msg.data))
+            onmessage(response) {
+                switch (Number(response.id)) {
+                    case -2:
+                        messages.add({
+                            text: '未登录',
+                            level: Message.TYPES.ERROR.LEVEL,
+                            to
+                        })
+                        break
+                    case -1:
+                        messages.add({
+                            text: '用户名或密码错误',
+                            level: Message.TYPES.ERROR.LEVEL,
+                            to
+                        })
+                        break
+                    case 0:
+                        const {user, node, elem} = JSON.parse(response.data)
+                        messages.add({
+                            text: '当前用户：' + user,
+                            level: Message.TYPES.SUCCESS.LEVEL,
+                            to
+                        })
+                        messages.add({
+                            text:
+                                '节点数：' + node + '，单元数：' + elem,
+                            level: Message.TYPES.SUCCESS.LEVEL,
+                            to
+                        })
+                        messages.add({
+                            text: '获取计算结果',
+                            level: Message.TYPES.INFO.LEVEL,
+                            to,
+                            animation: true
+                        })
+                        break
+                    default:
+                        handleData(JSON.parse(response.data))
+                }
             },
-            onclose() {
+            onclose(response) {
                 messages.add({
                     text: '服务器连接断开',
                     level: Message.TYPES.WARNING.LEVEL,
@@ -148,19 +212,17 @@ const task = {
                 })
                 controller.abort()
             },
-            onerror(err) {
-                //设置一个大值，等待controller起作用
-                const retryInterval = 1.0e6
+            onerror(error) {
                 messages.add({
                     text: '服务器内部错误',
                     level: Message.TYPES.ERROR.LEVEL,
                     to
                 })
                 controller.abort()
-                return retryInterval
+                throw error
             }
         })
     }
 }
 
-export {user, task}
+export {auth, task}

@@ -31,7 +31,6 @@ const operation = ref({
     position: '0,0,0',
     gap: '0,0,0',
     nos,
-    singleNo: nos,
     start: model.maxNo.node + 1,
     noNew: model.maxNo.node + 1,
     create: {
@@ -46,6 +45,20 @@ const operation = ref({
         onlyIsolated: true
     },
     rename: {
+    },
+    check: {
+        position: function () {
+            const numberArray = stringToNumberArray(this)
+            const validator = new Validator(numberArray)
+            validator.addCondition(Validator.AllNumber)
+            return numberArray.length == 3 && validator.validate()
+        },
+        singleNo: function () {
+            return this !== '' && stringToNumberArray(this).length == 1
+        },
+        noExist: function () {
+            return model.node.some(node => node.no === this)
+        }
     }
 })
 const options = ref([
@@ -68,25 +81,21 @@ const options = ref([
 ])
 
 const validatePosition = (_, value, callback) => {
-    const numberArray = stringToNumberArray(value)
-    const validator = new Validator(numberArray)
-    validator
-        .addCondition(Validator.AllNumber)
-    if (numberArray.length == 3 && validator.validate()) {
+    if (operation.value.check.position.apply(value)) {
         callback()
     } else {
         callback(new Error('格式错误'))
     }
 }
-const validateNodeExist = (_, value, callback) => {
-    if (!model.node.find(node => node.no == value)) {
-        callback()
+const validateNodeNotExist = (_, value, callback) => {
+    if (operation.value.check.noExist.apply(value)) {
+        callback(new Error('节点存在'))
     } else {
-        callback(new Error('节点已存在'))
+        callback()
     }
 }
 const validateSingleNo = (_, value, callback) => {
-    if (value === undefined || stringToNumberArray(value).length == 1) {
+    if (operation.value.type !== type.rename || operation.value.check.singleNo.apply(value)) {
         callback()
     } else {
         callback(new Error('选择单个节点'))
@@ -96,9 +105,8 @@ const validateSingleNo = (_, value, callback) => {
 const rules = ref({
     position: [{ validator: validatePosition, trigger: 'blur' }],
     gap: [{ validator: validatePosition, trigger: 'blur' }],
-    start: [{ validator: validateNodeExist, trigger: 'change' }],
-    noNew: [{ validator: validateNodeExist, trigger: 'change' }],
-    singleNo: [{ validator: validateSingleNo, trigger: 'change' }]
+    noNew: [{ validator: validateNodeNotExist, trigger: 'change' }],
+    nos: [{ validator: validateSingleNo, trigger: 'change' }]
 })
 watch(
     () => status.ui.dialog.apply,
@@ -115,10 +123,16 @@ function onApply() {
     let nodeExist, no = operation.value.start
     switch (operation.value.type) {
         case type.create:
+            if (!operation.value.check.position.apply(operation.value.position)) {
+                return
+            }
             const position = new Vector3(...stringToNumberArray(operation.value.position))
             const times = operation.value.create.times
             nodeExist = model.node.map(node => node.no).filter(item => item >= no)
             if (times > 0) {
+                if (!operation.value.check.position.apply(operation.value.gap)) {
+                    return
+                }
                 gap = new Vector3(...stringToNumberArray(operation.value.gap))
             }
             let i = 0
@@ -137,9 +151,12 @@ function onApply() {
             }
             break
         case type.copy:
+            if (!operation.value.check.position.apply(operation.value.gap)) {
+                return
+            }
             gap = new Vector3(...stringToNumberArray(operation.value.gap))
             if (operation.value.copy.move) {
-                points.forEach(point => point.position = node.position.add(gap))
+                points.forEach(point => point.position = point.position.add(gap))
             }
             else {
                 const times = operation.value.copy.times
@@ -177,9 +194,11 @@ function onApply() {
             })
             break
         case type.rename:
+        if (!operation.value.check.singleNo.apply(operation.value.nos)) {
+                return
+            }
             const point = points.shift()
             point.mesh.metadata.no = operation.value.noNew
-            point.updateLabelText()
             break
     }
     view.scene.metadata.useStatus().mesh.selected.node.clear()
@@ -199,7 +218,7 @@ function onApply() {
             <template v-if="operation.type == type.create">
                 <el-form-item prop="start">
                     <el-col :span="8"><el-text>起始编号：</el-text></el-col>
-                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1" /></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1" :precision="0" /></el-col>
                 </el-form-item>
                 <el-form-item prop="position">
                     <el-col :span="8"><el-text>坐标：</el-text></el-col>
@@ -207,7 +226,8 @@ function onApply() {
                 </el-form-item>
                 <el-form-item>
                     <el-col :span="8"><el-text>复制次数：</el-text></el-col>
-                    <el-col :span="16"><el-input-number v-model="operation.create.times" :min="0" /></el-col>
+                    <el-col :span="16"><el-input-number v-model="operation.create.times" :min="0"
+                            :precision="0" /></el-col>
                 </el-form-item>
                 <el-form-item prop="gap">
                     <el-col :span="8"><el-text>复制间距：</el-text></el-col>
@@ -231,12 +251,12 @@ function onApply() {
                 </el-form-item>
                 <el-form-item prop="start">
                     <el-col :span="8"><el-text>起始编号：</el-text></el-col>
-                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1"
+                    <el-col :span="16"><el-input-number v-model="operation.start" :min="1" :precision="0"
                             :disabled="operation.copy.move" /></el-col>
                 </el-form-item>
                 <el-form-item>
                     <el-col :span="8"><el-text>复制次数：</el-text></el-col>
-                    <el-col :span="16"><el-input-number v-model="operation.copy.times" :min="1"
+                    <el-col :span="16"><el-input-number v-model="operation.copy.times" :min="1" :precision="0"
                             :disabled="operation.copy.move" /></el-col>
                 </el-form-item>
             </template>
@@ -249,13 +269,13 @@ function onApply() {
                 </el-form-item>
             </template>
             <template v-if="operation.type == type.rename">
-                <el-form-item label="选择单个节点" prop="singleNo">
-                    <el-input v-model="operation.singleNo" disabled />
+                <el-form-item label="选择单个节点" prop="nos">
+                    <el-input v-model="operation.nos" disabled />
                 </el-form-item>
                 <el-form-item prop="noNew">
                     <el-col :span="8"><el-text>新编号：</el-text></el-col>
                     <el-col :span="16">
-                        <el-input-number v-model="operation.noNew" :min="1" />
+                        <el-input-number v-model="operation.noNew" :min="1" :precision="0" />
                     </el-col>
                 </el-form-item>
             </template>
@@ -263,4 +283,8 @@ function onApply() {
     </Dialog>
 </template>
 
-<style scoped></style>
+<style scoped>
+.el-input-number{
+    width: 100%;
+}
+</style>

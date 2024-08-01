@@ -46,7 +46,7 @@ const drawFacets = async() => {
     await sleep(0.1)
     //计算已存在的facet最大编号
     let maxFacetNo = model.facet.map(facet => facet.no).sort(byNumAsec).pop()
-    if (maxFacetNo === undefined) {
+    if (maxFacetNo === void 0) {
         maxFacetNo = 0
     }
     const dcel = generateDcelBySelectedElem()

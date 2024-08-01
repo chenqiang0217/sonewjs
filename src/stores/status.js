@@ -1,26 +1,30 @@
-import { defineStore } from 'pinia'
-import { CONSTANT } from './constant'
+import {defineStore} from 'pinia'
+import {CONSTANT} from './constant'
 
 const useStatusStore = defineStore('status', {
     state: () => {
         return {
-            mode: 0,
             ui: {
-                dialog:{
+                dialog: {
                     show: false,
                     apply: false,
-                    component: void 0,
+                    component: void 0
+                },
+                modal: {
+                    show: false,
+                    apply: false,
+                    component: void 0
                 },
                 tab: {
                     main: {
                         list: [`view`],
-                        active: `view`,
+                        active: `view`
                     },
                     message: {
                         list: [`client`, `server`],
-                        active: `client`,
-                    },
-                },
+                        active: `client`
+                    }
+                }
             },
             view: {
                 loading: false
@@ -31,28 +35,33 @@ const useStatusStore = defineStore('status', {
                     step: 0,
                     loadStep: 0,
                     subStep: 0,
-                    iterativeStep: 0,
+                    iterativeStep: 0
                 },
-                view:{
-                    step: 0
+                view: {
+                    index: 0,
+                    animation: {
+                        show: false,
+                        frameRate: 0,
+                        index: 0,
+                        iFrame: 0,
+                        elem: {
+                            contour: false,
+                            key: void 0
+                        }
+                    }
                 }
             },
             user: {
-                name: ``,
-                password: ``,
-                mobilePhone: ``,
-                email: ``,
-                regiserDate: [],
-                group: [],
-                role: [],
+                logined: false
             }
         }
     },
-    getters: {
-    },
+    getters: {},
     actions: {
         addMainTab(tableName) {
-            let index = this.ui.tab.main.list.findIndex(name => name === tableName)
+            let index = this.ui.tab.main.list.findIndex(
+                name => name === tableName
+            )
             if (index != -1) {
                 this.ui.tab.main.list.splice(index, 1)
             }
@@ -68,4 +77,4 @@ const useStatusStore = defineStore('status', {
     }
 })
 
-export { useStatusStore }
+export {useStatusStore}

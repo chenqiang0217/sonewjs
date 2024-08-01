@@ -17,7 +17,7 @@ const useConfigStore = defineStore('config', {
                 response: {
                     delaySecond: 5,
                     // 服务端连续retry次都无法返回结果，即断开连接
-                    retry: 5,
+                    retry: 10,
                     count: 50
                 }
             }

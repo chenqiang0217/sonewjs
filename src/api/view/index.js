@@ -84,38 +84,37 @@ class View {
         this.points[type].push(point)
         return point
     }
-    removePoint(node, type = 'prep') {
+    disposePoint(node, type = 'prep') {
         const index = this.points[type].findIndex(
             point => point.mesh.metadata.no === node
         )
         if (index != -1) {
-            this.points[type].splice(index, 1).forEach(point => point.remove())
+            this.points[type].splice(index, 1).forEach(point => point.dispose())
         }
     }
     clearPoints(type = 'prep') {
         const points = this.points[type]
-        for (let i = 0; i < points.length; i++) {
-            points.pop().remove()
-        }
+        points.forEach(point => point.dispose())
+        points.splice(0, points.length)
+        
     }
     createLine(elem, type = 'prep') {
         const line = new Line(elem, this.scene, Line[type.toUpperCase()])
         this.lines[type].push(line)
         return line
     }
-    removeLine(elem, type = 'prep') {
+    disposeLine(elem, type = 'prep') {
         const index = this.lines[type].findIndex(
             line => line.mesh.metadata === elem
         )
         if (index != -1) {
-            this.lines[type].splice(index, 1).forEach(line => line.remove())
+            this.lines[type].splice(index, 1).forEach(line => line.dispose())
         }
     }
     clearLines(type = 'prep') {
         const lines = this.lines[type]
-        for (let i = 0; i < lines.length; i++) {
-            lines.pop().remove()
-        }
+        lines.forEach(line => line.dispose())
+        lines.splice(0, lines.length)
     }
 }
 

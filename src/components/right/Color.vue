@@ -10,6 +10,14 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    width: {
+        type: Number,
+        default: 10
+    },
+    height: {
+        type: Number,
+        default: 18
+    }
 })
 const emit = defineEmits(['change'])
 const color = ref(props.color)
@@ -20,7 +28,7 @@ watch(color, color => {
 
 <template>
     <el-color-picker v-model="color" :disabled="disabled" class="color"
-        style=" width:10px;height:18px;display: block;" />
+        :style="{ 'width': width == 0 ? '100%' : width + 'px', 'height': height == 0 ? '100%' : height + 'px', 'display': 'block' }" />
 </template>
 
 <style lang="scss">

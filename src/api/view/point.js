@@ -110,6 +110,7 @@ class Point {
     set position(p) {
         this.mesh.metadata.position = p
         this.mesh.position = this.mesh.metadata.positionInScene
+        return this
     }
     updateMeshColor(material) {
         if (material) {
@@ -185,7 +186,7 @@ class Point {
         this.mesh.isVisible = false
         this.textBlock.label.isVisible = false
     }
-    remove() {
+    dispose() {
         this.mesh.dispose()
         this.textBlock.label.dispose()
     }

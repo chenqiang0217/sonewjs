@@ -64,11 +64,12 @@ const useModelStore = defineStore('model', {
         categorized: state => {
             const freeElem = state.elem.filter(
                 elem => elem.eType === state.elemType[0]
-            )
+            ).sort(byNoAsec)
             const freeNode = freeElem
                 .map(elem => [elem.iNode, elem.jNode])
                 .flat()
                 .filter((item, index, arr) => arr.indexOf(item) === index)
+                .sort(byNoAsec)
             const femType = state.elem
                 .map(elem => elem.femType)
                 .filter((item, index, arr) => arr.indexOf(item) === index)
@@ -213,10 +214,10 @@ const useModelStore = defineStore('model', {
                 set: function (obj, prop, value, receiver) {
                     Reflect.set(obj, prop, value)
                     const view = useView()
-                    view.points.prep
-                        .find(point => point.mesh.metadata === receiver)
-                        .updatePosition()
-                        .updateLabel()
+                    const point = 
+                    view.points.prep.find(point => point.mesh.metadata === receiver)
+                    point.mesh.position = receiver.positionInScene
+                    point.updateLabelText()
                     view.lines.prep
                         .filter(
                             line =>
@@ -239,25 +240,43 @@ const useModelStore = defineStore('model', {
             const view = useView()
             //必须保证两数组数据一致
             if (index != -1) {
-                view.points.prep[index].remove()
+                view.points.prep[index].dispose()
                 view.points.prep.splice(index, 1)
                 this.node.splice(index, 1)
             }
         },
-        createElemFemType(no, label, color = Color3.Black) {
+        createElemFemType(no, label, color = Color3.Black()) {
             const elemFemType = new ElemFemType(no, label, color)
             this.elemFemType.push(elemFemType)
             return elemFemType
         },
-        createElemMat(no, label, color = Color3.Black) {
+        removeElemFemType(elemFemType) {
+            const index = this.elemFemType.findIndex(item => item === elemFemType)
+            if (index != -1) {
+                this.elemFemType.splice(index, 1)
+            }
+        },
+        createElemMat(no, label, color = Color3.Black()) {
             const elemMat = new ElemMat(no, label, color)
             this.elemMat.push(elemMat)
             return elemMat
         },
-        createElemSec(no, label, color = Color3.Black) {
+        removeElemMat(elemMat) {
+            const index = this.elemMat.findIndex(item => item === elemMat)
+            if (index != -1) {
+                this.elemMat.splice(index, 1)
+            }
+        },
+        createElemSec(no, label, color = Color3.Black()) {
             const elemSec = new ElemSec(no, label, color)
             this.elemSec.push(elemSec)
             return elemSec
+        },
+        removeElemSec(elemSec) {
+            const index = this.elemSec.findIndex(item => item === elemSec)
+            if (index != -1) {
+                this.elemSec.splice(index, 1)
+            }
         },
         createElem([no, typeNo, femTypeNo, matNo, secNo, iNodeNo, jNodeNo]) {
             const iNode = this.node.find(node => node.no === iNodeNo)
@@ -275,8 +294,7 @@ const useModelStore = defineStore('model', {
                             const view = useView()
                             view.lines.prep
                                 .find(l => l.mesh.metadata === receiver)
-                                .updatePosition()
-                                .updateLabel()
+                                .update()
                             // iNode, jNode不能放到[]里面采用forEach
                             view.points.prep
                                 .find(
@@ -305,7 +323,7 @@ const useModelStore = defineStore('model', {
             const view = useView()
             //必须保证两数组数据一致
             if (index != -1) {
-                view.lines.prep[index].remove()
+                view.lines.prep[index].dispose()
                 view.lines.prep.splice(index, 1)
                 this.elem.splice(index, 1)
             }
@@ -560,7 +578,7 @@ const useModelStore = defineStore('model', {
                 this.loadStep.splice(index, 1)
             }
         },
-        disposeResult() {
+        clearResult() {
             this.result = []
         }
     }

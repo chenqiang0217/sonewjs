@@ -15,19 +15,19 @@ defineProps({
 })
 const model = useModelStore()
 const status = useStatusStore()
-const node = model.result.find(res => res.step == status.task.view.step).node
+const index = status.task.view.index
+const elem = model.result[index].elem
 const cellWidth = 150
-const digits = 3
 const columns = [
-    { key: '1', title: '节点号', dataKey: 'no', width: cellWidth },
-    { key: '2', title: 'x坐标', dataKey: 'x', width: cellWidth },
-    { key: '3', title: 'y坐标', dataKey: 'y', width: cellWidth },
-    { key: '4', title: 'z坐标', dataKey: 'z', width: cellWidth },
+    { key: '1', title: '单元号', dataKey: 'no', width: cellWidth },
+    { key: '2', title: '长度', dataKey: 'l', width: cellWidth },
+    { key: '3', title: '力密度', dataKey: 'q', width: cellWidth },
+    { key: '4', title: '内力', dataKey: 'f', width: cellWidth },
 ]
 </script>
 
 <template>
-    <el-table-v2 :columns="columns" :data="node" :width="width" :height="height" :row-height="30" fixed>
+    <el-table-v2 :columns="columns" :data="elem" :width="width" :height="height" :row-height="30" fixed>
         <template #empty>
             <Empty />
         </template>

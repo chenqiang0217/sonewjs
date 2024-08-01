@@ -7,8 +7,8 @@ import Cnst from './table/Cnst.vue'
 import NodeShape from './table/NodeShape.vue'
 import ElemShape from './table/ElemShape.vue'
 import ElemForce from './table/ElemForce.vue'
-import Deformation from './table/Deformation.vue'
-import Force from './table/Force.vue'
+import NodeRslt from './table/NodeRslt.vue'
+import ElemRslt from './table/ElemRslt.vue'
 import Chart from './chart/Chart.vue'
 import { useStatusStore } from '../../stores/status'
 
@@ -69,15 +69,15 @@ watch(() => status.ui.tab.main.active, (tableName) => {
                 icon = 'chart'
                 component = Chart
                 break
-            case 'deformation':
+            case 'nodeRslt':
                 title = '变形'
                 icon = 'table'
-                component = Deformation
+                component = NodeRslt
                 break
-            case 'force':
+            case 'elemRslt':
                 title = '内力'
                 icon = 'table'
-                component = Force
+                component = ElemRslt
                 break
         }
         let tab = {

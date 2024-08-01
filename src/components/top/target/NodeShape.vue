@@ -160,10 +160,13 @@ function onApply() {
                 </el-col>
                 <el-col :span="16">
                     <el-form-item>
-                        <el-select v-model="operation.group">
+                        <el-select v-model="operation.group" placeholder="">
                             <el-option
                                 v-for="{ no, label } of operation.type == type.remove ? model.target.group.concat([{ no: -1, label: '全部' }]) : model.target.group"
                                 :label="label" :value="no" :key="no"></el-option>
+                            <template #empty>
+                                <el-text>未定义</el-text>
+                            </template>
                         </el-select>
                     </el-form-item>
                 </el-col>
@@ -195,9 +198,8 @@ function onApply() {
                     <el-form-item>
                         <el-select v-model="operation.target">
                             <el-option
-                                v-for="type of operation.type == type.remove ? Object.values(NodeShape.TYPE).concat([{is: -1,label: '全部',alias: ''}]) : Object.values(NodeShape.TYPE)"
-                                :label="type.alias + ' ' + type.label"
-                                :value="type.is" :key="type.is"></el-option>
+                                v-for="type of operation.type == type.remove ? Object.values(NodeShape.TYPE).concat([{ is: -1, label: '全部', alias: '' }]) : Object.values(NodeShape.TYPE)"
+                                :label="type.alias + ' ' + type.label" :value="type.is" :key="type.is"></el-option>
                         </el-select>
                     </el-form-item>
                 </el-col>
@@ -223,7 +225,7 @@ function onApply() {
                     </el-col>
                     <el-col :span="16">
                         <el-form-item>
-                            <el-input-number v-model.number="operation.noPrm" :min="1" />
+                            <el-input-number v-model.number="operation.noPrm" :min="1" :precision="0"/>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -248,4 +250,5 @@ function onApply() {
     </Dialog>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

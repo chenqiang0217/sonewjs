@@ -27,6 +27,7 @@
         "codemirror": "^6.0.1",
         "echarts": "^5.4.2",
         "element-plus": "^2.7.4",
+        "js-cookie": "^3.0.5",
         "pinia": "^2.0.20",
         "sass": "^1.66.1",
         "thememirror": "^2.0.1",

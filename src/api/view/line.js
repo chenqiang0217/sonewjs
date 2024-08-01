@@ -205,6 +205,12 @@ class Line {
         }
         return this
     }
+    update(){
+        this.updatePosition()
+        this.updateMeshColor()
+        this.updateLabelText()
+        this.updateLabelStyle()
+    }
     showMesh() {
         this.mesh.isVisible = true
     }
@@ -225,7 +231,7 @@ class Line {
         this.mesh.isVisible = false
         this.textBlock.label.isVisible = false
     }
-    remove() {
+    dispose() {
         this.mesh.dispose()
         this.textBlock.label.dispose()
     }

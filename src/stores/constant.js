@@ -1,8 +1,4 @@
 const CONSTANT = {
-    MODE: {
-        PREP: 0b00000000,
-        RSLT: 0b00000001
-    },
     TASK: {
         RUN: {
             NONE: 0b00000000,
@@ -10,7 +6,7 @@ const CONSTANT = {
             SUCCESS: 0b00000010,
             FAIL: 0b00000011,
             ABORT: 0b00000100,
-            END: 0b00000101,
+            END: 0b00000101
         },
     },
 }

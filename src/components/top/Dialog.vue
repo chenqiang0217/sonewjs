@@ -29,33 +29,30 @@ const position = computed(() => ({
 </script>
 
 <template>
-    <Teleport to="body">
-        <div class="dialog" :style="position" v-drag>
-            <div class="header">
-                <slot name="header">
-                    <el-text tag="b" style="margin-right: auto;">{{ title }}</el-text>
-                    <el-text class="close">
-                        <IconFront iconName="close" @click="status.ui.dialog.show = false" />
-                    </el-text>
-                </slot>
-            </div>
-            <div class="modal">
-                <slot></slot>
-            </div>
-            <div class="footer">
-                <slot name="footer">
-                    <el-button type="primary" round @click="status.ui.dialog.show = false"><el-text>
-                            关闭
-                        </el-text></el-button>
-                    <el-button type="primary" round @click="status.ui.dialog.apply = true">
-                        <el-text>
-                            应用
-                        </el-text></el-button>
-                </slot>
-            </div>
-
+    <div class="dialog" :style="position" v-drag>
+        <div class="header">
+            <slot name="header">
+                <el-text tag="b" style="margin-right: auto;">{{ title }}</el-text>
+                <el-text class="close">
+                    <IconFront iconName="close" @click="status.ui.dialog.show = false" />
+                </el-text>
+            </slot>
         </div>
-    </Teleport>
+        <div class="body">
+            <slot></slot>
+        </div>
+        <div class="footer">
+            <slot name="footer">
+                <el-button type="primary" round @click="status.ui.dialog.show = false"><el-text>
+                        关闭
+                    </el-text></el-button>
+                <el-button type="primary" round @click="status.ui.dialog.apply = true">
+                    <el-text>
+                        应用
+                    </el-text></el-button>
+            </slot>
+        </div>
+    </div>
 </template>
 
 <style lang="scss" scoped>
@@ -74,7 +71,7 @@ const position = computed(() => ({
     display: flex;
     align-items: center;
 
-    &.el-text {
+    .el-text {
         color: var(--el-color-primary);
     }
 }
@@ -97,7 +94,7 @@ const position = computed(() => ({
     }
 
     .el-text.close:hover {
-        color:  var(--el-color-primary-light-5);
+        color: var(--el-color-primary-light-5);
     }
 }
 
@@ -108,15 +105,15 @@ const position = computed(() => ({
     margin: 10px 10px;
 }
 
-.modal {
+.body {
     padding: 10px;
     padding-bottom: 0;
 
-    &.el-input-number {
+    .el-input-number {
         width: 100%;
     }
 
-    &.el-select {
+    .el-select {
         width: 100%;
     }
 }

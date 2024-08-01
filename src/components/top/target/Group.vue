@@ -107,7 +107,7 @@ watch(
         <el-table :data="model.target.group" @row-click="onRowClick" style="width: 100%;  margin-bottom: 20px"
             highlight-current-row max-height="400" border fit show-overflow-tooltip tooltip-effect="light"
             :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ 'text-align': 'center' }">
-            <el-table-column prop="no" label="编号" width="60" />
+            <el-table-column prop="no" label="编号" width="80" />
             <el-table-column prop="label" label="名称">
                 <template #default="scope">
                     <el-input v-if="cell.row === scope.$index && cell.column === scope.cellIndex" v-model="cell.data"

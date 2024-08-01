@@ -4,6 +4,7 @@ import Node from './Node.vue'
 import Elem from './Elem.vue'
 import Cnst from './Cnst.vue'
 import Load from './Load.vue'
+import Chrc from './Chrc.vue'
 
 
 const showDialogNode = () => {
@@ -26,8 +27,12 @@ const showDialogLoad = () => {
     status.ui.dialog.component = markRaw(Load)
     status.ui.dialog.show = true
 }
+const showDialogCharacter = () => {
+    const status = useStatusStore()
+    status.ui.dialog.component = markRaw(Chrc)
+    status.ui.dialog.show = true
+}
 
 
 
-
-export { showDialogNode, showDialogElem, showDialogConstraint, showDialogLoad }
+export { showDialogNode, showDialogElem, showDialogConstraint, showDialogLoad, showDialogCharacter }

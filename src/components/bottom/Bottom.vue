@@ -11,8 +11,7 @@ const status = useStatusStore()
         <el-tab-pane name="client">
             <template #label>
                 <span>
-                    <IconFront iconName="interactive"></IconFront>
-                    <span>命令信息</span>
+                    <IconFront iconName="interactive" />命令信息
                 </span>
             </template>
             <Client />
@@ -21,8 +20,7 @@ const status = useStatusStore()
         <el-tab-pane name="server">
             <template #label>
                 <span>
-                    <IconFront iconName="yun"></IconFront>
-                    <span>分析信息</span>
+                    <IconFront iconName="yun" />分析信息
                 </span>
             </template>
             <Server />

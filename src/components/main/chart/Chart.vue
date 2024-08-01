@@ -112,13 +112,13 @@ const series = [
     {
         xAxisIndex: 0,
         yAxisIndex: 0,
-        name: '误差',
+        name: '节点误差',
         type: 'line',
         showSymbol: false,
         smooth: true,
         data: [],
         itemStyle: {
-            color: 'rgb(0, 0, 255)',
+            color: 'rgb(120, 120, 255)',
         },
         tooltip: {
             valueFormatter: function (value) {
@@ -136,7 +136,23 @@ const series = [
             },
             data: []
         }
-
+    },
+    {
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        name: '单元误差',
+        type: 'line',
+        showSymbol: false,
+        smooth: true,
+        data: [],
+        itemStyle: {
+            color: 'rgb(60, 60, 255)',
+        },
+        tooltip: {
+            valueFormatter: function (value) {
+                return value.toExponential(2)
+            },
+        }
     },
     {
         xAxisIndex: 0,
@@ -233,14 +249,15 @@ onMounted(() => {
     chart = echarts.init(canvas, null, { width: props.width, height: props.height })
     chart.setOption(option)
     model.result.forEach(result => {
-        series[0].data.push([result.step, result.rsdl])
-        series[1].data.push([result.step, result.mu])
-        series[2].data.push([result.step, loadStep.subStep
-            .find(ss => ss.no == result.subStep).rsdl
+        series[0].data.push([result.step, result.rsdlx])
+        series[1].data.push([result.step, result.rsdlq])
+        series[2].data.push([result.step, result.mu])
+        series[3].data.push([result.step, loadStep.subStep
+            .find(ss => ss.no == result.subStep)?.rsdl
         ])
     })
-    series[3].data.pop()
-    series[3].data.push(progress.value * 100)
+    series[4].data.pop()
+    series[4].data.push(progress.value * 100)
     chart.setOption({ series })
     start = model.result.length - 1
 })
@@ -271,16 +288,17 @@ watch(
     (now, pre) => {
         if (now == 0) {
             series.forEach((item) => (item.data = []))
-            series[3].data.push(0)
+            series[4].data.push(0)
         } else {
             if (start != 0) {
                 start = pre
             }
             for (let i = start; i < now; i++) {
                 let result = model.result[i]
-                series[0].data.push([result.step, result.rsdl])
-                series[1].data.push([result.step, result.mu])
-                series[2].data.push([result.step, model.loadStep.find(ls => ls.run).subStep
+                series[0].data.push([result.step, result.rsdlx])
+                series[1].data.push([result.step, result.rsdlq])
+                series[2].data.push([result.step, result.mu])
+                series[3].data.push([result.step, model.loadStep.find(ls => ls.run).subStep
                     .at(result.subStep - 1).rsdl
                 ])
             }
@@ -292,8 +310,8 @@ watch(
                 { xAxis: model.result.findLast(res => res.loadStep == item.loadStep && res.subStep == item.subStep).step }
             ))
         }
-        series[3].data.pop()
-        series[3].data.push(progress.value * 100)
+        series[4].data.pop()
+        series[4].data.push(progress.value * 100)
         chart.setOption({ series })
     }
 )

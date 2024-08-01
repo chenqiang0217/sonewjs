@@ -4,7 +4,7 @@ const byNumAsec = (a, b) => {
 const byNoAsec = (a, b) => {
     return a.no - b.no
 }
-const stringToNumberArray = (str, splitter = ',') => str.split(splitter).map(item => Number(item))
+const stringToNumberArray = (str, splitter = ',') => str.split(splitter).map(item => Number.parseFloat(item))
 const SetOperation = (aSet, bSet, type) => {
     let aArr = Array.from(aSet)
     let bArr = Array.from(bSet)
@@ -57,10 +57,10 @@ function float64ArrayToBase64(float64Array) {
 
 class Validator{
     static  AllNumber() {
-        return !this.includes(Number.NaN)
+        return this.map(item => Number.isFinite(item)).reduce((a, b) => a && b, true)
     }
     static  AllInterger() {
-        return this.map(item => item % 1 === 0).reduce((a, b) => a && b, true)
+        return this.map(item => Number.isInteger(item)).reduce((a, b) => a && b, true)
     }
     constructor(data) {
         this.data = data

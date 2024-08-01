@@ -26,7 +26,7 @@ const switchTextBlockElemVisibility = () => {
         view.lines.rslt.forEach(line => line.updateLabelText())
     }
 }
-const switchTextBlockTargetisibility = () => {
+const switchTextBlockTargetVisibility = () => {
     const view = useView()
     const status = view.scene.metadata.useStatus()
     status.textBlock.visible.target.all = !status.textBlock.visible.target.all
@@ -43,6 +43,6 @@ export {
     switchMeshNodeVisibility,
     switchTextBlockNodeVisibility,
     switchTextBlockElemVisibility,
-    switchTextBlockTargetisibility,
+    switchTextBlockTargetVisibility,
     meshViewConfig
 }

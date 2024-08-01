@@ -1,6 +1,7 @@
 import {createApp} from 'vue'
 import {createPinia} from 'pinia'
 import ElementPlus from 'element-plus'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import {vDrag} from './directives/vDrag'
 import './index.scss'
@@ -11,10 +12,14 @@ import App from './App.vue'
 import {useModelStore} from './stores/model'
 import {useConfigStore} from './stores/config'
 
+import 'element-plus/theme-chalk/dark/css-vars.css'
+
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
-app.use(ElementPlus)
+app.use(ElementPlus, {
+    locale: zhCn
+})
 app.use(ContextMenu)
 
 app.directive('drag', vDrag)
@@ -23,9 +28,9 @@ app.mount('#app')
 
 globalThis.useModel = useModelStore
 globalThis.useConfig = useConfigStore
-// globalThis.help = 
-    // 'const model = useModel() 获取模型数据\n' +
-    // 'const config = useConfig() 获取设置数据'
+// globalThis.help =
+// 'const model = useModel() 获取模型数据\n' +
+// 'const config = useConfig() 获取设置数据'
 
 // 设置本地用户及其邮箱用于生成ras公用密钥
 // git config --global user.name chenqiang0217

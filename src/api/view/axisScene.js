@@ -30,7 +30,7 @@ class AxisScene extends Scene {
         this.activeCamera.orthoBottom = - this.axisHelperSize * 1.5
         this.activeCamera.resizeObserver.disconnect()
 
-        new AxesViewer(this, 0.60 * this.axisHelperSize, undefined, undefined, undefined, undefined, 4)
+        new AxesViewer(this, 0.60 * this.axisHelperSize, void 0, void 0, void 0, void 0, 4)
         this.ui = AdvancedDynamicTexture.CreateFullscreenUI("axisUi", true, this)
         for (let i = 0; i < 3; i++) {
             const axis = MeshBuilder.CreatePlane('viewaxes', { height: 1, width: 1, sideOrientation: Mesh.DOUBLESIDE }, this)

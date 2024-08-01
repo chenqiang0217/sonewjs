@@ -92,57 +92,78 @@ const modelTreeView = computed(() => [
         label: '特征值',
         icon: `character`,
         children: [{
-            label: '类型: ' + model.categorized.elem.femType.length,
+            label: '类型: ' + model.elemFemType.length,
             icon: `femType`,
-            children: model.categorized.elem.femType.map((femType) => {
-                return {
-                    label: femType.key.label + ': ' + femType.elem.length,
-                    icon: `tag`,
-                    tag: {
-                        view: {
-                            mesh: 'elem',
-                            from: 'femType',
-                            label: femType.key
+            children: model.elemFemType.map(femType => {
+                const length = model.elem.filter(elem => elem.femType === femType).length
+                if (length >= 0) {
+                    return {
+                        label: femType.label + ': ' + length,
+                        icon: `tag`,
+                        tag: {
+                            view: {
+                                mesh: 'elem',
+                                from: 'femType',
+                                label: femType
+                            },
+                            table: 'elem'
                         },
-                        table: 'elem'
-                    },
-                    color: femType.key.color
+                        color: femType.color,
+                        _: Object.values(femType.color).map(item => item)
+                    }
+                }
+                else{
+                    return void 0
                 }
             })
         }, {
-            label: '材料: ' + model.categorized.elem.mat.length,
+            label: '材料: ' + model.elemMat.length,
             icon: `mat`,
-            children: model.categorized.elem.mat.map(mat => {
-                return {
-                    label: mat.key.label + ': ' + mat.elem.length,
-                    icon: `tag`,
-                    tag: {
-                        view: {
-                            mesh: 'elem',
-                            from: 'mat',
-                            label: mat.key
+            children: model.elemMat.map(mat => {
+                const length = model.elem.filter(elem => elem.mat === mat).length
+                if (length >= 0) {
+                    return {
+                        label: mat.label + ': ' + length,
+                        icon: `tag`,
+                        tag: {
+                            view: {
+                                mesh: 'elem',
+                                from: 'mat',
+                                label: mat
+                            },
+                            table: 'elem'
                         },
-                        table: 'elem'
-                    },
-                    color: mat.key.color
+                        color: mat.color,
+                        _: Object.values(mat.color).map(item => item)
+                    }
+                }
+                else{
+                    return void 0
                 }
             })
         }, {
-            label: '截面: ' + model.categorized.elem.sec.length,
+            label: '截面: ' + model.elemSec.length,
             icon: `sec`,
-            children: model.categorized.elem.sec.map(sec => {
-                return {
-                    label: sec.key.label + ': ' + sec.elem.length,
-                    icon: `tag`,
-                    tag: {
-                        view: {
-                            mesh: 'elem',
-                            from: 'sec',
-                            label: sec.key
+            children: model.elemSec.map(sec => {
+                const length = model.elem.filter(elem => elem.sec === sec).length
+                if (length >= 0) {
+                    return {
+                        label: sec.label + ': ' + length,
+                        icon: `tag`,
+                        tag: {
+                            view: {
+                                mesh: 'elem',
+                                from: 'sec',
+                                label: sec
+                            },
+                            table: 'elem'
                         },
-                        table: 'elem'
-                    },
-                    color: sec.key.color
+                        color: sec.color,
+                        _: Object.values(sec.color).map(item => item)
+                    }
+                }
+                else{
+                    return void 0
                 }
             })
         }]

@@ -6,7 +6,7 @@ class Edge {
         this.aVertex = aVertex
         this.bVertex = bVertex
         this.face = 0
-        this.angle = undefined
+        this.angle = void 0
         this.boundary = boundary
     }
 }

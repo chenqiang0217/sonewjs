@@ -1,6 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useStatusStore } from '../../stores/status'
+import { CONSTANT } from '../../stores/constant'
+import { useViewStatusStore } from '../../api/view/index'
 import {
     projectNew,
     projectOpen,
@@ -12,6 +14,7 @@ import {
     showDialogElem,
     showDialogConstraint,
     showDialogLoad,
+    showDialogCharacter
     // drawFacets,
     // drawPyramids
 } from './model/model'
@@ -25,7 +28,8 @@ import {
     showDialogSolutionConfig,
     showDialogSolutionRun,
     showSolutionProgress,
-    showDialogSolutionResult
+    showDialogSolutionResult,
+    clearResult
 } from './solution/solution'
 import {
     meshSelect,
@@ -47,16 +51,16 @@ import {
     switchMeshNodeVisibility,
     switchTextBlockNodeVisibility,
     switchTextBlockElemVisibility,
-    switchTextBlockTargetisibility,
+    switchTextBlockTargetVisibility,
     meshViewConfig
 } from './visibility/visibility'
-import { account } from './account/account'
+import { showDialogAccountLogin, showDialogAccountDetail } from './account/account'
 import { about } from './about/about'
 import { test } from './test/test'
 
-
 const status = useStatusStore()
-const toolBars = ref([
+const viewStatus = useViewStatusStore()
+const toolBars = computed(() => [
     [
         {
             label: '新建',
@@ -121,6 +125,12 @@ const toolBars = ref([
             icon: 'load',
             action: showDialogLoad,
             clicked: false
+        },
+        {
+            label: '特性',
+            icon: 'character',
+            action: showDialogCharacter,
+            clicked: false
         }
     ],
     [
@@ -151,32 +161,6 @@ const toolBars = ref([
     ],
     [
         {
-            label: '求解设置',
-            icon: 'run-setting',
-            action: showDialogSolutionConfig,
-            clicked: false
-        },
-        {
-            label: '求解',
-            icon: 'run',
-            action: showDialogSolutionRun,
-            clicked: false
-        },
-        {
-            label: '计算进度',
-            icon: 'result',
-            action: showSolutionProgress,
-            clicked: false
-        },
-        {
-            label: '结果',
-            icon: 'deformation-element-density',
-            action: showDialogSolutionResult,
-            clicked: false
-        }
-    ],
-    [
-        {
             label: '选择',
             icon: 'select-s',
             action: meshSelect,
@@ -200,6 +184,48 @@ const toolBars = ref([
             action: meshClearselect,
             clicked: false
         }
+    ],
+    [
+        {
+            label: '求解设置',
+            icon: 'run-setting',
+            action: showDialogSolutionConfig,
+            clicked: false
+        },
+        {
+            label: '求解',
+            icon: 'run',
+            action: showDialogSolutionRun,
+            clicked: false,
+            disable: status.task.run !== CONSTANT.TASK.RUN.NONE
+        },
+        {
+            label: '计算进度',
+            icon: 'result',
+            action: showSolutionProgress,
+            clicked: false,
+            disable: status.task.run === CONSTANT.TASK.RUN.NONE
+        },
+        {
+            label: '结果',
+            icon: 'deformation-element-density',
+            action: showDialogSolutionResult,
+            clicked: false,
+            disable: status.task.run === CONSTANT.TASK.RUN.NONE
+        },
+        status.task.run !== CONSTANT.TASK.RUN.NONE ?
+            {
+                label: '解锁',
+                icon: 'lock-big',
+                action: clearResult,
+                disable: status.task.run === CONSTANT.TASK.RUN.PROGRESS
+            } :
+            {
+                label: '锁定',
+                icon: 'unlock-big',
+                action: () => { },
+                disable: true
+            }
     ],
     [
         {
@@ -256,25 +282,30 @@ const toolBars = ref([
             label: '节点',
             icon: 'node',
             action: switchMeshNodeVisibility,
-            clicked: false
+            clicked: false,
+            active: viewStatus.mesh.visible.node
         },
         {
             label: '节点号',
             icon: 'node-no',
             action: switchTextBlockNodeVisibility,
-            clicked: false
+            clicked: false,
+            active: viewStatus.textBlock.visible.label.node
         },
         {
             label: '单元号',
             icon: 'element-no',
             action: switchTextBlockElemVisibility,
-            clicked: false
+            clicked: false,
+            active: viewStatus.textBlock.visible.label.elem
         },
         {
             label: '目标类别',
             icon: 't-circle',
-            action: switchTextBlockTargetisibility,
-            clicked: false
+            action: switchTextBlockTargetVisibility,
+            clicked: false,
+            active: viewStatus.textBlock.visible.target.all,
+            disable: status.task.run !== CONSTANT.TASK.RUN.NONE
         },
         {
             label: '设置',
@@ -284,12 +315,20 @@ const toolBars = ref([
         }
     ],
     [
-        {
-            label: '账号',
-            icon: 'account',
-            action: account,
-            clicked: false
-        },
+        status.user.logined ?
+            {
+                label: '用户详情',
+                icon: 'person-check',
+                action: showDialogAccountDetail,
+                clicked: false,
+                show: status.user.logined
+            } :
+            {
+                label: '用户登录',
+                icon: 'person',
+                action: showDialogAccountLogin,
+                clicked: false
+            },
         {
             label: '关于',
             icon: 'info',
@@ -313,7 +352,8 @@ const toolBars = ref([
                 <template v-for="(toolBar, j) in toolBarGroup" v-bind:key="j">
                     <div>
                         <el-tooltip :content="toolBar.label" placement="bottom" effect="light">
-                            <el-button @click="toolBar.action">
+                            <el-button @click="toolBar.action" :disabled="toolBar.disable"
+                                :class="toolBar.active ? 'active' : ''">
                                 <div class="iconFront">
                                     <IconFront :iconName="toolBar.icon"></IconFront>
                                 </div>
@@ -339,19 +379,23 @@ const toolBars = ref([
         </template>
     </div>
     <input type="file" id="xlsxFile" @change="projectImport" style="display: none" />
-    <!-- <Dialog :title="status.ui.dialog.title" :width="status.ui.dialog.width" v-if="status.ui.dialog.show" :alginCenter="status.ui.dialog.alginCenter">
-        <component :is="status.ui.dialog.component.is" />
-    </Dialog> -->
     <Teleport to="body">
-        <component :is="status.ui.dialog.component" v-if="status.ui.dialog.show"/>
+        <component :is="status.ui.dialog.component" v-if="status.ui.dialog.show" />
     </Teleport>
+    <component :is="status.ui.modal.component" v-if="status.ui.modal.show" />
+
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .el-button {
-    margin: 0;
+    height: 28px;
+    margin: 2px 1px;
     padding: 0 5px;
-    border: 0;
+    border-radius: var(--el-border-radius-base);
+}
+
+.active {
+    background-color: var(--el-button-hover-bg-color) !important;
 }
 
 .el-divider {

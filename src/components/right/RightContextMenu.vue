@@ -107,11 +107,11 @@ const filter = ({ mesh, from, label = 0, group = 0, type = 0 }) => {
                             return model.categorized.elem.lock
                     }
                 case 'femType':
-                    return model.categorized.elem[from].find(i => i.key === label).node
+                    return model.elem.filter(elem => elem[from] === label)
                 case 'mat':
-                    return model.categorized.elem[from].find(i => i.key === label).elem
+                    return model.elem.filter(elem => elem[from] === label)
                 case 'sec':
-                    return model.categorized.elem[from].find(i => i.key === label).elem
+                    return model.elem.filter(elem => elem[from] === label)
                 case 'elemShape':
                     return model.categorized.target.elemShape
                         .find(shape => shape.group === group.no && shape.equality === type)
