@@ -98,12 +98,11 @@ const onApply = () => {
         return
     }
     status.task.view.index = index
-    viewResult(index, option.value.tag)
+    viewResult(index, option.value.tag, false, option.value.animation.frameRate, option.value.animation.frameRate)
     if (option.value.animation.show) {
         status.task.view.animation.show = true
         status.task.view.animation.frameRate = option.value.animation.frameRate
         status.task.view.animation.index = 0
-        status.task.view.animation.iFrame = 0
         status.task.view.animation.iFrame = 0
         status.task.view.animation.elem.contour = option.value.tag.elem.show.contour
         status.task.view.animation.elem.key = option.value.tag.elem.key

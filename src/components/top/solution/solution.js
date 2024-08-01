@@ -350,7 +350,7 @@ const clearResult = () => {
     status.task.run = CONSTANT.TASK.RUN.NONE
 }
 
-const viewResult = (index, tag, iFrame = 0, frameRate = 10) => {
+const viewResult = (index, tag, animation = false, iFrame, frameRate) => {
     const model = useModelStore()
     const view = useView()
     const points = view.points.rslt
@@ -387,7 +387,7 @@ const viewResult = (index, tag, iFrame = 0, frameRate = 10) => {
     } else {
         view.control.hideTextBlock('label', 'elem', 'rslt')
     }
-    if (tag.elem.show.contour && iFrame == 0) {
+    if (tag.elem.show.contour && (animation && iFrame == 0 || !animation)) {
         const key = tag.elem.key
         const config = view.scene.metadata.useConfig()
         config.mesh.elem.color.contour.by = key
@@ -398,6 +398,10 @@ const viewResult = (index, tag, iFrame = 0, frameRate = 10) => {
             const v = result.elem[i][key]
             let j = Math.round(((v - min) / (max - min)) * (nSec - 1))
             line.updateMeshColor(colors[j])
+        })
+    } else if (!tag.elem.show.contour && !animation) {
+        view.lines.rslt.forEach(line => {
+            line.updateMeshColor()
         })
     }
 }
@@ -418,6 +422,7 @@ class Animation {
                     key: this.status.elem.key
                 }
             },
+            this.status.show,
             this.status.iFrame,
             this.status.frameRate
         )
@@ -450,12 +455,21 @@ class Animation {
     }
     stop() {
         this.pause()
-        this.status.index = 0
-        this.status.iFrame = 0
-        viewResult(this.status.index, {
-            node: {show: false},
-            elem: {show: {text: false, contour: false}}
-        })
+        this.status.index = this.index
+        this.status.iFrame = this.status.frameRate
+        viewResult(
+            this.status.index,
+            {
+                node: {show: false},
+                elem: {
+                    show: {text: false, contour: this.status.elem.contour},
+                    key: this.status.elem.key
+                }
+            },
+            false,
+            this.status.iFrame,
+            this.status.frameRate
+        )
     }
 }
 
