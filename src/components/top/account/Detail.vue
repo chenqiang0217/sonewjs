@@ -8,12 +8,11 @@ import Modal from '../Modal.vue'
 const status = useStatusStore()
 const messages = useMessageStore()
 const to = 'client'
-const width = 360
 
 </script>
 
 <template>
-    <Modal title="" :width="width">
+    <Modal :width="360" apply="运用"  >
     </Modal>
 </template>
 

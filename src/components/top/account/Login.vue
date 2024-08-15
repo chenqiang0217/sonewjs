@@ -4,11 +4,11 @@ import { useStatusStore } from '../../../stores/status'
 import { useMessageStore, Message } from '../../../stores/message'
 import { auth } from '../../../api/request'
 import Modal from '../Modal.vue'
+import CdButton from '../../utils/CdButton.vue'
 
 const status = useStatusStore()
 const messages = useMessageStore()
 const to = 'client'
-const width = 360
 
 const user = ref({
     username: '',
@@ -22,7 +22,8 @@ const user = ref({
             return this.match(regex)
         },
         email: function () {
-            const regex = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/
+            const regex =
+                /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/
             return this.match(regex)
         },
         password: function () {
@@ -38,21 +39,19 @@ const user = ref({
 const validateUsername = (_, username, callback) => {
     if (user.value.check.username.apply(username)) {
         if (active.value === 'register') {
-            auth.userExist(JSON.stringify({ username }))
-                .then(({ authenticated = fasle }) => {
+            auth.userExist(JSON.stringify({ username })).then(
+                ({ authenticated = fasle }) => {
                     if (authenticated) {
                         callback()
-                    }
-                    else {
+                    } else {
                         callback(new Error('用户已存在'))
                     }
-                })
-        }
-        else{
+                }
+            )
+        } else {
             callback()
         }
-    }
-    else {
+    } else {
         callback(new Error('字母开头，包含数字、-、_，4~20位'))
     }
 }
@@ -111,9 +110,13 @@ watch(
 )
 const register = ({ username, email, password }) => {
     const check = user.value.check
-    if (check.username.apply(username) && check.email.apply(email) && check.password.apply(password)) {
-        auth.register(JSON.stringify({ username, email, password }))
-            .then(({ authenticated = fasle }) => {
+    if (
+        check.username.apply(username) &&
+        check.email.apply(email) &&
+        check.password.apply(password)
+    ) {
+        auth.register(JSON.stringify({ username, email, password })).then(
+            ({ authenticated = fasle }) => {
                 status.ui.tab.message.active = to
                 if (authenticated) {
                     messages.add({
@@ -122,17 +125,16 @@ const register = ({ username, email, password }) => {
                         to
                     })
                     login({ username, password })
-                }
-                else {
+                } else {
                     messages.add({
                         text: '注册失败',
                         level: Message.TYPES.ERROR.LEVEL,
                         to
                     })
                 }
-            })
-    }
-    else {
+            }
+        )
+    } else {
         messages.add({
             text: '输入格式错误',
             level: Message.TYPES.ERROR.LEVEL,
@@ -143,8 +145,8 @@ const register = ({ username, email, password }) => {
 const login = ({ username, password }) => {
     const check = user.value.check
     if (check.username.apply(username) && check.password.apply(password)) {
-        auth.login(JSON.stringify({ username, password }))
-            .then(({ authenticated = false , token = ''}) => {
+        auth.login(JSON.stringify({ username, password })).then(
+            ({ authenticated = false, token = '' }) => {
                 status.ui.tab.message.active = to
                 if (authenticated) {
                     status.user.authenticated = true
@@ -157,17 +159,16 @@ const login = ({ username, password }) => {
                     setTimeout(() => {
                         status.ui.modal.show = false
                     }, 500)
-                }
-                else {
+                } else {
                     messages.add({
                         text: '登录失败',
                         level: Message.TYPES.ERROR.LEVEL,
                         to
                     })
                 }
-            })
-    }
-    else {
+            }
+        )
+    } else {
         messages.add({
             text: '输入格式错误',
             level: Message.TYPES.ERROR.LEVEL,
@@ -178,8 +179,8 @@ const login = ({ username, password }) => {
 const sendVerificationCode = () => {
     const username = user.value.username
     const email = user.value.email
-    auth.sendVerificationCode(JSON.stringify({ username, email }))
-        .then(({ authenticated = fasle }) => {
+    auth.sendVerificationCode(JSON.stringify({ username, email })).then(
+        ({ authenticated = fasle }) => {
             status.ui.tab.message.active = to
             if (authenticated) {
                 messages.add({
@@ -187,40 +188,50 @@ const sendVerificationCode = () => {
                     level: Message.TYPES.SUCCESS.LEVEL,
                     to
                 })
-            }
-            else {
+            } else {
                 messages.add({
                     text: '验证码发送失败',
                     level: Message.TYPES.ERROR.LEVEL,
                     to
                 })
             }
-        })
+        }
+    )
 }
-const resetPassword = ({ username, email, verificationCode, password, passwordCheck }) => {
+const resetPassword = ({
+    username,
+    email,
+    verificationCode,
+    password,
+    passwordCheck
+}) => {
     const check = user.value.check
-    if (check.username.apply(username) && check.email.apply(email) && check.verificationCode.apply(verificationCode)
-        && check.password.apply(password) && password === passwordCheck) {
-        auth.resetPassword(JSON.stringify({ username, email, verificationCode, password }))
-            .then(({ authenticated = fasle }) => {
-                status.ui.tab.message.active = to
-                if (authenticated) {
-                    messages.add({
-                        text: '重置密码成功',
-                        level: Message.TYPES.SUCCESS.LEVEL,
-                        to
-                    })
-                }
-                else {
-                    messages.add({
-                        text: '重置密码失败',
-                        level: Message.TYPES.ERROR.LEVEL,
-                        to
-                    })
-                }
-            })
-    }
-    else {
+    if (
+        check.username.apply(username) &&
+        check.email.apply(email) &&
+        check.verificationCode.apply(verificationCode) &&
+        check.password.apply(password) &&
+        password === passwordCheck
+    ) {
+        auth.resetPassword(
+            JSON.stringify({ username, email, verificationCode, password })
+        ).then(({ authenticated = fasle }) => {
+            status.ui.tab.message.active = to
+            if (authenticated) {
+                messages.add({
+                    text: '重置密码成功',
+                    level: Message.TYPES.SUCCESS.LEVEL,
+                    to
+                })
+            } else {
+                messages.add({
+                    text: '重置密码失败',
+                    level: Message.TYPES.ERROR.LEVEL,
+                    to
+                })
+            }
+        })
+    } else {
         messages.add({
             text: '输入格式错误',
             level: Message.TYPES.ERROR.LEVEL,
@@ -243,11 +254,25 @@ function onApply() {
 </script>
 
 <template>
-    <Modal title="" :width="width" :apply="active == 'register' ? '注册' : active == 'login' ? '登录' : '重置密码'">
+    <Modal
+        :width="360"
+        :apply="
+            active == 'register'
+                ? '注册'
+                : active == 'login'
+                ? '登录'
+                : '重置密码'
+        "
+        :countdown="10">
         <el-tabs v-model="activeTab">
             <el-tab-pane name="login">
                 <template #label>
-                    <span :class="active == 'login' || active == 'resetPassword' ? '' : 'inactive'">
+                    <span
+                        :class="
+                            active == 'login' || active == 'resetPassword'
+                                ? ''
+                                : 'inactive'
+                        ">
                         <IconFront iconName="person" />登录
                     </span>
                 </template>
@@ -264,37 +289,75 @@ function onApply() {
             <el-form-item label="用户名" prop="username">
                 <el-input v-model="user.username" placeholder="" clearable />
             </el-form-item>
-            <el-form-item v-show="active == 'register' || active == 'resetPassword'" prop="email">
+            <el-form-item
+                v-show="active == 'register' || active == 'resetPassword'"
+                prop="email">
                 <template #label>
-                    <div style="display: flex;">
+                    <div style="display: flex">
                         <el-text>邮箱</el-text>
-                        <el-link type="danger" v-show="active == 'resetPassword'" :underline="false"
-                            style="margin-left: auto;" @click="active = 'login'">我有密码</el-link>
+                        <el-link
+                            type="danger"
+                            v-show="active == 'resetPassword'"
+                            :underline="false"
+                            style="margin-left: auto"
+                            @click="active = 'login'"
+                            >我有密码</el-link
+                        >
                     </div>
                 </template>
                 <el-input v-model="user.email" placeholder="">
                     <template #suffix>
-                        <el-link type="success" v-show="active !== 'register'" :underline="false" style="margin: 0;"
-                            @click="sendVerificationCode()" :disabled="disable">发送验证码</el-link>
+                        <CdButton
+                            link
+                            type="success"
+                            label="发送验证码"
+                            class="cd-button"
+                            :countdown="10"
+                            :disabled="disable"
+                            @click="sendVerificationCode" />
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item label="验证码" v-show="active == 'resetPassword'" prop="verificationCode">
-                <el-input v-model="user.verificationCode" placeholder="" clearable />
+            <el-form-item
+                label="验证码"
+                v-show="active == 'resetPassword'"
+                prop="verificationCode">
+                <el-input
+                    v-model="user.verificationCode"
+                    placeholder=""
+                    clearable />
             </el-form-item>
             <el-form-item prop="password">
                 <template #label>
-                    <div style="display: flex;">
-                        <el-text>{{ active == 'resetPassword' ? '新密码' : '密码' }}</el-text>
-                        <el-link type="danger" v-show="active == 'login'" :underline="false" style="margin-left: auto;"
-                            @click="active = 'resetPassword'">没有密码？</el-link>
+                    <div style="display: flex">
+                        <el-text>{{
+                            active == 'resetPassword' ? '新密码' : '密码'
+                        }}</el-text>
+                        <el-link
+                            type="danger"
+                            v-show="active == 'login'"
+                            :underline="false"
+                            style="margin-left: auto"
+                            @click="active = 'resetPassword'"
+                            >没有密码？</el-link
+                        >
                     </div>
                 </template>
-                <el-input v-model="user.password" type="password" placeholder="" show-password />
+                <el-input
+                    v-model="user.password"
+                    type="password"
+                    placeholder=""
+                    show-password />
             </el-form-item>
-            <el-form-item :label="active == 'resetPassword' ? '新密码确认' : '密码确认'" v-show="active != 'login'"
+            <el-form-item
+                :label="active == 'resetPassword' ? '新密码确认' : '密码确认'"
+                v-show="active != 'login'"
                 prop="passwordCheck">
-                <el-input v-model="user.passwordCheck" type="password" placeholder="" show-password />
+                <el-input
+                    v-model="user.passwordCheck"
+                    type="password"
+                    placeholder=""
+                    show-password />
             </el-form-item>
         </el-form>
     </Modal>

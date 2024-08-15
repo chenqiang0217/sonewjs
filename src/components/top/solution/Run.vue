@@ -27,7 +27,6 @@ const onSelectionChange = (rows) => {
         }
     })
 }
-const width = 600
 watch(
     () => status.ui.dialog.apply,
     (apply) => {
@@ -41,7 +40,7 @@ watch(
 </script>
 
 <template>
-    <Dialog title="求解" :width="width">
+    <Dialog title="求解" :width="600" >
         <el-table :data="model.loadStep" ref="tableRef" @selection-change="onSelectionChange"
             style="width: 100%;  margin-bottom: 20px" highlight-current-row max-height="400" border fit
             show-overflow-tooltip tooltip-effect="light" :header-cell-style="{ 'text-align': 'center' }"

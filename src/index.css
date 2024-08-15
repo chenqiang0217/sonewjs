@@ -30,3 +30,11 @@ body {
     flex: 1
 }
 
+.cd-button {
+    height: 2em;
+    display: flex;
+    align-items: center;
+    max-width: 160px;
+    width: 100%;
+}
+

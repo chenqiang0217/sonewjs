@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useStatusStore } from '../../stores/status'
+import CdButton from '../utils/CdButton.vue'
 const status = useStatusStore()
 const props = defineProps({
     title: {
@@ -18,23 +19,30 @@ const props = defineProps({
     width: {
         type: Number,
         required: true
+    },
+    countdown: {
+        type: Number,
+        default: 3
     }
 })
 const position = computed(() => ({
     left: props.left + 'px',
     top: props.top + 'px',
     width: props.width + 'px'
-}
-))
+}))
 </script>
 
 <template>
     <div class="dialog" :style="position" v-drag>
         <div class="header">
             <slot name="header">
-                <el-text tag="b" style="margin-right: auto;">{{ title }}</el-text>
+                <el-text tag="b" style="margin-right: auto">{{
+                    title
+                }}</el-text>
                 <el-text class="close">
-                    <IconFront iconName="close" @click="status.ui.dialog.show = false" />
+                    <IconFront
+                        iconName="close"
+                        @click="status.ui.dialog.show = false" />
                 </el-text>
             </slot>
         </div>
@@ -43,9 +51,15 @@ const position = computed(() => ({
         </div>
         <div class="footer">
             <slot name="footer">
-                <el-button type="primary" plain round @click="status.ui.dialog.show = false">关闭</el-button>
-                <el-button type="primary" plain round @click="status.ui.dialog.apply = true">
-                    应用</el-button>
+                <CdButton
+                    label="关闭"
+                    class="cd-button"
+                    @click="status.ui.dialog.show = false" />
+                <CdButton
+                    label="应用"
+                    class="cd-button"
+                    :countdown="props.countdown"
+                    @click="status.ui.dialog.apply = true" />
             </slot>
         </div>
     </div>
@@ -85,14 +99,6 @@ const position = computed(() => ({
 
 .header {
     padding: 0 10px;
-}
-
-.el-button {
-    height: 2em;
-    display: flex;
-    align-items: center;
-    max-width: 160px;
-    width: 100%;
 }
 
 .footer {

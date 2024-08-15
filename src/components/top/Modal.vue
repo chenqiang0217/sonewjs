@@ -1,11 +1,9 @@
 <script setup>
 import { useStatusStore } from '../../stores/status'
+import CdButton from '../utils/CdButton.vue'
+
 const status = useStatusStore()
 const props = defineProps({
-    title: {
-        type: String,
-        required: true
-    },
     width: {
         type: Number,
         required: true
@@ -13,21 +11,25 @@ const props = defineProps({
     apply: {
         type: String,
         default: '运用'
+    },
+    countdown: {
+        type: Number,
+        default: 0
     }
 })
+
 </script>
 
 <template>
-    <el-dialog v-model="status.ui.modal.show" :title="title" :width="width" draggable class="dialog">
+    <el-dialog v-model="status.ui.modal.show" :width="width" draggable>
         <slot></slot>
         <div class="footer">
             <slot name="footer">
-                <!-- <el-button type="primary" round @click="status.ui.modal.show = false"><el-text>
-                        关闭
-                    </el-text></el-button> -->
-                <el-button type="primary" plain round @click="status.ui.modal.apply = true">
-                    {{ props.apply }}
-                </el-button>
+                <CdButton
+                    :label="props.apply"
+                    :countdown="props.countdown"
+                    class="cd-button"
+                    @click="status.ui.modal.apply = true" />
             </slot>
         </div>
     </el-dialog>
@@ -37,30 +39,6 @@ const props = defineProps({
 .footer {
     display: flex;
     justify-content: space-around;
-
-    .el-button {
-        // background: var(--el-color-primary-light-7);
-        height: 2em;
-        display: flex;
-        align-items: center;
-        max-width: 160px;
-        width: 100%;
-
-        // .el-text {
-        //     color: var(--el-color-primary);
-        // }
-
-        // &:hover {
-        //     background: var(--el-color-primary);
-
-        //     .el-text {
-        //         color: var(--el-color-primary-light-7);
-        //     }
-
-        //     .el-text.close:hover {
-        //         color: var(--el-color-primary-light-5);
-        //     }
-        // }
-    }
 }
+
 </style>

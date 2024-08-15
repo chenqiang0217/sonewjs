@@ -1,7 +1,7 @@
 import {Vector3} from '@babylonjs/core'
-import {useModelStore} from '../../stores/model'
-import {Command} from './command'
-import {generateUniqueNo} from '../utils'
+import {useModelStore} from '../../../stores/model'
+import {Command} from '../command'
+import {generateUniqueNo} from '../../utils'
 
 class NodeCreateCommand extends Command {
     constructor(node) {

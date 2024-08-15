@@ -6,7 +6,7 @@ import {
     NodeRemoveCommand,
     NodeRenameCommand,
     NodeReceiver
-} from './node'
+} from './model/node'
 
 export {
     Command,
