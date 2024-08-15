@@ -227,8 +227,8 @@ const colorChange = (data, colorHexString) => {
             </el-table-column>
             <el-table-column prop="color" label="颜色">
                 <template #default="scope">
-                    <Color :color="scope.row.color.toHexString()" :width="0" :height="25"
-                        @change="(color) => colorChange(scope.row, color)" style="padding: 0 10px;" />
+                    <Color :color="scope.row.color.toHexString()" :width="0" :height="23"
+                        @change="(color) => colorChange(scope.row, color)" />
                 </template>
             </el-table-column>
             <template #empty>
@@ -238,4 +238,14 @@ const colorChange = (data, colorHexString) => {
     </Dialog>
 </template>
 
-<style scoped></style>
+<style scoped>
+.el-button {
+    height: 2em;
+}
+
+.el-table .el-text {
+    display: block;
+    width: 100%;
+    text-align: center
+}
+</style>

@@ -1,5 +1,4 @@
-import {markRaw} from 'vue'
-// import {v4 as uuidv4} from 'uuid'
+import {markRaw, nextTick} from 'vue'
 import {Node} from '../../../api/model/index'
 import {useModelStore} from '../../../stores/model'
 import {useMessageStore, Message} from '../../../stores/message'
@@ -31,30 +30,26 @@ const solutionRun = async () => {
     const model = useModelStore()
     const status = useStatusStore()
     const messages = useMessageStore()
-    const to = 'client'
-    if (status.task.run == CONSTANT.TASK.RUN.PROGRESS) {
+    if (status.user.authenticated) {
+        status.ui.tab.message.active = 'server'
+        status.task.run = CONSTANT.TASK.RUN.PROGRESS
+        status.resetTaskResponse()
+        model.clearResult()
+        showSolutionProgress()
+        try {
+            task.run(await modelJson(), handleResult)
+        } catch (error) {
+            status.task.run = CONSTANT.TASK.RUN.ERROR
+            throw error
+        }
+    } else {
+        const to = 'client'
         status.ui.tab.message.active = to
         messages.add({
-            text: '计算中，勿重复点击',
-            level: Message.TYPES.WARNING.LEVEL,
+            text: '未登录',
+            level: Message.TYPES.ERROR.LEVEL,
             to
         })
-    } else {
-        if (status.user.logined) {
-            status.ui.tab.message.active = 'server'
-            model.clearResult()
-            task.run(await modelJson(), handleResult)
-            showSolutionProgress()
-            status.task.run = CONSTANT.TASK.RUN.PROGRESS
-            status.resetTaskResponse()
-        } else {
-            status.ui.tab.message.active = to
-            messages.add({
-                text: '未登录',
-                level: Message.TYPES.ERROR.LEVEL,
-                to
-            })
-        }
     }
 }
 const showSolutionProgress = () => {
@@ -82,18 +77,19 @@ const resultViewInit = () => {
     if (view.points.rslt.length == 0 || view.lines.rslt.length == 0) {
         view.points.prep
             .filter(point =>
-                model.categorized.node.free.find(
+                model.categorized.node.free.some(
                     node => point.mesh.metadata === node
                 )
             )
             .forEach(point => point.hide())
         view.lines.prep
             .filter(line =>
-                model.categorized.elem.free.find(
+                model.categorized.elem.free.some(
                     elem => line.mesh.metadata === elem
                 )
             )
             .forEach(line => line.hide())
+        status.mesh.visible.prepFree = false
         model.categorized.node.free.forEach(node => {
             view.createPoint(node.clone(), 'rslt').updateMeshColor(
                 view.scene.metadata.materials.point.free
@@ -114,6 +110,7 @@ const resultViewInit = () => {
 const modelJson = async () => {
     const model = useModelStore()
     const config = useConfigStore()
+    const status = useStatusStore()
     const loadStep = model.loadStep.find((item, index) => {
         if (item.run) {
             item.no = index + 1
@@ -178,7 +175,8 @@ const modelJson = async () => {
         config: {
             response: config.task.response,
             loadStep
-        }
+        },
+        token: status.user.token
     })
 }
 
@@ -342,17 +340,25 @@ const clearResult = () => {
     const model = useModelStore()
     const status = useStatusStore()
     const view = useView()
+    const animation = useAnimation()
+    animation.pause()
+    status.task.view.animation.show = false
     model.clearResult()
     view.clearPoints('rslt')
     view.clearLines('rslt')
     view.points.prep.forEach(point => point.show())
     view.lines.prep.forEach(line => line.show())
+    view.scene.metadata.useStatus().mesh.visible.prepFree = true
     status.task.run = CONSTANT.TASK.RUN.NONE
 }
 
-const viewResult = (index, tag, animation = false, iFrame, frameRate) => {
+const viewResult = async (index, tag, animation = false, iFrame, frameRate) => {
     const model = useModelStore()
     const view = useView()
+    const status = view.scene.metadata.useStatus()
+    status.textBlock.visible.label.node = false
+    status.textBlock.visible.label.elem = false
+    await nextTick()
     const points = view.points.rslt
     const result = model.result[index]
     const resultPre = model.result[index == 0 ? index : index - 1]
@@ -387,7 +393,7 @@ const viewResult = (index, tag, animation = false, iFrame, frameRate) => {
     } else {
         view.control.hideTextBlock('label', 'elem', 'rslt')
     }
-    if (tag.elem.show.contour && (animation && iFrame == 0 || !animation)) {
+    if (tag.elem.show.contour && ((animation && iFrame == 0) || !animation)) {
         const key = tag.elem.key
         const config = view.scene.metadata.useConfig()
         config.mesh.elem.color.contour.by = key

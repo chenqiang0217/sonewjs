@@ -1,14 +1,22 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, unref, markRaw } from 'vue'
+import { ClickOutside as vClickOutside } from 'element-plus'
 import { useStatusStore } from '../../stores/status'
 import { CONSTANT } from '../../stores/constant'
 import { useViewStatusStore } from '../../api/view/index'
+import { useCommandStore } from '../../api/command/index'
+
 import {
     projectNew,
     projectOpen,
     projectImport,
-    projectSave
+    projectSave,
+    projectUndo,
+    projectRedo
 } from './project/project'
+import Undo from './project/Undo.vue'
+import Redo from './project/Redo.vue'
+import Import from './project/Import.vue'
 import {
     showDialogNode,
     showDialogElem,
@@ -46,8 +54,10 @@ import {
     viewRight
 } from './view/view'
 import {
-    activeMesh,
-    freezeMesh,
+    activateSelectedMesh,
+    freezeSelectedMesh,
+    activateAllMesh,
+    freezeAllMesh,
     switchMeshNodeVisibility,
     switchTextBlockNodeVisibility,
     switchTextBlockElemVisibility,
@@ -60,6 +70,7 @@ import { test } from './test/test'
 
 const status = useStatusStore()
 const viewStatus = useViewStatusStore()
+const commands = useCommandStore()
 const toolBars = computed(() => [
     [
         {
@@ -76,16 +87,31 @@ const toolBars = computed(() => [
         },
         {
             label: '导入',
-            icon: 'import',
-            action: () => {
-                document.getElementById('xlsxFile').click()
-            },
-            clicked: false
+            icon: 'suitcase-lg',
+            action: () => {},
+            clicked: false,
+            suffix: Import,
         },
         {
             label: '保存',
-            icon: 'save',
+            icon: 'floppy',
             action: projectSave,
+            clicked: false
+        },
+        {
+            label: '撤销',
+            icon: 'undo',
+            action: projectUndo,
+            disabled: commands.currentStep < 0,
+            suffix: Undo,
+            clicked: false
+        },
+        {
+            label: '重做',
+            icon: 'redo',
+            action: projectRedo,
+            disabled: commands.currentStep + 1 == commands.commandQueue.length,
+            suffix: Redo,
             clicked: false
         }
     ],
@@ -197,34 +223,34 @@ const toolBars = computed(() => [
             icon: 'run',
             action: showDialogSolutionRun,
             clicked: false,
-            disable: status.task.run !== CONSTANT.TASK.RUN.NONE
+            disabled: status.task.run !== CONSTANT.TASK.RUN.NONE
         },
         {
             label: '计算进度',
             icon: 'result',
             action: showSolutionProgress,
             clicked: false,
-            disable: status.task.run === CONSTANT.TASK.RUN.NONE
+            disabled: status.task.run === CONSTANT.TASK.RUN.NONE
         },
         {
             label: '结果',
             icon: 'deformation-element-density',
             action: showDialogSolutionResult,
             clicked: false,
-            disable: status.task.run === CONSTANT.TASK.RUN.NONE
+            disabled: status.task.run === CONSTANT.TASK.RUN.NONE
         },
         status.task.run !== CONSTANT.TASK.RUN.NONE ?
             {
                 label: '解锁',
                 icon: 'lock-big',
                 action: clearResult,
-                disable: status.task.run === CONSTANT.TASK.RUN.PROGRESS
+                disabled: status.task.run === CONSTANT.TASK.RUN.PROGRESS
             } :
             {
                 label: '锁定',
                 icon: 'unlock-big',
                 action: () => { },
-                disable: true
+                disabled: true
             }
     ],
     [
@@ -268,14 +294,26 @@ const toolBars = computed(() => [
     [
         {
             label: '激活',
-            icon: 'active',
-            action: activeMesh,
+            icon: 'activate',
+            action: activateSelectedMesh,
             clicked: false
         },
         {
             label: '冻结',
-            icon: 'frezone',
-            action: freezeMesh,
+            icon: 'freeze',
+            action: freezeSelectedMesh,
+            clicked: false
+        },
+        {
+            label: '全部激活',
+            icon: 'activate-all',
+            action: activateAllMesh,
+            clicked: false
+        },
+        {
+            label: '全部冻结',
+            icon: 'freeze-all',
+            action: freezeAllMesh,
             clicked: false
         },
         {
@@ -305,7 +343,7 @@ const toolBars = computed(() => [
             action: switchTextBlockTargetVisibility,
             clicked: false,
             active: viewStatus.textBlock.visible.target.all,
-            disable: status.task.run !== CONSTANT.TASK.RUN.NONE
+            disabled: status.task.run !== CONSTANT.TASK.RUN.NONE
         },
         {
             label: '设置',
@@ -315,13 +353,13 @@ const toolBars = computed(() => [
         }
     ],
     [
-        status.user.logined ?
+        status.user.authenticated ?
             {
                 label: '用户详情',
                 icon: 'person-check',
                 action: showDialogAccountDetail,
                 clicked: false,
-                show: status.user.logined
+                show: status.user.authenticated
             } :
             {
                 label: '用户登录',
@@ -343,6 +381,16 @@ const toolBars = computed(() => [
         }
     ]
 ])
+const suffixRef = ref()
+const popoverRef = ref()
+const onClickOutside = () => {
+    unref(popoverRef).popperRef?.delayHide?.()
+}
+const onMouseoverSuffix = (e, suffix) => {
+    suffixRef.value = e.currentTarget
+    status.ui.popover.component = markRaw(suffix)
+}
+
 </script>
 
 <template>
@@ -352,10 +400,14 @@ const toolBars = computed(() => [
                 <template v-for="(toolBar, j) in toolBarGroup" v-bind:key="j">
                     <div>
                         <el-tooltip :content="toolBar.label" placement="bottom" effect="light">
-                            <el-button @click="toolBar.action" :disabled="toolBar.disable"
+                            <el-button @click="() => toolBar.action()" :disabled="toolBar.disabled"
                                 :class="toolBar.active ? 'active' : ''">
                                 <div class="iconFront">
                                     <IconFront :iconName="toolBar.icon"></IconFront>
+                                    <div class="suffix" v-if="toolBar.suffix" v-click-outside="onClickOutside"
+                                        @mouseover="e => onMouseoverSuffix(e, toolBar.suffix)" @click.stop="">
+                                        <IconFront iconName="caret-down-fill" suffix></IconFront>
+                                    </div>
                                 </div>
                             </el-button>
                         </el-tooltip>
@@ -379,6 +431,11 @@ const toolBars = computed(() => [
         </template>
     </div>
     <input type="file" id="xlsxFile" @change="projectImport" style="display: none" />
+    <el-popover
+        popper-style="padding: 0px;border: 1px solid var(--el-color-primary-light-7);box-shadow: var(--el-box-shadow-light); width:auto; min-width:0"
+        ref="popoverRef" virtual-triggering :virtual-ref="suffixRef" trigger="click">
+        <component :is="status.ui.popover.component" />
+    </el-popover>
     <Teleport to="body">
         <component :is="status.ui.dialog.component" v-if="status.ui.dialog.show" />
     </Teleport>
@@ -392,6 +449,7 @@ const toolBars = computed(() => [
     margin: 2px 1px;
     padding: 0 5px;
     border-radius: var(--el-border-radius-base);
+
 }
 
 .active {
@@ -403,6 +461,17 @@ const toolBars = computed(() => [
 }
 
 .iconFront {
+    display: flex;
+    align-items: end;
     color: var(--el-color-primary-light-3);
+
+    .suffix:hover {
+        color: var(--el-color-primary);
+    }
+}
+
+.dialog {
+    border: 1px solid var(--el-color-primary-light-7);
+    box-shadow: var(--el-box-shadow-light);
 }
 </style>

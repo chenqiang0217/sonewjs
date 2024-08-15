@@ -236,7 +236,7 @@ const useModelStore = defineStore('model', {
             return this.node.at(-1)
         },
         removeNode(node) {
-            const index = this.node.findIndex(item => item === node)
+            const index = this.node.findIndex(item => item.no === node.no)
             const view = useView()
             //必须保证两数组数据一致
             if (index != -1) {
@@ -251,7 +251,7 @@ const useModelStore = defineStore('model', {
             return elemFemType
         },
         removeElemFemType(elemFemType) {
-            const index = this.elemFemType.findIndex(item => item === elemFemType)
+            const index = this.elemFemType.findIndex(item => item.no === elemFemType.no)
             if (index != -1) {
                 this.elemFemType.splice(index, 1)
             }
@@ -262,7 +262,7 @@ const useModelStore = defineStore('model', {
             return elemMat
         },
         removeElemMat(elemMat) {
-            const index = this.elemMat.findIndex(item => item === elemMat)
+            const index = this.elemMat.findIndex(item => item.no === elemMat.no)
             if (index != -1) {
                 this.elemMat.splice(index, 1)
             }
@@ -273,7 +273,7 @@ const useModelStore = defineStore('model', {
             return elemSec
         },
         removeElemSec(elemSec) {
-            const index = this.elemSec.findIndex(item => item === elemSec)
+            const index = this.elemSec.findIndex(item => item.no === elemSec.no)
             if (index != -1) {
                 this.elemSec.splice(index, 1)
             }
@@ -319,7 +319,7 @@ const useModelStore = defineStore('model', {
             }
         },
         removeElem(elem) {
-            const index = this.elem.findIndex(item => item === elem)
+            const index = this.elem.findIndex(item => item.no === elem.no)
             const view = useView()
             //必须保证两数组数据一致
             if (index != -1) {
@@ -334,7 +334,7 @@ const useModelStore = defineStore('model', {
             this.cnst.push(new Cnst([no, node, dim, cs]))
         },
         removeCnst(cnst) {
-            const index = this.cnst.findIndex(item => item === cnst)
+            const index = this.cnst.findIndex(item => item.no === cnst.no)
             if (index != -1) {
                 this.cnst.splice(index, 1)
             }
@@ -401,7 +401,7 @@ const useModelStore = defineStore('model', {
         },
         removeNodeShape(target) {
             const index = this.target.nodeShape.findIndex(
-                item => item === target
+                item => item.no === target.no
             )
             const view = useView()
             const point = view.points.prep.find(
@@ -475,7 +475,7 @@ const useModelStore = defineStore('model', {
         },
         removeElemShape(target) {
             const index = this.target.elemShape.findIndex(
-                item => item === target
+                item => item.no === target.no
             )
             const view = useView()
             const line = view.lines.prep.find(
@@ -544,7 +544,7 @@ const useModelStore = defineStore('model', {
         },
         removeElemForce(target) {
             const index = this.target.elemForce.findIndex(
-                item => item === target
+                item => item.no === target.no
             )
             const view = useView()
             const line = view.lines.prep.find(
@@ -559,7 +559,7 @@ const useModelStore = defineStore('model', {
             this.target.group.push(new TargetGroup(no, label, description))
         },
         removeTargetGroup(group) {
-            const index = this.target.group.findIndex(item => item === group)
+            const index = this.target.group.findIndex(item => item.no === group.no)
             if (index != -1) {
                 this.target.group.splice(index, 1)
             }
@@ -573,7 +573,7 @@ const useModelStore = defineStore('model', {
             )
         },
         removeLoadStep(loadStep) {
-            const index = this.loadStep.findIndex(item => item === loadStep)
+            const index = this.loadStep.findIndex(item => item.no === loadStep.no)
             if (index != -1) {
                 this.loadStep.splice(index, 1)
             }

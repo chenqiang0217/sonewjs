@@ -142,7 +142,7 @@ function onApply() {
                         continue
                     }
                     else {
-                        model.createElem([no, operation.value.eType, operation.value.femType, operation.value.mat, operation.value.sec, iNode, jNode])
+                        model.createElem([no, operation.value.eType, operation.value.femType.no, operation.value.mat, operation.value.sec.no, iNode, jNode])
                         no += 1
                         break
                     }

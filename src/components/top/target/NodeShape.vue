@@ -34,9 +34,9 @@ const operation = ref({
         z: false
     },
     values: {
-        x: 0,
-        y: 0,
-        z: 0
+        x: 0.0,
+        y: 0.0,
+        z: 0.0
     }
 })
 const options = ref([
@@ -240,7 +240,7 @@ function onApply() {
                     </el-col>
                     <el-col :span="18">
                         <el-form-item>
-                            <el-input v-model.number="operation.values[key]"
+                            <el-input v-model="operation.values[key]"
                                 :disabled="!operation.dim[key] || (operation.target == NodeShape.TYPE.SNODE.is && operation.valuesFromModel)" />
                         </el-form-item>
                     </el-col>

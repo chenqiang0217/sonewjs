@@ -144,10 +144,11 @@ const login = ({ username, password }) => {
     const check = user.value.check
     if (check.username.apply(username) && check.password.apply(password)) {
         auth.login(JSON.stringify({ username, password }))
-            .then(({ authenticated = false }) => {
+            .then(({ authenticated = false , token = ''}) => {
                 status.ui.tab.message.active = to
                 if (authenticated) {
-                    status.user.logined = true
+                    status.user.authenticated = true
+                    status.user.token = token
                     messages.add({
                         text: '登录成功',
                         level: Message.TYPES.SUCCESS.LEVEL,

@@ -1,6 +1,7 @@
 <script setup>
 import { useModelStore } from '../../../stores/model'
 import Empty from './Empty.vue'
+import ToolBar from './ToolBar.vue'
 
 defineProps({
     width: {
@@ -23,11 +24,14 @@ const columns = [
 </script>
 
 <template>
-    <el-table-v2 :columns="columns" :data="model.node" :width="width" :height="height" :row-height="30" fixed>
-        <template #empty>
-            <Empty />
-        </template>
-    </el-table-v2>
+    <div style="position: relative;">
+        <ToolBar :data="model.node" />
+        <el-table-v2 :columns="columns" :data="model.node" :width="width" :height="height" :row-height="30" fixed>
+            <template #empty>
+                <Empty />
+            </template>
+        </el-table-v2>
+    </div>
 </template>
 
 <style></style>

@@ -4,7 +4,21 @@ const byNumAsec = (a, b) => {
 const byNoAsec = (a, b) => {
     return a.no - b.no
 }
-const stringToNumberArray = (str, splitter = ',') => str.split(splitter).map(item => Number.parseFloat(item))
+
+const generateUniqueNo = (no, nos) => {
+    const set = new Set(nos)
+    let uniqueNo = no
+    while (true) {
+        if (set.has(uniqueNo)) {
+            set.delete(uniqueNo)
+            uniqueNo += 1
+        } else {
+            return uniqueNo
+        }
+    }
+}
+const stringToNumberArray = (str, splitter = ',') =>
+    str.split(splitter).map(item => Number.parseFloat(item))
 const SetOperation = (aSet, bSet, type) => {
     let aArr = Array.from(aSet)
     let bArr = Array.from(bSet)
@@ -30,8 +44,8 @@ function debounce(fn, delay = 300) {
         }, delay)
     }
 }
-const sleep = (time) => {
-    return new Promise((resolve) => setTimeout(resolve, time * 1000))
+const sleep = time => {
+    return new Promise(resolve => setTimeout(resolve, time * 1000))
 }
 function base64ToFloat64Array(base64String) {
     const rawData = atob(base64String)
@@ -55,25 +69,31 @@ function float64ArrayToBase64(float64Array) {
     })
 }
 
-class Validator{
-    static  AllNumber() {
-        return this.map(item => Number.isFinite(item)).reduce((a, b) => a && b, true)
+class Validator {
+    static AllNumber() {
+        return this.map(item => Number.isFinite(item)).reduce(
+            (a, b) => a && b,
+            true
+        )
     }
-    static  AllInterger() {
-        return this.map(item => Number.isInteger(item)).reduce((a, b) => a && b, true)
+    static AllInterger() {
+        return this.map(item => Number.isInteger(item)).reduce(
+            (a, b) => a && b,
+            true
+        )
     }
     constructor(data) {
         this.data = data
         this.conditions = []
         return this
     }
-    addCondition(condition){
+    addCondition(condition) {
         this.conditions.push(condition)
         return this
     }
-    validate(){
-        for(const condition of this.conditions){
-            if(!condition.apply(this.data)){
+    validate() {
+        for (const condition of this.conditions) {
+            if (!condition.apply(this.data)) {
                 return false
             }
         }
@@ -81,5 +101,15 @@ class Validator{
     }
 }
 
-
-export { byNumAsec, byNoAsec, stringToNumberArray, SetOperation, debounce, sleep, base64ToFloat64Array, float64ArrayToBase64, Validator }
+export {
+    byNumAsec,
+    byNoAsec,
+    generateUniqueNo,
+    stringToNumberArray,
+    SetOperation,
+    debounce,
+    sleep,
+    base64ToFloat64Array,
+    float64ArrayToBase64,
+    Validator
+}

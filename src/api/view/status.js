@@ -15,6 +15,7 @@ const useViewStatusStore = defineStore('viewStatus', {
             ],
             mesh: {
                 visible: {
+                    prepFree: true,
                     node: true,
                     elem: true,
                     cnst: false

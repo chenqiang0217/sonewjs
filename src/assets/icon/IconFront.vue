@@ -22,15 +22,19 @@ const props = defineProps({
             return ['big', 'medium', 'small'].includes(value)
         }
     },
+    suffix: {
+        type: Boolean,
+        default: false
+    }
 })
 const size = computed(() => {
     switch (props.size) {
         case 'big':
-            return '30px'
+            return props.suffix ? '10px' : '30px'
         case 'medium':
-            return '18px'
+            return props.suffix ? '10px' : '18px'
         case 'small':
-            return '1em'
+            return props.suffix ? '0.5em' : '1em'
     }
 })
 </script>

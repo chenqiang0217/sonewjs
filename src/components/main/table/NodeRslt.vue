@@ -2,6 +2,7 @@
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import Empty from './Empty.vue'
+import ToolBar from './ToolBar.vue'
 
 defineProps({
     width: {
@@ -24,14 +25,18 @@ const columns = [
     { key: '3', title: 'y坐标', dataKey: 'y', width: cellWidth },
     { key: '4', title: 'z坐标', dataKey: 'z', width: cellWidth },
 ]
+
 </script>
 
 <template>
-    <el-table-v2 :columns="columns" :data="node" :width="width" :height="height" :row-height="30" fixed>
-        <template #empty>
-            <Empty />
-        </template>
-    </el-table-v2>
+    <div style="position: relative;">
+        <ToolBar :data="node" />
+        <el-table-v2 :columns="columns" :data="node" :width="width" :height="height" :row-height="30" fixed>
+            <template #empty>
+                <Empty />
+            </template>
+        </el-table-v2>
+    </div>
 </template>
 
 <style></style>

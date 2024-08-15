@@ -23,7 +23,6 @@ import { CanvasRenderer } from 'echarts/renderers'
 let chart
 const model = useModelStore()
 const status = useStatusStore()
-const config = useConfigStore()
 const props = defineProps({
     width: {
         type: Number,
@@ -245,15 +244,14 @@ onMounted(() => {
         CanvasRenderer,
     ])
     const canvas = document.getElementById('chart')
-    const loadStep = model.loadStep.find(ls => ls.run)
     chart = echarts.init(canvas, null, { width: props.width, height: props.height })
     chart.setOption(option)
     model.result.forEach(result => {
         series[0].data.push([result.step, result.rsdlx])
         series[1].data.push([result.step, result.rsdlq])
         series[2].data.push([result.step, result.mu])
-        series[3].data.push([result.step, loadStep.subStep
-            .find(ss => ss.no == result.subStep)?.rsdl
+        series[3].data.push([result.step, model.loadStep.find(ls => ls.run).subStep
+                    .at(result.subStep - 1).rsdl
         ])
     })
     series[4].data.pop()

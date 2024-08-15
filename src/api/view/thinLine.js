@@ -1,12 +1,8 @@
-import {
-    MeshBuilder,
-    CreateGreasedLine,
-    VertexBuffer
-} from '@babylonjs/core'
-import { TextBlock } from '@babylonjs/gui'
-import { VIEWCONSTANT } from './index'
-import { alignTextWithLine } from './control'
-import { ElemShape, ElemForce } from '../model/index'
+import {MeshBuilder, VertexBuffer, Mesh, VertexData} from '@babylonjs/core'
+import {TextBlock} from '@babylonjs/gui'
+import {VIEWCONSTANT} from './index'
+import {alignTextWithLine} from './control'
+import {ElemShape, ElemForce} from '../model/index'
 class Line {
     static PREP = {
         PREFIX: {
@@ -30,9 +26,17 @@ class Line {
     }
     constructor(elem, scene, TYPE = Line.PREP) {
         this.type = TYPE
-        this.mesh = _createMesh(elem, scene, TYPE)
+        const points = [elem.iNode.positionInScene, elem.jNode.positionInScene]
+        this.mesh = MeshBuilder.CreateLines(
+            TYPE.PREFIX.MESH + elem.no,
+            {points, updatable: true},
+            scene,
+            true
+        )
+        this.mesh.layerMask = TYPE.LAYER.MESH
+        this.mesh.isVisible = true
+        this.mesh.metadata = elem
         this.updateMeshColor()
-
         const label = new TextBlock(
             TYPE.PREFIX.TEXT + TYPE.PREFIX.MESH + elem.no
         )
@@ -119,31 +123,37 @@ class Line {
         }
     }
     updatePosition() {
-        // const points = [
-        //     ...this.mesh.metadata.iNode.positionInScene.asArray(),
-        //     ...this.mesh.metadata.jNode.positionInScene.asArray()
-        // ]
-        // this.mesh.setPoints([points])
-        _updateMeshVertices(this.mesh)
+        const positions = [
+            ...this.mesh.metadata.iNode.positionInScene.asArray(),
+            ...this.mesh.metadata.jNode.positionInScene.asArray()
+        ]
+        this.mesh.updateVerticesData(
+            VertexBuffer.PositionKind,
+            new Float32Array(positions)
+        )
+        this.mesh.refreshBoundingInfo()
         this.alignText()
         return this
     }
     updateMeshColor(color) {
-        if (color === void 0) {
+        if (color) {
+            this.mesh.color = color
+        } else {
             const config = this.mesh.getScene().metadata.useConfig()
             const binding = config.mesh.elem.color.binding
-            color = this.mesh.metadata[binding].color
+            this.mesh.color = this.mesh.metadata[binding].color
         }
-        _updateMeshColor(this.mesh, color)
         return this
     }
     updateLabelText(text) {
-        if (text === void 0) {
+        if (text) {
+            this.textBlock.label.text = text
+        } else {
             const config = this.mesh.getScene().metadata.useConfig()
             const binding = config.textBlock.elem.label.binding
-            text = this.mesh.metadata[binding].no || this.mesh.metadata[binding]
+            this.textBlock.label.text =
+                this.mesh.metadata[binding].no || this.mesh.metadata[binding]
         }
-        this.textBlock.label.text = text
         return this
     }
     updateLabelStyle(textBlock) {
@@ -152,8 +162,7 @@ class Line {
         if (!textBlock || textBlock === this.textBlock.label) {
             style = {
                 fontFamily: config.textBlock.elem.label.family,
-                fontSizeInPixels:
-                    config.textBlock.elem.label.size * window.devicePixelRatio,
+                fontSizeInPixels: config.textBlock.elem.label.size,
                 color: config.textBlock.elem.label.color
             }
             for (const [key, value] of Object.entries(style)) {
@@ -163,9 +172,7 @@ class Line {
         if (!textBlock || textBlock === this.textBlock.target.elemShape) {
             style = {
                 fontFamily: config.textBlock.elem.target.elemShape.family,
-                fontSizeInPixels:
-                    config.textBlock.elem.target.elemShape.size *
-                    window.devicePixelRatio,
+                fontSizeInPixels: config.textBlock.elem.target.elemShape.size,
                 color: config.textBlock.elem.target.elemShape.color
             }
             this.textBlock.target.elemShape.forEach(textBlock => {
@@ -177,9 +184,7 @@ class Line {
         if (!textBlock || textBlock === this.textBlock.target.elemForce) {
             style = {
                 fontFamily: config.textBlock.elem.target.elemForce.family,
-                fontSizeInPixels:
-                    config.textBlock.elem.target.elemForce.size *
-                    window.devicePixelRatio,
+                fontSizeInPixels: config.textBlock.elem.target.elemForce.size,
                 color: config.textBlock.elem.target.elemForce.color
             }
             this.textBlock.target.elemForce.forEach(textBlock => {
@@ -234,86 +239,4 @@ class Line {
     }
 }
 
-const _createMesh = (function () {
-    if (window.devicePixelRatio == 1) {
-        return (elem, scene, TYPE) => {
-            const points = [
-                elem.iNode.positionInScene,
-                elem.jNode.positionInScene
-            ]
-            const mesh = MeshBuilder.CreateLines(
-                TYPE.PREFIX.MESH + elem.no,
-                { points, updatable: true },
-                scene,
-                true
-            )
-            mesh.layerMask = TYPE.LAYER.MESH
-            mesh.isVisible = true
-            mesh.metadata = elem
-            return mesh
-        }
-    } else {
-        return (elem, scene, TYPE) => {
-            const points = [
-                ...elem.iNode.positionInScene.asArray(),
-                ...elem.jNode.positionInScene.asArray()
-            ]
-            const mesh = CreateGreasedLine(
-                TYPE.PREFIX.MESH + elem.no,
-                {
-                    points,
-                    updatable: true
-                },
-                {
-                    width: scene.activeCamera.meshWidth.line
-                },
-                scene
-            )
-            // const pointsCount = GetPointsCount(mesh.points)
-            // mesh.widths = CompleteGreasedLineWidthTable(
-            //     pointsCount * 2,
-            //     mesh.widths,
-            //     GreasedLineMeshWidthDistribution.WIDTH_DISTRIBUTION_START
-            // )
-            mesh.widths = new Array(8).fill(1)
-            mesh.layerMask = TYPE.LAYER.MESH
-            mesh.isVisible = true
-            mesh.metadata = elem
-            return mesh
-        }
-    }
-})()
-
-const _updateMeshVertices = (function () {
-    if (window.devicePixelRatio == 1) {
-        return mesh => {
-            const positions = [
-                ...mesh.metadata.iNode.positionInScene.asArray(),
-                ...mesh.metadata.jNode.positionInScene.asArray()
-            ]
-            mesh.updateVerticesData(
-                VertexBuffer.PositionKind,
-                new Float32Array(positions)
-            )
-            mesh.refreshBoundingInfo()
-        }
-    } else {
-        return mesh => {
-            const points = [
-                ...mesh.metadata.iNode.positionInScene.asArray(),
-                ...mesh.metadata.jNode.positionInScene.asArray()
-            ]
-            mesh.setPoints([points])
-        }
-    }
-})()
-
-const _updateMeshColor = (function () {
-    if (window.devicePixelRatio == 1) {
-        return (mesh, color) => (mesh.color = color)
-    } else {
-        return (mesh, color) => (mesh.greasedLineMaterial.color = color)
-    }
-})()
-
-export { Line }
+export {Line}

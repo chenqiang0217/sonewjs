@@ -2,13 +2,14 @@ import {Color3} from '@babylonjs/core'
 import {defineStore} from 'pinia'
 import {VIEWCONSTANT} from './constant'
 
+const devicePixelRatio = window.devicePixelRatio
 const useViewConfigStore = defineStore('viewConfig', {
     state: () => {
         return {
             canvas: 'canvas',
             mesh: {
                 node: {
-                    sizePx: 3,
+                    widthPx: 3 * devicePixelRatio,
                     color: {
                         selected: VIEWCONSTANT.COLOR.MESH.NODE.SELECTED,
                         lock: VIEWCONSTANT.COLOR.MESH.NODE.LOCK,
@@ -16,6 +17,7 @@ const useViewConfigStore = defineStore('viewConfig', {
                     }
                 },
                 elem: {
+                    widthPx: 1 * devicePixelRatio,
                     color: {
                         selected: VIEWCONSTANT.COLOR.MESH.ELEM.SELECTED,
                         binding: VIEWCONSTANT.COLOR.MESH.ELEM.BINDING.ETYPE,

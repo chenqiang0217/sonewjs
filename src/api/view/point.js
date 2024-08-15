@@ -27,7 +27,6 @@ class Point {
     }
     constructor(node, scene, TYPE = Point.PREP) {
         this.type = TYPE
-        const nodeSize = scene.activeCamera.nodeSize
         const option = {
             size: 1.0,
             sideOrientation: Mesh.DOUBLESIDE
@@ -37,7 +36,9 @@ class Point {
             option,
             scene
         )
-        this.mesh.scaling = Vector3.One().scale(nodeSize)
+        this.mesh.scaling = Vector3.One().scale(
+            scene.activeCamera.meshWidth.point
+        )
         this.mesh.position = node.positionInScene
         this.mesh.layerMask = TYPE.LAYER.MESH
         this.mesh.billboardMode = 7
@@ -72,7 +73,9 @@ class Point {
             textBlock.metadata.push(nodeShape)
         } else {
             textBlock = new TextBlock(
-                Point.PREP.PREFIX.TEXT + Point.PREP.PREFIX.MESH + this.mesh.metadata.no
+                Point.PREP.PREFIX.TEXT +
+                    Point.PREP.PREFIX.MESH +
+                    this.mesh.metadata.no
             )
             textBlock.metadata = [nodeShape]
             textBlocks.push(textBlock)
@@ -130,8 +133,7 @@ class Point {
     updateLabelText(text = void 0) {
         if (text) {
             this.textBlock.label.text = text
-        }
-        else{
+        } else {
             this.textBlock.label.text = String(this.mesh.metadata.no)
         }
         return this
@@ -142,9 +144,13 @@ class Point {
         if (!textBlock || textBlock === this.textBlock.label) {
             style = {
                 fontFamily: config.textBlock.node.label.family,
-                fontSizeInPixels: config.textBlock.node.label.size,
+                fontSizeInPixels:
+                    config.textBlock.node.label.size * window.devicePixelRatio,
                 color: config.textBlock.node.label.color,
-                linkOffsetYInPixels: -config.textBlock.node.label.size * 0.6
+                linkOffsetYInPixels:
+                    -config.textBlock.node.label.size *
+                    window.devicePixelRatio *
+                    0.6
             }
             for (const [key, value] of Object.entries(style)) {
                 this.textBlock.label[key] = value
@@ -153,10 +159,14 @@ class Point {
         if (!textBlock || textBlock === this.textBlock.target.nodeShape) {
             style = {
                 fontFamily: config.textBlock.node.target.nodeShape.family,
-                fontSizeInPixels: config.textBlock.node.target.nodeShape.size,
+                fontSizeInPixels:
+                    config.textBlock.node.target.nodeShape.size *
+                    window.devicePixelRatio,
                 color: config.textBlock.node.target.nodeShape.color,
                 linkOffsetYInPixels:
-                    -config.textBlock.node.target.nodeShape.size * 0.6
+                    -config.textBlock.node.target.nodeShape.size *
+                    window.devicePixelRatio *
+                    0.6
             }
             this.textBlock.target.nodeShape.forEach(textBlock => {
                 for (const [key, value] of Object.entries(style)) {
@@ -179,12 +189,22 @@ class Point {
         this.textBlock.label.isVisible = false
     }
     show() {
-        this.mesh.isVisible = true
-        this.textBlock.label.isVisible = true
+        ;[
+            this.mesh,
+            this.textBlock.label,
+            ...this.textBlock.target.nodeShape
+        ].forEach(item => {
+            item.isVisible = true
+        })
     }
     hide() {
-        this.mesh.isVisible = false
-        this.textBlock.label.isVisible = false
+        ;[
+            this.mesh,
+            this.textBlock.label,
+            ...this.textBlock.target.nodeShape
+        ].forEach(item => {
+            item.isVisible = false
+        })
     }
     dispose() {
         this.mesh.dispose()

@@ -133,7 +133,7 @@ watch(
     <Dialog title="求解设置" :width="600">
         <!-- 求解工况表格 -->
         <div style="display: flex;padding-bottom: 5px;">
-            <el-text tag="b" type="info" style="margin-right: auto;">求解工况</el-text>
+            <el-text tag="b" type="info" style="margin-right: auto;">工况</el-text>
             <el-button v-if="model.loadStep.length == 0" round @click="createLoadStep(true)"><el-text type="info">
                     <IconFront iconName="node-plus"></IconFront> 添加默认
                 </el-text></el-button>

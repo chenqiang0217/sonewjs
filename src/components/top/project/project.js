@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx/xlsx.mjs'
 import {useModelStore} from '../../../stores/model'
 import {useStatusStore} from '../../../stores/status'
 import {useView} from '../../../api/view/index'
+import {useCommandStore} from '../../../api/command'
 import {sleep} from '../../../api/utils'
 
 const projectNew = e => {}
@@ -117,4 +118,13 @@ function callFunc(func, data) {
     func(data)
 }
 
-export {projectNew, projectOpen, projectImport, projectSave}
+function projectUndo(step) {
+    const commands = useCommandStore()
+    commands.undo(step)
+}
+function projectRedo(step) {
+    const commands = useCommandStore()
+    commands.execute(step)
+}
+
+export {projectNew, projectOpen, projectImport, projectSave, projectUndo, projectRedo}

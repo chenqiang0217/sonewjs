@@ -11,16 +11,16 @@ const VIEWCONSTANT = {
     PREFIX: {
         MESH: {
             NODE: {
-                PREP: 'n',
-                RSLT: 'rn'
+                PREP: 'np',
+                RSLT: 'nr'
             },
             ELEM: {
-                PREP: 'l',
-                RSLT: 'rl'
+                PREP: 'lp',
+                RSLT: 'lr'
             },
             MEMBRANE: {
-                PREP: 'm',
-                RSLT: 'rm'
+                PREP: 'mp',
+                RSLT: 'mr'
             }
         },
         TEXT: 't'

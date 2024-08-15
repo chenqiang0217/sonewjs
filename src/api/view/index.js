@@ -30,13 +30,6 @@ class View {
             prep: [],
             rslt: []
         }
-        this.symbols = {
-            target: {
-                nodeShape: [],
-                elemShape: [],
-                elemForce: []
-            }
-        }
     }
     //在View.vue中进行配置
     get useModel() {
@@ -96,7 +89,6 @@ class View {
         const points = this.points[type]
         points.forEach(point => point.dispose())
         points.splice(0, points.length)
-        
     }
     createLine(elem, type = 'prep') {
         const line = new Line(elem, this.scene, Line[type.toUpperCase()])

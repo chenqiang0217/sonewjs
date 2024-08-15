@@ -1,12 +1,20 @@
 <script setup>
 import { Vector3 } from '@babylonjs/core'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useModelStore } from '../../../stores/model'
 import { useStatusStore } from '../../../stores/status'
 import { useView } from '../../../api/view/index'
 import { stringToNumberArray, Validator } from '../../../api/utils'
+import {
+    useCommandStore,
+    NodeCreateCommand,
+    NodeMoveCommand,
+    NodeCopyCommand,
+    NodeRemoveCommand,
+    NodeRenameCommand,
+    NodeReceiver
+} from '../../../api/command/index'
 import Dialog from '../Dialog.vue'
-
 
 const model = useModelStore()
 const status = useStatusStore()
@@ -117,88 +125,59 @@ watch(
         }
     }
 )
-function onApply() {
-    let gap = new Vector3(...[0, 0, 0])
-    const points = stringToNumberArray(operation.value.nos).map(no => view.points.prep.find(point => point.mesh.metadata.no === no)).filter(item => item)
-    let nodeExist, no = operation.value.start
+async function onApply() {
+    const commands = useCommandStore()
+    let command, no, position, times, gap, nos, onlyIsolated, noNew
     switch (operation.value.type) {
         case type.create:
             if (!operation.value.check.position.apply(operation.value.position)) {
                 return
             }
-            const position = new Vector3(...stringToNumberArray(operation.value.position))
-            const times = operation.value.create.times
-            nodeExist = model.node.map(node => node.no).filter(item => item >= no)
-            if (times > 0) {
-                if (!operation.value.check.position.apply(operation.value.gap)) {
-                    return
-                }
-                gap = new Vector3(...stringToNumberArray(operation.value.gap))
-            }
-            let i = 0
-            while (i <= times) {
-                const index = nodeExist.findIndex(item => item === no)
-                if (index != -1) {
-                    nodeExist.splice(index, 1)
-                    no += 1
-                    continue
-                }
-                else {
-                    model.createNode([no, ...position.add(gap.scale(i)).asArray()])
-                    no += 1
-                    i += 1
-                }
-            }
+            no = operation.value.start
+            position = new Vector3(...stringToNumberArray(operation.value.position))
+            times = operation.value.create.times
+            gap = times == 0 ? Vector3.Zero() : new Vector3(...stringToNumberArray(operation.value.gap))
+            command = new NodeCreateCommand(new NodeReceiver({ no, position, times, gap }))
+            commands.addCommand(command)
+            commands.execute()
             break
         case type.copy:
             if (!operation.value.check.position.apply(operation.value.gap)) {
                 return
             }
+            nos = stringToNumberArray(operation.value.nos)
             gap = new Vector3(...stringToNumberArray(operation.value.gap))
             if (operation.value.copy.move) {
-                points.forEach(point => point.position = point.position.add(gap))
+                command = new NodeMoveCommand(new NodeReceiver({ nos, gap }))
+                commands.addCommand(command)
+                commands.execute()
             }
             else {
-                const times = operation.value.copy.times
-                let i = 0, j
-                nodeExist = model.node.map(node => node.no).filter(item => item >= no)
-                while (i < times) {
-                    j = 0
-                    while (j < points.length) {
-                        const index = nodeExist.findIndex(item => item == no)
-                        if (index != -1) {
-                            nodeExist.splice(index, 1)
-                            no += 1
-                            continue
-                        }
-                        else {
-                            const node = points[j].mesh.metadata
-                            model.createNode([no, ...node.position.add(gap.scale(i + 1)).asArray()])
-                            no += 1
-                            j += 1
-                        }
-                    }
-                    i += 1
-                }
+                no = operation.value.start
+                times = operation.value.copy.times
+                command = new NodeCopyCommand(new NodeReceiver({ nos, gap, no, times }))
+                commands.addCommand(command)
+                commands.execute()
             }
             break
         case type.remove:
-            points.forEach(point => {
-                const node = point.mesh.metadata
-                const inElem = model.elem.find(elem => elem.iNode === node || elem.jNode === node)
-                const inCnst = model.cnst.find(cnst => cnst.node === node)
-                const inNodeShape = model.target.nodeShape.find(nodeShape => nodeShape.nodePrm === node || nodeShape.nodeSlv === node)
-                if (!operation.value.remove.onlyIsolated || (operation.value.remove.onlyIsolated && !(inElem || inCnst || inNodeShape))) {
-                    model.removeNode(node)
-                }
-            })
+            nos = stringToNumberArray(operation.value.nos)
+            onlyIsolated = operation.value.remove.onlyIsolated
+            command = new NodeRemoveCommand(new NodeReceiver({ nos, onlyIsolated }))
+            commands.addCommand(command)
+            commands.execute()
             break
         case type.rename:
-        if (!operation.value.check.singleNo.apply(operation.value.nos)) {
-                return
+            nos = stringToNumberArray(operation.value.nos)
+            noNew = operation.value.noNew
+            if (nos.length == 1) {
+                // 预先更新选中节点颜色
+                view.scene.metadata.useStatus().mesh.selected.node.clear()
+                await nextTick()
+                command = new NodeRenameCommand(new NodeReceiver({ nos, noNew }))
+                commands.addCommand(command)
+                commands.execute()
             }
-            const point = points.shift()
-            point.mesh.metadata.no = operation.value.noNew
             break
     }
     view.scene.metadata.useStatus().mesh.selected.node.clear()
@@ -284,7 +263,7 @@ function onApply() {
 </template>
 
 <style scoped>
-.el-input-number{
+.el-input-number {
     width: 100%;
 }
 </style>

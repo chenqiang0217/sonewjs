@@ -15,6 +15,10 @@ const useStatusStore = defineStore('status', {
                     apply: false,
                     component: void 0
                 },
+                popover: {
+                    show: false,
+                    apply: false,
+                    component: void 0                },
                 tab: {
                     main: {
                         list: [`view`],
@@ -52,7 +56,8 @@ const useStatusStore = defineStore('status', {
                 }
             },
             user: {
-                logined: false
+                authenticated: false,
+                token: ''
             }
         }
     },

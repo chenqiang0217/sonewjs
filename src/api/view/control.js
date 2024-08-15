@@ -1,7 +1,13 @@
-import {Vector3, Vector2, MeshBuilder, VertexBuffer} from '@babylonjs/core'
-import {watch} from 'vue'
-import {useView} from './index'
-import {SetOperation} from '../utils'
+import {
+    Vector3,
+    Vector2,
+    MeshBuilder,
+    VertexBuffer,
+    GreasedLineMesh
+} from '@babylonjs/core'
+import { watch } from 'vue'
+import { useView } from './index'
+import { SetOperation } from '../utils'
 
 class Control {
     constructor(scene) {
@@ -11,7 +17,7 @@ class Control {
         this.camera = scene.activeCamera
         this.pickBox = MeshBuilder.CreateBox(
             'pickBox',
-            {width: 1, height: 1, depth: 1},
+            { width: 1, height: 1, depth: 1 },
             scene
         )
         this.pickBox.layerMask = this.LAYER.PICKBOX
@@ -62,7 +68,7 @@ class Control {
                     }
                 }
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示节点
         watch(
@@ -70,7 +76,7 @@ class Control {
             visible => {
                 this.showMesh(`node`, `all`, visible)
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示节点text
         watch(
@@ -78,7 +84,7 @@ class Control {
             visible => {
                 this.showTextBlock(`label`, `node`, `all`, visible)
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示单元text
         watch(
@@ -86,7 +92,7 @@ class Control {
             visible => {
                 this.showTextBlock(`label`, `elem`, `all`, visible)
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示nodeShape text
         watch(
@@ -97,7 +103,7 @@ class Control {
                     status.textBlock.visible.target.nodeShape[key] = visible
                 })
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示target text
         watch(
@@ -109,7 +115,7 @@ class Control {
                         (status.textBlock.visible.target[key]['all'] = visible)
                 )
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示nodeShape text
         watch(
@@ -122,7 +128,7 @@ class Control {
                             visible)
                 )
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示elemShape text
         watch(
@@ -135,7 +141,7 @@ class Control {
                             visible)
                 )
             },
-            {immediate: true}
+            { immediate: true }
         )
         //是否显示elemForce text
         watch(
@@ -148,7 +154,7 @@ class Control {
                             visible)
                 )
             },
-            {immediate: true}
+            { immediate: true }
         )
         //选中节点，单元显红
         watch(
@@ -156,14 +162,14 @@ class Control {
             (now, pre) => {
                 onNodeSelected(now, pre)
             },
-            {deep: true}
+            { deep: true }
         )
         watch(
             () => new Set(Array.from(status.mesh.selected.elem)),
             (now, pre) => {
                 onElemSelected(now, pre)
             },
-            {deep: true}
+            { deep: true }
         )
     }
     showMesh(entity = 'all', which = 'all', visible = true) {
@@ -207,24 +213,25 @@ function alignTextWithLines() {
         alignTextWithLine.call(line)
     })
 }
+const _meshLastVerticesIndex = window.devicePixelRatio == 1 ? 3 : 6
 function alignTextWithLine() {
     const view = useView()
-    let points = this.mesh.getVerticesData(VertexBuffer.PositionKind)
-    let aPoint = Vector3.FromArray(points, 0)
-    let bPoint = Vector3.FromArray(points, 3)
-    let {x, y} = Vector3.TransformNormal(
+    const points = this.mesh.getVerticesData(VertexBuffer.PositionKind)
+    const aPoint = Vector3.FromArray(points, 0)
+    const bPoint = Vector3.FromArray(points, _meshLastVerticesIndex)
+    const { x, y } = Vector3.TransformNormal(
         bPoint.subtract(aPoint),
         view.scene.activeCamera.getViewMatrix()
     )
-    let v1 = new Vector2(x, y),v2
-    if(v1.length() > Number.EPSILON){
+    let v1 = new Vector2(x, y)
+    let v2
+    if (v1.length() > Number.EPSILON) {
         v1 = v1.scale(1 / v1.length())
         if (v1.x < 0) {
             v1 = v1.negate()
         }
         v2 = new Vector2(-v1.y, v1.x)
-    }
-    else{
+    } else {
         v2 = new Vector2(0, 1)
     }
     const textBlocks = [
@@ -241,7 +248,6 @@ function alignTextWithLine() {
             -alpha * textBlock.fontSizeInPixels * v2.y * 0.6
     })
 }
-
 function onPickStart() {
     //  view.scene.activeCamera.alpha:绕y轴的角度，从x轴起算
     //  view.scene.activeCamera.beta：绕x轴的角度，从y轴起算
@@ -251,7 +257,7 @@ function onPickStart() {
     const pickBox = view.control.pickBox
     pickBox.rotation.x = -Math.PI / 2 + view.scene.activeCamera.beta
     pickBox.rotation.y = Math.PI / 2 - view.scene.activeCamera.alpha
-    status.pointer[0] = {x: view.scene.pointerX, y: view.scene.pointerY}
+    status.pointer[0] = { x: view.scene.pointerX, y: view.scene.pointerY }
     const pickResult = view.scene.pick(view.scene.pointerX, view.scene.pointerY)
     pickBox.position = pickResult.ray.origin.add(
         pickResult.ray.direction.scale(view.scene.activeCamera.radius)
@@ -263,7 +269,7 @@ function onPickProcessing() {
     const view = useView()
     const status = view.scene.metadata.useStatus()
     const pickBox = view.control.pickBox
-    status.pointer[1] = {x: view.scene.pointerX, y: view.scene.pointerY}
+    status.pointer[1] = { x: view.scene.pointerX, y: view.scene.pointerY }
     let pick1 = view.scene.pick(status.pointer[0].x, status.pointer[0].y)
     let pick2 = view.scene.pick(status.pointer[1].x, status.pointer[1].y)
     let position1 = pick1.ray.origin.add(
@@ -366,4 +372,4 @@ function onElemSelected(now, pre) {
         .forEach(line => line.updateMeshColor())
 }
 
-export {Control, alignTextWithLines, alignTextWithLine}
+export { Control, alignTextWithLines, alignTextWithLine }

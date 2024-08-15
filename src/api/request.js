@@ -1,12 +1,15 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import {fetchEventSource} from '@microsoft/fetch-event-source'
+import {useStatusStore} from '../stores/status'
 import {useMessageStore, Message} from '../stores/message'
+import {CONSTANT} from '../stores/constant'
 
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL
 const service = axios.create({
-    baseURL: '/api',
+    baseURL: VITE_BASE_URL,
     withCredentials: false, // send cookies when cross-domain requests
-    timeout: 5000
+    timeout: 10000
 })
 
 service.interceptors.request.use(
@@ -123,6 +126,7 @@ const task = {
     run: async (data, handleData) => {
         const controller = new AbortController()
         const messages = useMessageStore()
+        const status = useStatusStore()
         const to = 'server'
         const headers = {
             'Content-Type': 'text/event-stream'
@@ -131,7 +135,7 @@ const task = {
         if (csrftoken !== void 0) {
             headers['X-CSRFToken'] = csrftoken
         }
-        await fetchEventSource('/api/task/run/', {
+        await fetchEventSource(VITE_BASE_URL + 'task/run/', {
             method: 'post',
             headers: headers,
             openWhenHidden: true,
@@ -167,6 +171,7 @@ const task = {
             onmessage(response) {
                 switch (Number(response.id)) {
                     case -2:
+                        status.task.run = CONSTANT.TASK.RUN.NONE
                         messages.add({
                             text: '未登录',
                             level: Message.TYPES.ERROR.LEVEL,
@@ -174,6 +179,7 @@ const task = {
                         })
                         break
                     case -1:
+                        status.task.run = CONSTANT.TASK.RUN.NONE
                         messages.add({
                             text: '用户名或密码错误',
                             level: Message.TYPES.ERROR.LEVEL,

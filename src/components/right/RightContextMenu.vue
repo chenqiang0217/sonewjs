@@ -41,31 +41,51 @@ const show = ref(false)
 defineExpose({ show })
 const onClick = (action, mode, { view, table }) => {
     const viewStatus = useView().scene.metadata.useStatus()
-    let meshList, mesh
+    let meshList, key
     switch (action) {
         case `select`:
             meshList = filter(view)
-            mesh = view.mesh
+            key = view.mesh
             switch (mode) {
                 case VIEWCONSTANT.SELECTING.S:
-                    viewStatus.mesh.selected[mesh].clear()
-                    meshList.forEach((item) =>
-                        viewStatus.mesh.selected[mesh].add(item.no)
+                    viewStatus.mesh.selected[key].clear()
+                    meshList.forEach(item =>
+                        viewStatus.mesh.selected[key].add(item.no)
                     )
                     break
                 case VIEWCONSTANT.SELECTING.A:
-                    meshList.forEach((item) =>
-                        viewStatus.mesh.selected[mesh].add(item.no)
+                    meshList.forEach(item =>
+                        viewStatus.mesh.selected[key].add(item.no)
                     )
                     break
                 case VIEWCONSTANT.SELECTING.U:
-                    meshList.forEach((item) =>
-                        viewStatus.mesh.selected[mesh].delete(item.no)
+                    meshList.forEach(item =>
+                        viewStatus.mesh.selected[key].delete(item.no)
                     )
                     break
             }
             break
         case `activate`:
+            const model = useModelStore()
+            meshList = new Set(filter(view).map(item => item.no))
+            key = view.mesh
+            let meshes = useView()[key == 'node' ? 'points' : 'lines']
+            const lockMesh = new Set(model.categorized[key].lock.map(item => item.no))
+            meshes = viewStatus.mesh.visible.prepFree ? meshes.prep : [...meshes.rslt, ...meshes.prep
+                .filter(mesh => lockMesh.has(mesh.mesh.metadata.no))]
+            const meshes2 = meshes.filter(mesh => meshList.has(mesh.mesh.metadata.no))
+            switch (mode) {
+                case VIEWCONSTANT.SELECTING.S:
+                    meshes.forEach(mesh => mesh.hide())
+                    meshes2.forEach(mesh => mesh.show())
+                    break
+                case VIEWCONSTANT.SELECTING.A:
+                    meshes2.forEach(mesh => mesh.show())
+                    break
+                case VIEWCONSTANT.SELECTING.U:
+                    meshes2.forEach(mesh => mesh.hide())
+                    break
+            }
             break
         case `table`:
             const status = useStatusStore()
@@ -128,7 +148,6 @@ const showTargetTextBlock = ({ from: target, group, type: equalityNo }, s) => {
     const view = useView()
     const control = view.control
     const [equality, _] = Object.entries(Target.EQUALITY).find(([key, value]) => value == equalityNo)
-    let isVisible = true
     switch (s) {
         case 's':
             control.hideTextBlock('target', 'all', 'all')
@@ -178,33 +197,33 @@ const showTargetTextBlock = ({ from: target, group, type: equalityNo }, s) => {
             </template>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem>
+        <ContextMenuItem @click="onClick(`activate`, VIEWCONSTANT.SELECTING.S, tag)">
             <template #label>
                 <el-text>激活</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName="active" size="small" class="iconFront" />
+                    <IconFront iconName="activate" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem>
+        <ContextMenuItem @click="onClick(`activate`, VIEWCONSTANT.SELECTING.A, tag)">
             <template #label>
                 <el-text>再激活</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName="active" size="small" class="iconFront" />
+                    <IconFront iconName="activate" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
-        <ContextMenuItem>
+        <ContextMenuItem @click="onClick(`activate`, VIEWCONSTANT.SELECTING.U, tag)">
             <template #label>
                 <el-text>冻结</el-text>
             </template>
             <template #icon>
                 <el-text>
-                    <IconFront iconName="frezone" size="small" class="iconFront" />
+                    <IconFront iconName="freeze" class="iconFront" />
                 </el-text>
             </template>
         </ContextMenuItem>
@@ -240,9 +259,8 @@ const showTargetTextBlock = ({ from: target, group, type: equalityNo }, s) => {
                     </el-text>
                 </template>
             </ContextMenuItem>
+            <ContextMenuSeparator />
         </template>
-        <ContextMenuSeparator />
-
         <ContextMenuItem @click="onClick(`table`, 0, tag)">
             <template #label>
                 <el-text>表格</el-text>

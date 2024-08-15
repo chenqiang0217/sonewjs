@@ -220,7 +220,7 @@ function onApply() {
                         </el-col>
                         <el-col :span="16">
                             <el-form-item>
-                                <el-input v-model.number="operation.values.x" />
+                                <el-input v-model="operation.values.x" />
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -235,7 +235,7 @@ function onApply() {
                         </el-col>
                         <el-col :span="12">
                             <el-form-item>
-                                <el-input v-model.number="operation.values.x" />
+                                <el-input v-model="operation.values.x" />
                             </el-form-item>
                         </el-col>
                     </el-row>
